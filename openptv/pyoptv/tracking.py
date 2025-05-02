@@ -56,7 +56,11 @@ def track_particles(particles, max_link_distance=1.0, min_trajectory_length=3,
 
     for i in range(num_trajectories):
         # Create a trajectory with random length
-        length = np.random.randint(min_trajectory_length, min(10, len(particles)))
+        max_length = min(10, len(particles))
+        if max_length <= min_trajectory_length:
+            length = min_trajectory_length
+        else:
+            length = np.random.randint(min_trajectory_length, max_length)
 
         # Start at a random position from the particles array
         start_idx = np.random.randint(0, len(particles))
