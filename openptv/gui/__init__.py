@@ -8,6 +8,15 @@ to the pyptv-gui submodule.
 
 import os
 import sys
+import warnings
+
+# Set the toolkit before importing TraitsUI components
+try:
+    from traits.etsconfig.api import ETSConfig
+    if not ETSConfig.toolkit:
+        ETSConfig.toolkit = 'qt'
+except ImportError:
+    pass
 
 # Add the pyptv-gui directory to the Python path
 pyptv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'pyptv-gui'))
@@ -21,23 +30,27 @@ try:
 
     # Try to import components from pyptv-gui
     try:
-        from pyptv.pyptv_gui import PYPTV_GUI
-        from pyptv.gui_options import Experiment
-        from pyptv.ptv import PTV
-        from pyptv.calibration_gui import CalibrationGUI
-        from pyptv.directory_editor import DirectoryEditor
+        # Suppress the warning about the toolkit
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            from pyptv.pyptv_gui import PYPTV_GUI
+            from pyptv.gui_options import Experiment
+            from pyptv.ptv import PTV
+            from pyptv.calibration_gui import CalibrationGUI
+            from pyptv.directory_editor import DirectoryEditor
 
         # Set a flag to indicate that the pyptv GUI components are available
         pyptv_available = True
     except ImportError as e:
-        import warnings
         warnings.warn(f"Could not import pyptv GUI components: {e}. Some GUI functionality will be limited.")
+        pyptv_available = False
+    except ValueError as e:
+        warnings.warn(f"Toolkit conflict when importing pyptv GUI components: {e}. Some GUI functionality will be limited.")
         pyptv_available = False
 
     # Set a flag to indicate that basic GUI components are available
     gui_available = True
 except ImportError as e:
-    import warnings
     warnings.warn(f"Could not import basic GUI components: {e}. GUI functionality will not be available.")
     gui_available = False
     pyptv_available = False

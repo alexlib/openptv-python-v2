@@ -20,14 +20,14 @@ try:
     from openptv.binding.tracking_cy import track_particles_py as track_particles
     from openptv.binding.tracking_cy import find_correspondences_py as find_correspondences
     _using_cython = True
-except ImportError:
+except ImportError as e:
     # Fall back to pure Python implementation
-    from openptv.pyoptv.tracking import track_particles, find_correspondences
-    _using_cython = False
     warnings.warn(
-        "Cython bindings not available, using pure Python implementation. "
+        f"Cython bindings not available ({e}), using pure Python implementation. "
         "This may be significantly slower for large datasets."
     )
+    from openptv.pyoptv.tracking import track_particles, find_correspondences
+    _using_cython = False
 
 def using_cython():
     """Return True if using Cython bindings, False if using pure Python."""
@@ -35,10 +35,33 @@ def using_cython():
 
 # Try to import GUI components
 try:
-    from openptv.gui import is_gui_available, launch_gui
+    # Defer the actual import to avoid circular imports
+    def is_gui_available():
+        """Return True if GUI components are available, False otherwise."""
+        try:
+            from openptv.gui import gui_available
+            return gui_available
+        except ImportError:
+            return False
+
+    def launch_gui():
+        """Run the OpenPTV GUI application."""
+        try:
+            from openptv.gui import launch_gui as _launch_gui
+            return _launch_gui()
+        except ImportError:
+            raise ImportError(
+                "GUI components are not available. Make sure the required dependencies "
+                "are installed: traitsui, chaco, enable, pyface."
+            )
+
     _gui_available = is_gui_available()
 except ImportError:
     _gui_available = False
+
+    def is_gui_available():
+        """Return True if GUI components are available, False otherwise."""
+        return False
 
     def launch_gui():
         """Placeholder function when GUI is not available."""

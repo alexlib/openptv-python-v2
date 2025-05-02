@@ -48,8 +48,33 @@ class BuildExtCommand(build_ext):
 extensions = [
     Extension(
         "openptv.binding.tracking_cy",
-        ["openptv/binding/tracking_cy.pyx", "liboptv/src/tracking.c"],
-        include_dirs=[numpy.get_include(), "liboptv/include"],
+        [
+            "openptv/binding/tracking_cy.pyx",
+            "openptv/binding/optv.c",  # Our implementation of the functions
+            # Commenting out the liboptv sources for now until we properly integrate them
+            # "liboptv/liboptv/src/track.c",
+            # "liboptv/liboptv/src/tracking_frame_buf.c",
+            # "liboptv/liboptv/src/parameters.c",
+            # "liboptv/liboptv/src/calibration.c",
+            # "liboptv/liboptv/src/orientation.c",
+            # "liboptv/liboptv/src/trafo.c",
+            # "liboptv/liboptv/src/multimed.c",
+            # "liboptv/liboptv/src/imgcoord.c",
+            # "liboptv/liboptv/src/ray_tracing.c",
+            # "liboptv/liboptv/src/lsqadj.c",
+            # "liboptv/liboptv/src/vec_utils.c",
+            # "liboptv/liboptv/src/correspondences.c",
+            # "liboptv/liboptv/src/epi.c",
+            # "liboptv/liboptv/src/segmentation.c",
+            # "liboptv/liboptv/src/tracking_run.c",
+            # "liboptv/liboptv/src/sortgrid.c",
+            # "liboptv/liboptv/src/image_processing.c",
+        ],
+        include_dirs=[
+            numpy.get_include(),
+            "openptv/binding",  # For optv.h
+            "liboptv/liboptv/include",  # Keep this for future integration
+        ],
         language="c",
     ),
     # Add more extensions as needed
