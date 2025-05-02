@@ -13,8 +13,20 @@ from Cython.Build import cythonize
 extensions = [
     Extension(
         "openptv.binding.tracking_cy",
-        ["openptv/binding/tracking_cy.pyx", "liboptv/src/tracking.c"],
-        include_dirs=[numpy.get_include(), "liboptv/include"],
+        [
+            "openptv/binding/tracking_cy.pyx",
+            "openptv/binding/optv.c",
+            # Add more C source files as needed
+            # "openptv/c_src/src/track.c",
+            # "openptv/c_src/src/tracking_frame_buf.c",
+            # "openptv/c_src/src/parameters.c",
+            # etc.
+        ],
+        include_dirs=[
+            numpy.get_include(),
+            "openptv/binding",
+            "openptv/c_src/include",
+        ],
         language="c",
     ),
     # Add more extensions as needed

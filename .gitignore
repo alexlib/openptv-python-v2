@@ -17,6 +17,8 @@ build/
 *.c
 *.cpp
 !liboptv/src/*.c
+!openptv/binding/optv.c
+!openptv/c_src/src/*.c
 
 # IDE files
 .idea/
