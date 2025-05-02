@@ -13,3 +13,10 @@ switching between implementations.
 
 # Import Python implementations here
 from .tracking import track_particles, find_correspondences
+
+# Flag to indicate that this is the Python implementation
+__is_cython__ = False
+
+def using_cython():
+    """Return True if using the Cython implementation, False if using Python."""
+    return __is_cython__

@@ -9,6 +9,7 @@ This package provides tools for PTV analysis with a flexible architecture:
 """
 
 import importlib.util
+import os
 import sys
 import warnings
 
@@ -31,3 +32,33 @@ except ImportError:
 def using_cython():
     """Return True if using Cython bindings, False if using pure Python."""
     return _using_cython
+
+# Try to import GUI components
+try:
+    from openptv.gui import is_gui_available, launch_gui
+    _gui_available = is_gui_available()
+except ImportError:
+    _gui_available = False
+
+    def launch_gui():
+        """Placeholder function when GUI is not available."""
+        raise ImportError(
+            "GUI components are not available. Make sure the required dependencies "
+            "are installed: traitsui, chaco, enable, pyface."
+        )
+
+def is_gui_available():
+    """Return True if GUI components are available, False otherwise."""
+    return _gui_available
+
+# Define a function to run the GUI
+def run_gui():
+    """Run the OpenPTV GUI application."""
+    if not _gui_available:
+        raise ImportError(
+            "GUI components are not available. Make sure the required dependencies "
+            "are installed: traitsui, chaco, enable, pyface."
+        )
+
+    # Launch the GUI
+    return launch_gui()

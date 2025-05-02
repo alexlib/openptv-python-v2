@@ -4,10 +4,45 @@ Setup script for the openptv-python package.
 
 import os
 import sys
+import subprocess
 import numpy
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
+from setuptools.command.develop import develop
+from setuptools.command.install import install
 from Cython.Build import cythonize
+
+# Check if we're in a Git repository
+is_git_repo = os.path.exists('.git')
+
+# Custom commands to initialize submodules
+def init_submodules():
+    """Initialize Git submodules if they're not already initialized."""
+    if is_git_repo:
+        print("Initializing Git submodules...")
+        try:
+            subprocess.check_call(['git', 'submodule', 'update', '--init', '--recursive'])
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            print(f"Warning: Failed to initialize Git submodules: {e}")
+            print("You may need to initialize them manually with: git submodule update --init --recursive")
+
+class DevelopCommand(develop):
+    """Custom develop command to initialize submodules."""
+    def run(self):
+        init_submodules()
+        develop.run(self)
+
+class InstallCommand(install):
+    """Custom install command to initialize submodules."""
+    def run(self):
+        init_submodules()
+        install.run(self)
+
+class BuildExtCommand(build_ext):
+    """Custom build_ext command to initialize submodules."""
+    def run(self):
+        init_submodules()
+        build_ext.run(self)
 
 # Define the extension modules
 extensions = [
@@ -69,6 +104,11 @@ setup(
             "openptv-gui=openptv.gui.main:main",
         ],
     },
+    cmdclass={
+        'develop': DevelopCommand,
+        'install': InstallCommand,
+        'build_ext': BuildExtCommand,
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Science/Research",
@@ -81,4 +121,9 @@ setup(
         "Topic :: Scientific/Engineering",
     ],
     python_requires=">=3.7",
+    # Include data files from submodules
+    package_data={
+        'openptv': ['binding/*.pyx', 'binding/*.pxd'],
+    },
+    include_package_data=True,
 )
