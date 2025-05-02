@@ -79,7 +79,7 @@ def simulate_traitsui_interface():
     plt.figtext(0.02, 0.1, 'HGroup', ha='left', va='center', fontsize=8, color='gray')
 
     # Add a note about the simulation
-    plt.figtext(0.5, 0.01, 'Note: This is a simulation of the TraitsUI interface using matplotlib',
+    plt.figtext(0.5, 0.01, 'Note: This is a simulation of the TraitsUI interface using matplotli',
                 ha='center', fontsize=8, style='italic')
 
     plt.tight_layout(rect=[0, 0.07, 1, 0.97])

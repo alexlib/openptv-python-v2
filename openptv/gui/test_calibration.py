@@ -163,7 +163,7 @@ def plot_cal_points(pairs_list):
     
     for p in pairs_list:
         ax.plot([p[0][0]], [p[0][2]], [p[0][1]], 'xr')
-        ax.plot([p[1][0]], [p[1][2]], [p[1][1]], 'xb')
+        ax.plot([p[1][0]], [p[1][2]], [p[1][1]], 'x')
     
     ax.set_xlabel('X')
     ax.set_ylabel('Z')

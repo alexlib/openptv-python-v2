@@ -24,9 +24,9 @@ def _encode_if_needed(s):
     return s  # Already bytes or None
 
 default_naming = {
-    'corres': b'res/rt_is',
-    'linkage': b'res/ptv_is',
-    'prio': b'res/added'
+    'corres': 'res/rt_is',
+    'linkage': 'res/ptv_is',
+    'prio': 'res/added'
 }
 
 cdef class Tracker:

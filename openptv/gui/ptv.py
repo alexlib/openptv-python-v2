@@ -381,7 +381,7 @@ def py_sequence_loop(exp) -> None:
 
     # # Sequence parameters
     # spar = SequenceParams(num_cams=n_cams)
-    # spar.read_sequence_par(b"parameters/sequence.par", n_cams)
+    # spar.read_sequence_par("parameters/sequence.par", n_cams)
 
 
     pftVersionParams = par.PftVersionParams(path=Path("parameters"))
@@ -696,8 +696,8 @@ def py_calibration(selection, exp):
 
             # Save the results
             ori_filename = exp.cpar.get_cal_img_base_name(cam)
-            addpar_filename = ori_filename + b".addpar"
-            ori_filename = ori_filename + b".ori"
+            addpar_filename = ori_filename + ".addpar"
+            ori_filename = ori_filename + ".ori"
             calibs[cam].write(ori_filename, addpar_filename)
             # exp._write_ori(cam, addpar_flag=True)  # addpar_flag to save addpar file
 

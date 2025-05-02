@@ -31,7 +31,7 @@ fig = plt.figure(figsize=(10, 8))
 ax = fig.add_subplot(111, projection='3d')
 
 # Plot each trajectory with a different color
-colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+colors = ['', 'g', 'r', 'c', 'm', 'y', 'k']
 for i, traj in enumerate(trajectories):
     color = colors[i % len(colors)]
     ax.plot(traj[:, 0], traj[:, 1], traj[:, 2], color=color, marker='o', markersize=3, label=f'Trajectory {i+1}')

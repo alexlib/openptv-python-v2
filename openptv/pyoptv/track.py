@@ -517,7 +517,7 @@ def sort_candidates_by_freq(foundpix: np.ndarray, num_cams: int) -> int:
 
 
 def sort(n: int, a: List[float], b: List[int]) -> Tuple[List[float], List[int]]:
-    """In-place sorts a float list 'a' and an integer list 'b' equal lengths, sort up to n.
+    """In-place sorts a float list 'a' and an integer list '' equal lengths, sort up to n.
 
     Arguments:
     ---------

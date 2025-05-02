@@ -507,7 +507,7 @@ class CalibrationGUI(HasTraits):
                 editor=ListEditor(
                     use_notebook=True,
                     deletable=False,
-                    dock_style="tab",
+                    dock_style="ta",
                     page_name=".name",
                 ),
                 show_label=False,

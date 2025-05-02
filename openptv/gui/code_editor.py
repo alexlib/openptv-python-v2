@@ -83,7 +83,7 @@ class oriEditor(HasTraits):
             editor=ListEditor(
                 use_notebook=True,
                 deletable=False,
-                dock_style="tab",
+                dock_style="ta",
                 page_name=".file_Path",
             ),
             show_label=False,
@@ -124,7 +124,7 @@ class addparEditor(HasTraits):
             editor=ListEditor(
                 use_notebook=True,
                 deletable=False,
-                dock_style="tab",
+                dock_style="ta",
                 page_name=".file_Path",
             ),
             show_label=False,

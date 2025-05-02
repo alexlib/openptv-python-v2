@@ -190,7 +190,7 @@ def preprocess_image(img, filter_hp, cpar, dim_lp)-> np.ndarray:
 #                 "Expecting a filter file name, received None or non-string."
 #             )
 #     else:
-#         filter_file = b""
+#         filter_file = ""
 
 #     for arr in (input_img, output_img):
 #         if not arr.flags["C_CONTIGUOUS"]:

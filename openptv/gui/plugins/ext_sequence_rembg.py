@@ -78,7 +78,7 @@ class Sequence:
 
         # # Sequence parameters
         # spar = SequenceParams(num_cams=n_cams)
-        # spar.read_sequence_par(b"parameters/sequence.par", n_cams)
+        # spar.read_sequence_par("parameters/sequence.par", n_cams)
 
 
         # sequence loop for all frames

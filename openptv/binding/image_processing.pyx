@@ -45,7 +45,7 @@ def preprocess_image(np.ndarray[ndim=2, dtype=np.uint8_t] input_img,
         if filter_file == None or not isinstance(filter_file, str):
             raise ValueError("Expecting a filter file name, received None or non-string.")
     else:
-        filter_file=b""
+        filter_file=""
         
     for arr in (input_img, output_img):
         if not arr.flags['C_CONTIGUOUS']:
