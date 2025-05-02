@@ -8,9 +8,9 @@ np.import_array()
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
 
-from optv.vec_utils cimport vec3d, vec_copy
+from openptv.binding.vec_utils cimport vec3d, vec_copy
 
-cdef extern from "optv/tracking_frame_buf.h":
+cdef extern from "../liboptv/include/tracking_frame_buf.h":
     int c_read_targets "read_targets" (target buffer[], \
         char* file_base, int frame_num)
     int write_targets(target buffer[], int num_targets, char* file_base, \
@@ -21,7 +21,7 @@ cdef extern from "optv/tracking_frame_buf.h":
     int read_frame(frame *self, char *corres_file_base, char *linkage_file_base,
         char *prio_file_base, char **target_file_base, int frame_num)
 
-cdef extern from "optv/correspondences.h":
+cdef extern from "../liboptv/include/correspondences.h":
     void quicksort_target_y(target *pix, int num)
 
 DEF MAX_TARGETS = 20000 # Until improvement of read_targets to auto-allocate.

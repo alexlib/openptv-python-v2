@@ -21,8 +21,8 @@ DTYPE = np.uint8
 # "ctypedef" assigns a corresponding compile-time type to DTYPE_t
 ctypedef np.uint8_t DTYPE_t  # Changed from int_t to uint8_t to match DTYPE
 
-from optv.parameters cimport TargetParams, ControlParams
-from optv.tracking_framebuf cimport TargetArray
+from openptv.binding.parameters cimport TargetParams, ControlParams
+from openptv.binding.tracking_framebuf cimport TargetArray
 
 def target_recognition(np.ndarray[np.uint8_t, ndim=2] img, TargetParams tpar, int cam, 
     ControlParams cparam, subrange_x=None, subrange_y=None):

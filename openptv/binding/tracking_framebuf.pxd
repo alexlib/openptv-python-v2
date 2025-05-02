@@ -4,9 +4,9 @@
 # Cython definitions for tracking_frame_buf.h
 # Implementing a minimal Python binding for frame and target.
 
-from optv.vec_utils cimport vec3d
+from openptv.binding.vec_utils cimport vec3d
 
-cdef extern from "optv/tracking_frame_buf.h":
+cdef extern from "../liboptv/include/tracking_frame_buf.h":
     ctypedef struct target:
         int pnr
         double x, y

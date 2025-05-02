@@ -9,17 +9,17 @@ Created on Sun Mar 19 19:42:41 2017
 import numpy as np
 cimport numpy as np
 
-from optv.calibration cimport Calibration, calibration
-from optv.parameters cimport ControlParams, VolumeParams, mm_np
-from optv.vec_utils cimport vec3d
-from optv.transforms cimport metric_to_pixel, pixel_to_metric, dist_to_flat
-from optv.imgcoord cimport img_coord
+from openptv.binding.calibration cimport Calibration, calibration
+from openptv.binding.parameters cimport ControlParams, VolumeParams, mm_np
+from openptv.binding.vec_utils cimport vec3d
+from openptv.binding.transforms cimport metric_to_pixel, pixel_to_metric, dist_to_flat
+from openptv.binding.imgcoord cimport img_coord
 
-cdef extern from "optv/ray_tracing.h":
+cdef extern from "../liboptv/include/ray_tracing.h":
     void ray_tracing(double x, double y, calibration* cal, mm_np mm,
         double X[3], double a[3]);
 
-cdef extern from "optv/multimed.h":
+cdef extern from "../liboptv/include/multimed.h":
     void move_along_ray(double glob_Z, vec3d vertex, vec3d direct, vec3d out)
 
 def epipolar_curve(np.ndarray[ndim=1, dtype=np.float64_t] image_point,

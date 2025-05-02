@@ -8,7 +8,7 @@ from libc.stdlib cimport malloc, free
 import numpy
 cimport numpy as cnp
 
-cdef extern from "optv/calibration.h":
+cdef extern from "../liboptv/include/calibration.h":
     calibration *read_calibration(char *ori_file, char *add_file,
         char *fallback_file)
     int write_calibration(calibration *cal, char *filename, char *add_file)

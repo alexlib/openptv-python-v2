@@ -2,7 +2,7 @@
 # distutils: language = c
 
 # Cython definitions for parameters.h
-cdef extern from "optv/parameters.h":
+cdef extern from "../liboptv/include/parameters.h":
     ctypedef struct mm_np:
         int nlay
         double n1

@@ -17,11 +17,11 @@ ITYPE = np.intp  # Add explicit integer type
 ctypedef np.float64_t DTYPE_t
 ctypedef np.intp_t ITYPE_t  # Add integer type definition
 
-from optv.transforms cimport pixel_to_metric, dist_to_flat
-from optv.parameters cimport ControlParams, VolumeParams
-from optv.calibration cimport Calibration
-from optv.orientation cimport COORD_UNUSED
-from optv.tracking_framebuf cimport TargetArray, Target, target, frame, \
+from openptv.binding.transforms cimport pixel_to_metric, dist_to_flat
+from openptv.binding.parameters cimport ControlParams, VolumeParams
+from openptv.binding.calibration cimport Calibration
+from openptv.binding.orientation cimport COORD_UNUSED
+from openptv.binding.tracking_framebuf cimport TargetArray, Target, target, frame, \
     PT_UNUSED, CORRES_NONE
 
 cdef class MatchedCoords:

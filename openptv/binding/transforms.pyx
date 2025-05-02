@@ -1,7 +1,7 @@
 import numpy as np
 cimport numpy as np
-from optv.parameters cimport control_par, ControlParams
-from optv.calibration cimport calibration, Calibration, ap_52
+from openptv.binding.parameters cimport control_par, ControlParams
+from openptv.binding.calibration cimport calibration, Calibration, ap_52
 
 # Define function pointer types - removed 'nogil' from typedef and made them noexcept
 ctypedef void (*convert_func)(double*, double*, double, double, control_par*) noexcept

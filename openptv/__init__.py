@@ -15,12 +15,17 @@ import os
 
 __version__ = '0.1.0'
 
+# Initialize flags for available implementations
+_using_cython = False
+_gui_available = False
+_gui_import_error = None
+
 # Try to import the Cython bindings
 try:
     # Import core tracking functions
-    from openptv.binding.tracking_cy import track_particles_py as track_particles
-    from openptv.binding.tracking_cy import find_correspondences_py as find_correspondences
-
+    from openptv.binding.vec_utils import py_vec_cmp as vec_cmp
+    from openptv.binding.vec_utils import py_vec_copy as vec_copy
+    
     _using_cython = True
 
 except ImportError as e:
@@ -30,7 +35,7 @@ except ImportError as e:
         "This may be significantly slower for large datasets."
     )
 
-    from openptv.pyoptv.tracking import track_particles, find_correspondences
+    from openptv.pyoptv.vec_utils import vec_cmp as vec_cmp, vec_copy as vec_copy
 
     _using_cython = False
 
@@ -42,8 +47,9 @@ def using_cython():
 try:
     from openptv.gui import pyptv_gui
     _gui_available = True
-except ImportError:
+except ImportError as e:
     _gui_available = False
+    _gui_import_error = str(e)
 
 def is_gui_available():
     """Return True if GUI components are available, False otherwise."""
@@ -53,11 +59,20 @@ def run_gui():
     """Run the OpenPTV GUI application."""
     if not _gui_available:
         raise ImportError(
-            "GUI components are not available. Make sure the required dependencies "
-            "are installed: pip install openptv-python[gui]"
+            f"GUI components are not available: {_gui_import_error}. "
+            "Make sure the required dependencies are installed: "
+            "pip install openptv-python[gui]"
         )
 
-    from openptv.gui.pyptv_gui import PYPTV_GUI
-    gui = PYPTV_GUI()
-    gui.configure_traits()
-    return gui
+    try:
+        from openptv.gui.pyptv_gui import PYPTV_GUI
+        gui = PYPTV_GUI()
+        gui.configure_traits()
+        return gui
+    except Exception as e:
+        import traceback
+        print(f"Error starting GUI: {e}")
+        traceback.print_exc()
+        raise
+
+

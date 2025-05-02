@@ -2,11 +2,11 @@
 # cython: language_level=3
 # distutils: language = c
 
-from optv.parameters cimport sequence_par, track_par, volume_par, control_par
-from optv.tracking_framebuf cimport framebuf
-from optv.calibration cimport calibration
+from openptv.binding.parameters cimport sequence_par, track_par, volume_par, control_par
+from openptv.binding.tracking_framebuf cimport framebuf
+from openptv.binding.calibration cimport calibration
 
-cdef extern from "optv/tracking_run.h":
+cdef extern from "../liboptv/include/tracking_run.h":
     ctypedef struct tracking_run:
         sequence_par *seq_par
         calibration **cal
@@ -17,7 +17,7 @@ cdef extern from "optv/tracking_run.h":
         char *corres_file_base, char *linkage_file_base, char *prio_file_base, 
         calibration **cal, double flatten_tol)
 
-cdef extern from "optv/track.h":
+cdef extern from "../liboptv/include/track.h":
     cdef enum:
         TR_BUFSPACE, MAX_TARGETS
     void track_forward_start(tracking_run *tr)

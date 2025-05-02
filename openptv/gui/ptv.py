@@ -20,20 +20,20 @@ from skimage import img_as_ubyte
 from skimage.color import rgb2gray
 
 # OptV imports
-from optv.calibration import Calibration
-from optv.correspondences import correspondences, MatchedCoords
-from optv.image_processing import preprocess_image
-from optv.orientation import point_positions, full_calibration
-from optv.parameters import (
+from openptv.binding.calibration import Calibration
+from openptv.binding.correspondences import correspondences, MatchedCoords
+from openptv.binding.image_processing import preprocess_image
+from openptv.binding.orientation import point_positions, full_calibration
+from openptv.binding.parameters import (
     ControlParams,
     VolumeParams,
     TrackingParams,
     SequenceParams,
     TargetParams,
 )
-from optv.segmentation import target_recognition
-from optv.tracking_framebuf import TargetArray
-from optv.tracker import Tracker, default_naming
+from openptv.binding.segmentation import target_recognition
+from openptv.binding.tracking_framebuf import TargetArray
+from openptv.binding.tracker import Tracker, default_naming
 
 # PyPTV imports
 from pyptv import parameters as par
@@ -622,7 +622,7 @@ def py_calibration(selection, exp):
 
     if selection == 10:
         """Run the calibration with particles """
-        from optv.tracking_framebuf import Frame
+        from openptv.binding.tracking_framebuf import Frame
         from pyptv.parameters import OrientParams, ShakingParams
 
         num_cams = exp.cpar.get_num_cams()
@@ -922,8 +922,8 @@ def full_scipy_calibration(cal: Calibration,
 
     """ Full calibration using scipy.optimize """
     from scipy.optimize import minimize
-    from optv.transforms import convert_arr_metric_to_pixel
-    from optv.imgcoord import image_coordinates
+    from openptv.binding.transforms import convert_arr_metric_to_pixel
+    from openptv.binding.imgcoord import image_coordinates
 
     def _residuals_k(x, cal, XYZ, xy, cpar):
         """Residuals due to radial distortion

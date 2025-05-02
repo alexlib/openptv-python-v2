@@ -6,13 +6,13 @@ cimport numpy as np
 np.import_array()  # Initialize NumPy C-API
 
 from libc.stdlib cimport free
-from optv.parameters cimport ControlParams, TrackingParams, SequenceParams, \
+from openptv.binding.parameters cimport ControlParams, TrackingParams, SequenceParams, \
     VolumeParams
-from optv.orientation cimport cal_list2arr
-from optv.tracking_framebuf cimport fb_free
+from openptv.binding.orientation cimport cal_list2arr
+from openptv.binding.tracking_framebuf cimport fb_free
 
 # External C functions from tracking_run.h should be declared in tracker.pxd
-from optv.tracker cimport (
+from openptv.binding.tracker cimport (
     tr_new, track_forward_start, trackcorr_c_loop,
     trackcorr_c_finish, trackback_c, TR_BUFSPACE, MAX_TARGETS
 )

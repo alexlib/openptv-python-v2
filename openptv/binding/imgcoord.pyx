@@ -1,8 +1,8 @@
 import numpy as np
 cimport numpy as np
 
-from optv.parameters cimport MultimediaParams, mm_np
-from optv.calibration cimport Calibration, calibration
+from openptv.binding.parameters cimport MultimediaParams, mm_np
+from openptv.binding.calibration cimport Calibration, calibration
 
 def flat_image_coordinates(np.ndarray[ndim=2, dtype=np.float_t] input,
                            Calibration cal,

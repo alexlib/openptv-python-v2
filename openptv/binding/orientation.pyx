@@ -5,11 +5,11 @@ np.import_array()
 from libc.stdlib cimport calloc, free
 
 # Import custom types from .pxd files
-from optv.calibration cimport Calibration
-from optv.parameters cimport ControlParams, VolumeParams
-from optv.tracking_framebuf cimport TargetArray
-from optv.orientation cimport orient_par
-from optv.vec_utils cimport vec3d
+from openptv.binding.calibration cimport Calibration
+from openptv.binding.parameters cimport ControlParams, VolumeParams
+from openptv.binding.tracking_framebuf cimport TargetArray
+from openptv.binding.orientation cimport orient_par
+from openptv.binding.vec_utils cimport vec3d
 
 DTYPE = np.float64
 ITYPE = np.int32

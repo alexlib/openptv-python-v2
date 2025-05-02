@@ -1,11 +1,11 @@
 # cython: language_level=3
 # distutils: language = c
 
-from optv.calibration cimport calibration
-from optv.parameters cimport mm_np
-from optv.vec_utils cimport vec3d
+from openptv.binding.calibration cimport calibration
+from openptv.binding.parameters cimport mm_np
+from openptv.binding.vec_utils cimport vec3d
 
-cdef extern from "optv/imgcoord.h":
+cdef extern from "../liboptv/include/imgcoord.h":
     void img_coord(vec3d pos,
                      calibration * cal,
                      mm_np * mm,

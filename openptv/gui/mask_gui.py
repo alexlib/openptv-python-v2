@@ -37,10 +37,10 @@ from pyptv.code_editor import oriEditor, addparEditor
 from pyptv.quiverplot import QuiverPlot
 
 
-from optv.imgcoord import image_coordinates
-from optv.transforms import convert_arr_metric_to_pixel
-from optv.orientation import match_detection_to_ref
-from optv.tracking_framebuf import TargetArray
+from openptv.binding.imgcoord import image_coordinates
+from openptv.binding.transforms import convert_arr_metric_to_pixel
+from openptv.binding.orientation import match_detection_to_ref
+from openptv.binding.tracking_framebuf import TargetArray
 
 
 from pyptv import ptv, parameter_gui, parameters as par

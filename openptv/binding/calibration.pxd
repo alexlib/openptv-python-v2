@@ -1,9 +1,9 @@
 # cython: language_level=3
 # distutils: language = c
 
-from optv.vec_utils cimport vec3d
+from openptv.binding.vec_utils cimport vec3d
 
-cdef extern from "optv/calibration.h":
+cdef extern from "../liboptv/include/calibration.h":
     ctypedef double Dmatrix [3][3]
 
     ctypedef struct Exterior:    

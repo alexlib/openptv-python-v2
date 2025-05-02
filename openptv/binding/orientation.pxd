@@ -1,16 +1,16 @@
 # cython: language_level=3
 # distutils: language = c
 
-from optv.calibration cimport calibration
-from optv.parameters cimport control_par, mm_np
-from optv.tracking_framebuf cimport target
-from optv.vec_utils cimport vec3d
-from optv.epipolar cimport epi_mm_2D
+from openptv.binding.calibration cimport calibration
+from openptv.binding.parameters cimport control_par, mm_np
+from openptv.binding.tracking_framebuf cimport target
+from openptv.binding.vec_utils cimport vec3d
+from openptv.binding.epipolar cimport epi_mm_2D
 
-cdef extern from "optv/sortgrid.h":
+cdef extern from "../liboptv/include/sortgrid.h":
     target *sortgrid(calibration *cal, control_par *cpar, int nfix, vec3d fix[], int num, int eps, target pix[])
 
-cdef extern from "optv/orientation.h":
+cdef extern from "../liboptv/include/orientation.h":
     ctypedef double vec2d[2]
     ctypedef struct orient_par:
         unsigned int useflag

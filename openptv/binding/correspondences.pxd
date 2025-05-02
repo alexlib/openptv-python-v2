@@ -10,18 +10,18 @@ Created on Fri Oct 28 13:47:26 2016
 @author: yosef
 """
 
-from optv.tracking_framebuf cimport TargetArray, frame
-from optv.parameters cimport volume_par, control_par
-from optv.calibration cimport calibration
+from openptv.binding.tracking_framebuf cimport TargetArray, frame
+from openptv.binding.parameters cimport volume_par, control_par
+from openptv.binding.calibration cimport calibration
 
 # For the life of me, I don't know why find_candidate and its related coord_2d 
 # should be in epi.h, but it's there and I'm not moving it right now.
-cdef extern from "optv/epi.h":
+cdef extern from "../liboptv/include/epi.h":
     ctypedef struct coord_2d:
         int pnr
         double x, y
 
-cdef extern from "optv/correspondences.h":
+cdef extern from "../liboptv/include/correspondences.h":
     ctypedef struct n_tupel:
         int p[4]
     

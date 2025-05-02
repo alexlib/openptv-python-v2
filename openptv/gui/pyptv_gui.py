@@ -20,7 +20,9 @@ import time
 import importlib
 
 import numpy as np
-import optv
+# Import our compatibility layer to redirect optv imports to openptv
+import openptv
+import optv  # This will be redirected to openptv by the compatibility layer
 from traits.api import HasTraits, Int, Bool, Instance, List, Enum, Any
 from traitsui.api import (
     View,
@@ -45,17 +47,17 @@ from skimage.util import img_as_ubyte
 from skimage.color import rgb2gray
 from skimage.io import imread
 
-from pyptv import parameters as par
-from pyptv import ptv
-from pyptv.calibration_gui import CalibrationGUI
-from pyptv.directory_editor import DirectoryEditorDialog
-from pyptv.parameter_gui import Experiment, Paramset
-from pyptv.quiverplot import QuiverPlot
-from pyptv.detection_gui import DetectionGUI
-from pyptv.mask_gui import MaskGUI
-from pyptv import __version__
-import optv.orientation
-import optv.epipolar
+from openptv.gui.pyptv import parameters as par
+from openptv.gui import ptv
+from openptv.gui.calibration_gui import CalibrationGUI
+from openptv.gui.directory_editor import DirectoryEditorDialog
+from openptv.gui.parameter_gui import Experiment, Paramset
+from openptv.gui.quiverplot import QuiverPlot
+from openptv.gui.detection_gui import DetectionGUI
+from openptv.gui.mask_gui import MaskGUI
+from openptv.gui.pyptv import __version__
+import optv.orientation  # This will be redirected to openptv by the compatibility layer
+import optv.epipolar    # This will be redirected to openptv by the compatibility layer
 
 
 class Clicker(ImageInspectorTool):
@@ -83,7 +85,7 @@ class Clicker(ImageInspectorTool):
             self.last_mouse_position = (event.x, event.y)
             self.left_changed = 1 - self.left_changed
             # print(f"left: x={self.x}, y={self.y}, I={self.data_value}, {self.left_changed}")
-            
+
 
     def normal_right_down(self, event):
         plot = self.component
@@ -93,8 +95,8 @@ class Clicker(ImageInspectorTool):
             self.data_value = plot.value.data[self.y, self.x]
             print(f"normal right down: x={self.x}, y={self.y}, I={self.data_value}")
             self.right_changed = 1 - self.right_changed
-            
-        
+
+
 
     # def normal_mouse_move(self, event):
     #     pass
@@ -140,26 +142,26 @@ class CameraWindow(HasTraits):
         ) = ([], [], [], [], [])
         self.cam_color = color
         self.name = name
-        
+
 
     def attach_tools(self):
         """attach_tools(self) contains the relevant tools:
         clicker, pan, zoom"""
-      
+
         print(f" Attaching clicker to camera {self.name}")
         self._click_tool = Clicker(component=self._img_plot)
         self._click_tool.on_trait_change(self.left_clicked_event, "left_changed")
         self._click_tool.on_trait_change(self.right_clicked_event, "right_changed")
         # self._img_plot.tools.clear()
         self._img_plot.tools.append(self._click_tool)
-        
+
         pan = PanTool(self._plot, drag_button="middle")
         zoom_tool = ZoomTool(self._plot, tool_mode="box", always_on=False)
         zoom_tool.max_zoom_out_factor = 1.0  # Disable "bird view" zoom out
         self._img_plot.overlays.append(zoom_tool)
         self._img_plot.tools.append(pan)
         # print(self._img_plot.tools)
-        
+
 
     def left_clicked_event(
         self,
@@ -172,7 +174,7 @@ class CameraWindow(HasTraits):
         print(
             f"x={self._click_tool.x} pix,y={self._click_tool.y} pix,I={self._click_tool.data_value}"
         )
-        
+
     def right_clicked_event(self):
         """right mouse button click event flag"""
         # # self._click_tool.right_changed = 1
@@ -181,7 +183,7 @@ class CameraWindow(HasTraits):
         )
         self.rclicked = 1
 
-        
+
     def create_image(self, image, is_float=False):
         """create_image - displays/updates image in the current camera window
         parameters:
@@ -565,7 +567,7 @@ class TreeMenuHandler(Handler):
                     background = imread(background_name)
                     # im[mask] = 0
                     info.object.orig_image[i] = np.clip(info.object.orig_image[i] - background, 0, 255).astype(np.uint8)
-                    
+
             except ValueError as exc:
                 raise ValueError("Failed subtracting mask") from exc
 
@@ -617,7 +619,7 @@ class TreeMenuHandler(Handler):
         pairs, and unused arrays
         """
 
-        
+
         print("correspondence proc started")
         (
             info.object.sorted_pos,
@@ -785,13 +787,13 @@ class TreeMenuHandler(Handler):
 
     # imx, imy = info.object.cpar.get_image_size()
 
-        
+
         for i_img in range(info.object.n_cams):
             for i_seq in range(seq_first, seq_last + 1):  # loop over sequences
                 intx_green, inty_green = [], []
                 intx_blue, inty_blue = [], []
-                 
-                # read targets from the current sequence    
+
+                # read targets from the current sequence
                 # file_name = ptv.replace_format_specifiers(base_names[i_img])
                 targets = ptv.read_targets(base_names[i_img], i_seq)
 
@@ -814,7 +816,7 @@ class TreeMenuHandler(Handler):
                 "x_tr_gr", "y_tr_gr", x1_a[i_img], y1_a[i_img], "green", 3)
             info.object.camera_list[i_img].drawcross(
                 "x_tr_bl","y_tr_bl", x2_a[i_img], y2_a[i_img], "blue",  2)
-            
+
             info.object.camera_list[i_img]._plot.request_redraw()
 
         print("Finished detect_part_track")
@@ -1134,7 +1136,7 @@ class Plugins(HasTraits):
         print('Reading external plugins lists')
         print(f'Reading from {tracking_plugins}, {sequence_plugins}')
 
-        
+
         # Initialize with default
         self.track_list = ["default"]
         self.seq_list = ["default"]
@@ -1142,7 +1144,7 @@ class Plugins(HasTraits):
         if os.path.exists(tracking_plugins):
             with open(tracking_plugins, "r", encoding="utf8") as f:
                 self.track_list.extend(f.read().split("\n"))
-                
+
         if os.path.exists(sequence_plugins):
             with open(sequence_plugins, "r", encoding="utf8") as f:
                 self.seq_list.extend(f.read().split("\n"))
@@ -1188,7 +1190,7 @@ class MainGUI(HasTraits):
             ),
             orientation="vertical",
         ),
-        
+
         title="pyPTV"  + __version__,
         id="main_view",
         width=1.0,
@@ -1206,7 +1208,7 @@ class MainGUI(HasTraits):
     # ---------------------------------------------------
     def __init__(self, exp_path: Path, software_path: Path):
         super(MainGUI, self).__init__()
-       
+
         colors = ["yellow", "green", "red", "blue"]
         self.exp1 = Experiment()
         self.exp1.populate_runs(exp_path)
@@ -1226,16 +1228,16 @@ class MainGUI(HasTraits):
         """
         Shows a line in camera color code corresponding to a point on another
         camera's view plane.
-        """        
+        """
         num_points = 2
-        
+
         try:
             _ = self.sorted_pos
             plot_epipolar = True
         except:
             plot_epipolar = False
-            
-        
+
+
         if plot_epipolar:
 
             i = self.current_camera
@@ -1246,16 +1248,16 @@ class MainGUI(HasTraits):
                 ],
                 dtype="float64",
             )
-            
-            # find closest point in the sorted_pos            
+
+            # find closest point in the sorted_pos
             for pos_type in self.sorted_pos: # quadruplet, triplet, pair
                 distances = np.linalg.norm(pos_type[i] - point, axis=1)
                 # next test prevents failure with empty quadruplets or triplets
                 if len(distances) > 0 and np.min(distances) < 5 :
                     point = pos_type[i][np.argmin(distances)]
-                    
-                    
-            
+
+
+
             if not np.allclose(point, [0.0, 0.0]):
                 # mark the point with a circle
                 c = str(np.random.rand())[2:]
@@ -1292,10 +1294,10 @@ class MainGUI(HasTraits):
                             pts[-1, 1],
                             self.camera_list[i].cam_color,
                         )
-                
+
                 self.camera_list[i].rclicked = 0
-                        
-        
+
+
 
     def create_plots(self, images, is_float=False) -> None:
         """update_plots
@@ -1308,7 +1310,7 @@ class MainGUI(HasTraits):
         for i in range(self.n_cams):
             self.camera_list[i].create_image(images[i], is_float)
             self.camera_list[i]._plot.request_redraw()
-            
+
     def update_plots(self, images, is_float=False) -> None:
         """update_plots
 
@@ -1438,11 +1440,11 @@ class MainGUI(HasTraits):
             for j in range(n_cams):
                 # img_name = self.base_name[j] + seq_ch
                 # img_name = self.base_name[j].replace("#", seq_ch)
-                img_name = self.base_name[j] % seq # works with jumps from 1 to 10                
+                img_name = self.base_name[j] % seq # works with jumps from 1 to 10
                 # print(f"Image name in load_set_seq is {img_name}")
                 self.load_disp_image(img_name, j, display_only)
-                
-                
+
+
     def overlay_set_images(self, seq_first: int, seq_last:int):
         """load and set sequence images and overlay them for tracking show
 
@@ -1459,7 +1461,7 @@ class MainGUI(HasTraits):
                 getattr(self.exp1.active_params.m_params, f"Basename_{i+1}_Seq")
                 for i in range(len(self.camera_list))
             ]
-     
+
 
         for cam_id in range(n_cams):
             if os.path.exists(self.base_name[cam_id] % seq_first):
@@ -1476,10 +1478,10 @@ class MainGUI(HasTraits):
                 h_img = self.exp1.active_params.m_params.imx
                 v_img = self.exp1.active_params.m_params.imy
                 temp_img = img_as_ubyte(np.zeros((v_img, h_img)))
-        
+
 
             self.camera_list[cam_id].update_image(temp_img)
-                    
+
 
     def load_disp_image(self, img_name: str, j: int, display_only: bool = False):
         """load and display image

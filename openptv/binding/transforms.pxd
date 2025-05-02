@@ -1,10 +1,10 @@
 # cython: language_level=3
 # distutils: language = c
 
-from optv.parameters cimport control_par
-from optv.calibration cimport ap_52, calibration
+from openptv.binding.parameters cimport control_par
+from openptv.binding.calibration cimport ap_52, calibration
 
-cdef extern from "optv/trafo.h":
+cdef extern from "../liboptv/include/trafo.h":
     void pixel_to_metric(double * x_metric
                          , double * y_metric
                          , double x_pixel
