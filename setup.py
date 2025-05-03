@@ -106,7 +106,7 @@ setup(
         'build_ext': CustomBuildExt,
     },
     install_requires=[
-        "numpy>=1.19.0",
+        "numpy>=1.19.0,<2.0",
         "scipy>=1.5.0",
     ],
     extras_require={
