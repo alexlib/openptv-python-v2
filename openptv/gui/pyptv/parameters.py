@@ -9,6 +9,40 @@ import shutil
 from pathlib import Path
 
 
+def g(f):
+    """ Returns a line without white spaces """
+    return f.readline().strip()
+
+
+# Base class for all parameters classes
+class Parameters:
+    # default path of the directory of the param files
+    default_path = Path("parameters")
+
+    def __init__(self, path=default_path):
+        if isinstance(path, str):
+            path = Path(path)
+            
+        self.path = path.resolve()
+        self.exp_path = self.path.parent 
+
+    # returns the name of the specific params file
+    def filename(self):
+        raise NotImplementedError()
+
+    # returns the path to the specific params file
+    def filepath(self):
+        return self.path.joinpath(self.filename())
+
+    # sets all variables of the param file (no actual writing to disk)
+    def set(self, *vars):
+        raise NotImplementedError()
+
+    # reads a param file and stores it in the object
+    def read(self):
+        raise NotImplementedError()
+
+
 def copy_params_dir(src_path, dst_path):
     """
     Copy a directory of parameter files.
@@ -31,65 +65,6 @@ def copy_params_dir(src_path, dst_path):
             shutil.copytree(src_item, dst_item)
 
 
-def read_calibration_parameters(file_path):
-    """
-    Read calibration parameters from a file.
-    
-    Args:
-        file_path: Path to the calibration parameter file
-        
-    Returns:
-        Dictionary of calibration parameters
-    """
-    # This is a placeholder implementation
-    # In a real implementation, this would read the calibration parameters from the file
-    return {
-        'cam_name': 'cam1',
-        'cam_pos': [0, 0, 0],
-        'cam_angle': [0, 0, 0],
-    }
-
-
-def write_calibration_parameters(file_path, params):
-    """
-    Write calibration parameters to a file.
-    
-    Args:
-        file_path: Path to the calibration parameter file
-        params: Dictionary of calibration parameters
-    """
-    # This is a placeholder implementation
-    # In a real implementation, this would write the calibration parameters to the file
-    pass
-
-
-def read_tracking_parameters(file_path):
-    """
-    Read tracking parameters from a file.
-    
-    Args:
-        file_path: Path to the tracking parameter file
-        
-    Returns:
-        Dictionary of tracking parameters
-    """
-    # This is a placeholder implementation
-    # In a real implementation, this would read the tracking parameters from the file
-    return {
-        'max_link_distance': 10.0,
-        'min_track_length': 3,
-        'max_angle': 30.0,
-    }
-
-
-def write_tracking_parameters(file_path, params):
-    """
-    Write tracking parameters to a file.
-    
-    Args:
-        file_path: Path to the tracking parameter file
-        params: Dictionary of tracking parameters
-    """
-    # This is a placeholder implementation
-    # In a real implementation, this would write the tracking parameters to the file
-    pass
+# Print detailed error to the console and show the user a friendly error window
+def error(owner, msg):
+    print(f"Exception caught, message: {msg}")

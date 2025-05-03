@@ -108,6 +108,7 @@ setup(
     install_requires=[
         "numpy>=1.19.0,<2.0",
         "scipy>=1.5.0",
+        "tqdm>=4.60.0",  # Add tqdm as a dependency
     ],
     extras_require={
         "dev": [

@@ -14,7 +14,7 @@ from traits.api import (
 from traitsui.api import Item, Group, View, Handler, ListEditor
 
 from pathlib import Path
-from pyptv import parameters as par
+from openptv.gui import parameters as par
 
 
 def get_path(filename):

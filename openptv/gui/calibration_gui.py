@@ -31,9 +31,9 @@ from chaco.tools.image_inspector_tool import ImageInspectorTool
 from chaco.tools.better_zoom import BetterZoom as SimpleZoom
 
 # from chaco.tools.simple_zoom import SimpleZoom
-from pyptv.text_box_overlay import TextBoxOverlay
-from pyptv.code_editor import oriEditor, addparEditor
-from pyptv.quiverplot import QuiverPlot
+from openptv.gui.text_box_overlay import TextBoxOverlay
+from openptv.gui.code_editor import oriEditor, addparEditor
+from chaco.api import QuiverPlot
 
 
 from openptv.binding.imgcoord import image_coordinates

@@ -6,7 +6,8 @@ from typing import List, Tuple
 
 import yaml
 
-from openptv_python.constants import TR_MAX_CAMS
+# Import constants from the standalone constants module
+from openptv.constants import TR_MAX_CAMS
 
 TrackParTuple = namedtuple('TrackParTuple',
                            ['dvxmin',
@@ -179,7 +180,7 @@ class SequencePar(Parameters):
 
 def read_sequence_par(filename: Path, num_cams: int = TR_MAX_CAMS) -> SequencePar:
     """Read sequence parameters from file and return SequencePar object."""
-    return SequencePar().from_file(filename, num_cams)
+    return SequencePar().from_file(filename)
 
 
 def compare_sequence_par(sp1: SequencePar, sp2: SequencePar) -> bool:
@@ -823,18 +824,27 @@ class MultiPlanesPar(Parameters):
 
 @dataclass
 class ExaminePar(Parameters):
-    """Examine parameters."""
-
-    examine_flag: bool = False
-    combine_flag: bool = False
-
+    """Examine parameters for multi-plane calibration."""
+    
+    Examine_Flag: bool = False
+    Combine_Flag: bool = False
+    
     @classmethod
-    def from_file(cls, file_path: Path):
+    def from_file(cls, file_path):
         """Read from examine.par file."""
-        with open(file_path, 'r', encoding="utf-8") as file:
-            examine_flag = bool(int(file.readline().strip()))
-            combine_flag = bool(int(file.readline().strip()))
-        return cls(examine_flag, combine_flag)
+        ret = cls()
+        try:
+            with open(file_path, "r", encoding="utf-8") as file:
+                ret.Examine_Flag = int(file.readline().strip()) != 0
+                ret.Combine_Flag = int(file.readline().strip()) != 0
+        except IOError:
+            print(f"Could not open examine parameters file {file_path}.")
+            # Create default file
+            with open(file_path, "w", encoding="utf-8") as file:
+                file.write("0\n")  # Examine_Flag
+                file.write("0\n")  # Combine_Flag
+        
+        return ret
 
 def read_examine_par(file_path: Path) -> ExaminePar:
     """Read from examine.par file."""

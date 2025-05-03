@@ -20,9 +20,9 @@ import time
 import importlib
 
 import numpy as np
-# Import our compatibility layer to redirect optv imports to openptv
+# Import directly from openptv instead of using the compatibility layer
 import openptv
-import optv  # This will be redirected to openptv by the compatibility layer
+from openptv import using_cython
 from traits.api import HasTraits, Int, Bool, Instance, List, Enum, Any
 from traitsui.api import (
     View,
@@ -35,9 +35,6 @@ from traitsui.api import (
     Group,
 )
 
-
-
-
 from traitsui.menu import Action, Menu, MenuBar
 from chaco.api import ArrayDataSource, ArrayPlotData, LinearMapper, Plot, gray
 from chaco.tools.api import PanTool, ZoomTool
@@ -47,6 +44,7 @@ from skimage.util import img_as_ubyte
 from skimage.color import rgb2gray
 from skimage.io import imread
 
+# Update imports to use the high-level API
 from openptv.gui.pyptv import parameters as par
 from openptv.gui import ptv
 from openptv.gui.calibration_gui import CalibrationGUI
@@ -56,9 +54,9 @@ from openptv.gui.quiverplot import QuiverPlot
 from openptv.gui.detection_gui import DetectionGUI
 from openptv.gui.mask_gui import MaskGUI
 from openptv.gui.pyptv import __version__
-import optv.orientation  # This will be redirected to openptv by the compatibility layer
-import optv.epipolar    # This will be redirected to openptv by the compatibility layer
 
+# Print which implementation we're using
+print(f"Using Cython implementation: {using_cython()}")
 
 class Clicker(ImageInspectorTool):
     """

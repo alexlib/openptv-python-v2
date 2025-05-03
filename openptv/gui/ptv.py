@@ -19,24 +19,40 @@ from skimage.io import imread
 from skimage import img_as_ubyte
 from skimage.color import rgb2gray
 
-# OptV imports
-from openptv.binding.calibration import Calibration
-from openptv.binding.correspondences import correspondences, MatchedCoords
-from openptv.binding.image_processing import preprocess_image
-from openptv.binding.orientation import point_positions, full_calibration
-from openptv.binding.parameters import (
+# Import from high-level API
+import openptv
+from openptv import (
+    using_cython,
+    Calibration,
     ControlParams,
     VolumeParams,
     TrackingParams,
     SequenceParams,
     TargetParams,
+    ExamineParams,
+    TargetArray,
+    Target,
+    Frame,
+    correspondences,
+    MatchedCoords,
+    preprocess_image,
+    target_recognition,
+    point_positions,
+    external_calibration,
+    full_calibration,
+    Tracker,
+    default_naming,
+    # Constants
+    TR_BUFSPACE, TR_MAX_CAMS, MAX_TARGETS,
+    CORRES_NONE, PT_UNUSED,
+    NPAR, COORD_UNUSED
 )
-from openptv.binding.segmentation import target_recognition
-from openptv.binding.tracking_framebuf import TargetArray
-from openptv.binding.tracker import Tracker, default_naming
 
 # PyPTV imports
-from pyptv import parameters as par
+from openptv.gui.pyptv import parameters as par
+
+# Print which implementation we're using
+print(f"Using Cython implementation: {using_cython()}")
 
 # Constants
 NAMES = ["cc", "xh", "yh", "k1", "k2", "k3", "p1", "p2", "scale", "shear"]
@@ -57,7 +73,10 @@ def negative(img: np.ndarray) -> np.ndarray:
 
 
 def simple_highpass(img: np.ndarray, cpar: ControlParams) -> np.ndarray:
-    """Apply a simple highpass filter to an image using liboptv preprocess_image.
+    """Apply a simple highpass filter to an image.
+    
+    This function will automatically use the appropriate implementation
+    (Cython or pure Python) based on availability.
 
     Args:
         img: Input image as numpy array
@@ -67,6 +86,7 @@ def simple_highpass(img: np.ndarray, cpar: ControlParams) -> np.ndarray:
         Highpass filtered image
     """
     return preprocess_image(img, 0, cpar, DEFAULT_HIGHPASS_FILTER_SIZE)
+
 
 def _read_calibrations(cpar: ControlParams, n_cams: int) -> List[Calibration]:
     """Read calibration files for all cameras.
@@ -99,7 +119,7 @@ def _read_calibrations(cpar: ControlParams, n_cams: int) -> List[Calibration]:
 
 def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeParams,
                                     TrackingParams, TargetParams, List[Calibration],
-                                    par.ExamineParams]:
+                                    ExamineParams]:
     """Read all parameters needed for processing.
 
     This function reads all parameter files from the parameters directory and initializes
@@ -117,17 +137,14 @@ def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeP
             - tpar: Target parameters
             - cals: List of calibration objects
             - epar: Examine parameters
-
-    Raises:
-        IOError: If any parameter file cannot be read
     """
-    # Define parameter file paths
-    param_dir = Path("parameters")
-    ptv_par_path = param_dir / "ptv.par"
-    sequence_par_path = param_dir / "sequence.par"
-    criteria_par_path = param_dir / "criteria.par"
-    track_par_path = param_dir / "track.par"
-    targ_rec_par_path = param_dir / "targ_rec.par"
+    # Get parameter file paths
+    ptv_par_path = Path("parameters/ptv.par")
+    sequence_par_path = Path("parameters/sequence.par")
+    criteria_par_path = Path("parameters/criteria.par")
+    track_par_path = Path("parameters/track.par")
+    targ_rec_par_path = Path("parameters/targ_rec.par")
+    examine_par_path = Path("parameters/examine.par")
 
     try:
         # Control parameters
@@ -151,16 +168,16 @@ def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeP
         tpar.read(str(targ_rec_par_path))
 
         # Examine parameters (multiplane vs single plane calibration)
-        epar = par.ExamineParams()
-        epar.read()
+        # Use the high-level API's ExamineParams
+        epar = ExamineParams.from_file(examine_par_path)
 
         # Read calibration files
         cals = _read_calibrations(cpar, n_cams)
 
         return cpar, spar, vpar, track_par, tpar, cals, epar
-
-    except IOError as e:
-        raise IOError(f"Failed to read parameter files: {e}")
+    except Exception as e:
+        print(f"Error reading parameters: {e}")
+        raise
 
 
 def py_pre_processing_c(list_of_images: List[np.ndarray], cpar: ControlParams) -> List[np.ndarray]:
@@ -189,7 +206,8 @@ def py_detection_proc_c(list_of_images: List[np.ndarray],
     """Detect targets in a list of images.
 
     This function performs target detection on each image and returns the detected
-    targets and their corrected coordinates.
+    targets and their corrected coordinates. It will automatically use the appropriate
+    implementation (Cython or pure Python) based on availability.
 
     Args:
         list_of_images: List of input images as numpy arrays
@@ -218,14 +236,14 @@ def py_detection_proc_c(list_of_images: List[np.ndarray],
         if existing_target:
             raise NotImplementedError("Existing targets are not implemented")
         else:
-            # Detect targets in the image
+            # Use the high-level API which will select the appropriate implementation
             targs = target_recognition(img, tpar, i_cam, cpar)
 
         # Sort targets by y-coordinate
         targs.sort_y()
         detections.append(targs)
 
-        # Create matched coordinates
+        # Create matched coordinates using the high-level API
         mc = MatchedCoords(targs, cpar, cals[i_cam])
         corrected.append(mc)
 
@@ -233,20 +251,16 @@ def py_detection_proc_c(list_of_images: List[np.ndarray],
 
 
 def py_correspondences_proc_c(exp):
-    """Provides correspondences
+    """Provides correspondences using the high-level API.
+    
     Inputs:
         exp = info.object from the pyptv_gui
     Outputs:
-        quadruplets, ... : four empty lists filled later with the
-    correspondences of quadruplets, triplets, pairs, and so on
+        sorted_pos, sorted_corresp, num_targs: Results of correspondence calculation
     """
+    frame = DEFAULT_FRAME_NUM  # just a temporary workaround
 
-    frame = 123456789  # just a temporary workaround. todo: think how to write
-
-    #        if any([len(det) == 0 for det in detections]):
-    #            return False
-
-    # Corresp. + positions.
+    # Use the high-level API which will select the appropriate implementation
     sorted_pos, sorted_corresp, num_targs = correspondences(
         exp.detections, exp.corrected, exp.cals, exp.vpar, exp.cpar)
 
@@ -254,11 +268,7 @@ def py_correspondences_proc_c(exp):
     for i_cam in range(exp.n_cams):
         base_name = exp.spar.get_img_base_name(i_cam)
         write_targets(exp.detections[i_cam], base_name, frame)
-
-
-    print("Frame " + str(frame) + " had " +
-          repr([s.shape[1] for s in sorted_pos]) + " correspondences.")
-
+        
     return sorted_pos, sorted_corresp, num_targs
 
 
@@ -497,7 +507,7 @@ def py_sequence_loop(exp) -> None:
 
 
 def py_trackcorr_init(exp):
-    """Reads all the necessary stuff into Tracker"""
+    """Reads all the necessary stuff into Tracker using the high-level API."""
 
     for cam_id in range(exp.cpar.get_num_cams()):
         img_base_name = exp.spar.get_img_base_name(cam_id)
@@ -509,10 +519,9 @@ def py_trackcorr_init(exp):
         print(f' Renaming {img_base_name} to {short_name} before C library tracker')
         exp.spar.set_img_base_name(cam_id, short_name)
 
-
+    # Use the high-level API which will select the appropriate implementation
     tracker = Tracker(exp.cpar, exp.vpar, exp.track_par, exp.spar, exp.cals,
-                      default_naming)
-
+                    default_naming)
 
     return tracker
 
@@ -791,10 +800,10 @@ def read_targets(file_base: str, frame: int=123456789) -> TargetArray:
     # buffer = TargetArray()
     # buffer = []
 
-    # # if file_base has an extension, remove it
-    # file_base = file_base.split(".")[0]
+    # if file_base has an extension, remove it
+    file_base = file_base.split(".")[0]
 
-    # file_base = replace_format_specifiers(file_base) # remove %d
+    file_base = replace_format_specifiers(file_base) # remove %d
     filename = file_base_to_filename(file_base, frame)
 
     print(f" filename: {filename}")
