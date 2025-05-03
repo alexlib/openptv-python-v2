@@ -29,12 +29,36 @@ openptv-python/
 
 ## Installation
 
+### Basic Installation
+
 ```bash
-# For development installation
+# For users (when available on PyPI)
+pip install openptv-python
+```
+
+### Development Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/openptv-python-v2.git
+cd openptv-python-v2
+
+# Create a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install in development mode
 pip install -e .
 
-# For users
-pip install openptv-python
+# Build the Cython extensions
+python setup.py build_ext --inplace
+```
+
+### With GUI Dependencies
+
+```bash
+# Install with GUI dependencies
+pip install openptv-python[gui]
 ```
 
 ## Development
@@ -44,7 +68,33 @@ The package supports two development workflows:
 1. **C/Cython Development**: For performance-critical components
 2. **Python Development**: For rapid prototyping and algorithm development
 
-See the documentation for more details on the development workflow.
+See the [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) for more details on the development workflow.
+
+## Running the GUI
+
+```bash
+# Run the GUI application
+openptv-gui
+
+# Or directly
+python -m openptv.gui.main
+```
+
+See [GUI_README.md](GUI_README.md) for more information on the GUI components.
+
+## Testing
+
+```bash
+# Run all tests
+python -m pytest tests/
+
+# Run specific tests
+python -m pytest tests/test_tracking.py
+```
+
+## Git Workflow
+
+See [GIT_WORKFLOW.md](GIT_WORKFLOW.md) for information on the Git workflow for this project.
 
 ## License
 
