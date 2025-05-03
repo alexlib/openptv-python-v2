@@ -4,10 +4,9 @@ Test script to verify core functionality of pyptv and optv
 """
 import os
 import sys
-import numpy as np
 import openptv
 from openptv.binding.calibration import Calibration
-from openptv.binding.parameters import ControlParams, VolumeParams
+from openptv.binding.parameters import VolumeParams
 
 def test_core_functionality(test_data_dir):
     """Test core functionality of pyptv and optv"""
@@ -75,5 +74,23 @@ def test_core_functionality(test_data_dir):
     assert True
 
 if __name__ == "__main__":
-    success = test_core_functionality()
-    sys.exit(0 if success else 1)
+    """Run the tests directly with detailed output."""
+    import sys
+    from pathlib import Path
+
+    print("\n=== Running Core Functionality Tests ===\n")
+
+    # Get the test_cavity directory
+    test_data_dir = Path(__file__).parent / "test_cavity"
+    if not test_data_dir.exists():
+        print(f"Test data directory {test_data_dir} not found")
+        sys.exit(1)
+
+    # Run the test
+    try:
+        test_core_functionality(test_data_dir)
+        print("\n✅ Core functionality test passed successfully!")
+        sys.exit(0)
+    except Exception as e:
+        print(f"\n❌ Core functionality test failed: {str(e)}")
+        sys.exit(1)

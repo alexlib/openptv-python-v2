@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 import os
 import sys
-import numpy as np
 import openptv
 from openptv.binding.calibration import Calibration
-from openptv.binding.parameters import ControlParams, VolumeParams, TrackingParams, SequenceParams
-from openptv.binding.tracking_framebuf import read_targets
+from openptv.binding.parameters import ControlParams
 
 def test_openptv_functionality(test_data_dir):
     """Test basic OpenPTV functionality"""
@@ -21,7 +19,10 @@ def test_openptv_functionality(test_data_dir):
         control_params_file = os.path.join(test_cavity_path, "parameters", "ptv.par")
         print(f"Control parameters file: {control_params_file}")
         if os.path.exists(control_params_file):
-            control_params = ControlParams(control_params_file)
+            # Create a ControlParams object with 4 cameras
+            control_params = ControlParams(4)
+            # Read the control parameters from the file
+            control_params.read_control_par(control_params_file)
             print(f"Successfully loaded control parameters")
             print(f"Number of cameras: {control_params.get_num_cams()}")
         else:
@@ -49,4 +50,23 @@ def test_openptv_functionality(test_data_dir):
     print("OpenPTV functionality test completed")
 
 if __name__ == "__main__":
-    test_openptv_functionality()
+    """Run the tests directly with detailed output."""
+    import sys
+    from pathlib import Path
+
+    print("\n=== Running OpenPTV Functionality Tests ===\n")
+
+    # Get the test_cavity directory
+    test_data_dir = Path(__file__).parent / "test_cavity"
+    if not test_data_dir.exists():
+        print(f"Test data directory {test_data_dir} not found")
+        sys.exit(1)
+
+    # Run the test
+    try:
+        test_openptv_functionality(test_data_dir)
+        print("\n✅ OpenPTV functionality test passed successfully!")
+        sys.exit(0)
+    except Exception as e:
+        print(f"\n❌ OpenPTV functionality test failed: {str(e)}")
+        sys.exit(1)
