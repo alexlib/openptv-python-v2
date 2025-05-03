@@ -397,7 +397,7 @@ def py_sequence_loop(exp) -> None:
 
     pftVersionParams = PftVersionParams(path=Path("parameters"))
     pftVersionParams.read()
-    Existing_Target = np.bool8(pftVersionParams.Existing_Target)
+    Existing_Target = np.bool_(pftVersionParams.Existing_Target)
 
     # sequence loop for all frames
     first_frame = spar.get_first()
