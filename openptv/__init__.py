@@ -83,7 +83,7 @@ else:
         TargetPar as TargetParams,
     )
 
-# exists only in Python 
+# Import Python-only components
 from openptv.pyoptv.parameters import ExaminePar as ExamineParams
 
 # Import GUI components if available

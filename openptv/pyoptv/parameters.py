@@ -95,7 +95,7 @@ class MultimediaPar(Parameters):
         """Return the thickness of the second medium."""
         return self.d
 
-    def set_layers(self, refr_index: list[float], thickness: list[float]):
+    def set_layers(self, refr_index: List[float], thickness: List[float]):
         """Set the layers of the medium."""
         if len(refr_index) != len(thickness):
             raise ValueError("Lengths of refractive index and thickness must be equal.")
@@ -364,11 +364,11 @@ class VolumePar(Parameters):
     #         'corrmin': self.corrmin,
     #     }
 
-    def set_z_min_lay(self, z_min_lay: list[float]) -> None:
+    def set_z_min_lay(self, z_min_lay: List[float]) -> None:
         """Set the minimum z coordinate of the layers."""
         self.z_min_lay = z_min_lay
 
-    def set_z_max_lay(self, z_max_lay: list[float]) -> None:
+    def set_z_max_lay(self, z_max_lay: List[float]) -> None:
         """Set the maximum z coordinate of the layers."""
         self.z_max_lay = z_max_lay
 
@@ -592,7 +592,7 @@ def compare_control_par(c1: ControlPar, c2: ControlPar) -> bool:
 class TargetPar(Parameters):
     """Target parameters."""
 
-    gvthresh: list[int] = field(default_factory=list)
+    gvthresh: List[int] = field(default_factory=list)
     discont: int = 100  # discontinuity
     nnmin: int = 1
     nnmax: int = 100
