@@ -12,12 +12,12 @@ from Cython.Build import cythonize
 
 class CustomBuildExt(build_ext):
     """Custom build_ext command with optimized compiler flags"""
-    
+
     def finalize_options(self):
         build_ext.finalize_options(self)
         # Add NumPy include directory
         self.include_dirs.append(numpy.get_include())
-    
+
     def build_extensions(self):
         # Customize compiler options if needed
         if self.compiler.compiler_type == 'unix':
@@ -33,30 +33,30 @@ def get_liboptv_sources():
 
 def create_extension(name, sources):
     """Create an Extension object with common settings"""
-    
+
     extra_compile_args = []
     extra_link_args = []
-    
+
     # Set platform-specific compiler flags
     if not sys.platform.startswith('win'):
         extra_compile_args.extend(['-Wno-cpp', '-Wno-unused-function'])
         extra_link_args.extend(['-Wl,-rpath,$ORIGIN'])
     else:
         extra_compile_args.append('/W4')
-    
+
     include_dirs = [
         numpy.get_include(),
         './openptv/liboptv/include/',
         './openptv/binding/',
     ]
-    
+
     # Add absolute paths for Windows
     if sys.platform.startswith('win'):
         include_dirs.extend([
             os.path.abspath('./openptv/liboptv/include/'),
             os.path.abspath('./openptv/binding/'),
         ])
-    
+
     return Extension(
         name,
         sources + get_liboptv_sources(),
@@ -110,6 +110,7 @@ setup(
         "scipy>=1.5.0",
         "tqdm>=4.60.0",  # Add tqdm as a dependency
         "imagecodecs>=2021.0.0",  # Add imagecodecs for image processing
+        "PyYAML>=6.0",  # Add PyYAML for configuration files
     ],
     extras_require={
         "dev": [
