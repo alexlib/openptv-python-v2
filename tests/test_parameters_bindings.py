@@ -36,6 +36,10 @@ class Test_MultimediaParams(unittest.TestCase):
         # assert that the arr affected the contents of m object
         numpy.testing.assert_array_equal(m.get_n2(), [77.77, 88.88, 99.99])
 
+    def tearDown(self):
+        # Clean up object references
+        pass
+
 class Test_TrackingParams(unittest.TestCase):
 
     def setUp(self):
@@ -99,6 +103,11 @@ class Test_TrackingParams(unittest.TestCase):
         self.assertTrue(self.track_obj2 != self.track_obj1)
         self.assertFalse(self.track_obj2 == self.track_obj1)
 
+    def tearDown(self):
+        # Clean up object references
+        self.track_obj1 = None
+        self.track_obj2 = None
+
 class Test_SequenceParams(unittest.TestCase):
     def setUp(self):
         self.input_sequence_par_file_name = "tests/testing_fodder/sequence_parameters/sequence.par"
@@ -146,7 +155,7 @@ class Test_SequenceParams(unittest.TestCase):
         self.assertFalse(self.seq_obj2 == self.seq_obj3)
 
         with self.assertRaises(TypeError):
-            var = (self.seq_obj2 > self.seq_obj3)
+            _ = (self.seq_obj2 > self.seq_obj3)
 
     def test_full_instantiate(self):
         """Instantiate a SequenceParams object from keywords."""
@@ -158,6 +167,12 @@ class Test_SequenceParams(unittest.TestCase):
         self.assertTrue(spar.get_img_base_name(1) == "test2")
         self.assertTrue(spar.get_first() == 1)
         self.assertTrue(spar.get_last() == 100)
+
+    def tearDown(self):
+        # Clean up object references
+        self.seq_obj = None
+        self.seq_obj2 = None
+        self.seq_obj3 = None
 
 class Test_VolumeParams(unittest.TestCase):
     def setUp(self):
@@ -253,7 +268,7 @@ class Test_VolumeParams(unittest.TestCase):
         self.assertFalse(self.vol_obj2 == self.vol_obj3)
 
         with self.assertRaises(TypeError):
-            var = (self.vol_obj2 < self.vol_obj3)
+            _ = (self.vol_obj2 < self.vol_obj3)
 
     def tearDown(self):
         # remove the testing output directory and its files
@@ -367,7 +382,7 @@ class Test_ControlParams(unittest.TestCase):
         self.assertFalse(self.cp_obj2 == self.cp_obj3)
 
         with self.assertRaises(TypeError):
-            var = (self.cp_obj2 > self.cp_obj3)  # unhandled operator >
+            _ = (self.cp_obj2 > self.cp_obj3)  # unhandled operator >
 
     def tearDown(self):
         # remove the testing output directory and its files
@@ -403,5 +418,23 @@ class TestTargetParams(unittest.TestCase):
         numpy.testing.assert_array_equal(
             tp.get_grey_thresholds(), [2, 3, 4, 5])
 
+    def tearDown(self):
+        # Clean up object references
+        pass
+
 if __name__ == "__main__":
-    unittest.main()
+    """Run the tests directly with detailed output."""
+    import sys
+
+    print("\n=== Running Parameters Bindings Tests ===\n")
+
+    # Run the tests with verbose output
+    import pytest
+    result = pytest.main(["-v", __file__])
+
+    if result == 0:
+        print("\n✅ All parameters bindings tests passed successfully!")
+    else:
+        print("\n❌ Some parameters bindings tests failed. See details above.")
+
+    sys.exit(result)

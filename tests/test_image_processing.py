@@ -1,8 +1,7 @@
 import unittest
 from openptv.binding.parameters import ControlParams
 from openptv.binding.image_processing import preprocess_image
-import numpy as np, os
-import tempfile
+import numpy as np
 
 class Test_image_processing(unittest.TestCase):
 
@@ -37,5 +36,24 @@ class Test_image_processing(unittest.TestCase):
 
         np.testing.assert_array_equal(res, correct_res)
 
+    def tearDown(self):
+        # Clean up object references
+        self.input_img = None
+        self.control = None
+
 if __name__ == "__main__":
-    unittest.main()
+    """Run the tests directly with detailed output."""
+    import sys
+
+    print("\n=== Running Image Processing Tests ===\n")
+
+    # Run the tests with verbose output
+    import pytest
+    result = pytest.main(["-v", __file__])
+
+    if result == 0:
+        print("\n✅ All image processing tests passed successfully!")
+    else:
+        print("\n❌ Some image processing tests failed. See details above.")
+
+    sys.exit(result)

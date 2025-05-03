@@ -3,6 +3,23 @@ import pytest
 from pathlib import Path
 import shutil
 
+# Define the order of test modules
+test_order = [
+    "test_trafo_bindings.py",
+    "test_tracker.py",
+    "test_segmentation.py",
+    # Add other test files here
+]
+
+def pytest_collection_modifyitems(items):
+    """Modify the order of test items to run problematic tests first."""
+    # Create a dictionary mapping test module names to their position in the test_order list
+    module_order = {module: i for i, module in enumerate(test_order)}
+
+    # Sort the test items based on their module's position in the test_order list
+    # If a module is not in the test_order list, it will be run after all modules in the list
+    items.sort(key=lambda item: module_order.get(os.path.basename(item.module.__file__), float('inf')))
+
 # Set GUI backend before any imports
 os.environ['ETS_TOOLKIT'] = 'qt4'
 os.environ['QT_API'] = 'pyside6'

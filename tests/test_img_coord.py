@@ -7,14 +7,14 @@ import numpy as np
 
 class Test_image_coordinates(unittest.TestCase):
     def setUp(self):
-        self.control = ControlParams(4) 
-    
+        self.control = ControlParams(4)
+
         self.calibration = Calibration()
-        
+
     def test_img_coord_typecheck(self):
-        
+
         with self.assertRaises(TypeError):
-            list = [[0 for x in range(3)] for x in range(10)]  # initialize a 10x3 list (but not numpy matrix)
+            list = [[0 for _ in range(3)] for _ in range(10)]  # initialize a 10x3 list (but not numpy matrix)
             flat_image_coordinates(list, self.control, out=None)
         with self.assertRaises(TypeError):
             flat_image_coordinates(np.empty((10, 2)), self.calibration, self.control.get_multimedia_params(), output=None)
@@ -22,9 +22,9 @@ class Test_image_coordinates(unittest.TestCase):
             image_coordinates(np.empty((10, 3)), self.calibration, self.control.get_multimedia_params(), output=np.zeros((10, 3)))
         with self.assertRaises(TypeError):
             image_coordinates(np.zeros((10, 2)), self.calibration, self.control.get_multimedia_params(), output=np.zeros((10, 2)))
-   
+
     def test_image_coord_regress(self):
-        
+
         self.calibration.set_pos(np.array([0, 0, 40]))
         self.calibration.set_angles(np.array([0, 0, 0]))
         self.calibration.set_primary_point(np.array([0, 0, 10]))
@@ -37,11 +37,11 @@ class Test_image_coordinates(unittest.TestCase):
                                      n2=np.array([1]),
                                      n3=1,
                                      d=np.array([1]))
-        
+
         input = np.array([[10., 5., -20.],
                           [10., 5., -20.]])  # vec3d
         output = np.zeros((2, 2))
-        
+
         x = 10. / 6.
         y = x / 2.
         correct_output = np.array([[x, y],
@@ -49,12 +49,31 @@ class Test_image_coordinates(unittest.TestCase):
 
         flat_image_coordinates(input=input, cal=self.calibration, mult_params=self.mult, output=output)
         np.testing.assert_array_equal(output, correct_output)
-        
+
         output=np.full((2,2), 999.)
         image_coordinates(input=input, cal=self.calibration, mult_params=self.mult, output=output)
 
         np.testing.assert_array_equal(output, correct_output)
-        
-if __name__ == '__main__':
-  unittest.main()
- 
+
+    def tearDown(self):
+        # Clean up object references
+        self.control = None
+        self.calibration = None
+        self.mult = None
+
+if __name__ == "__main__":
+    """Run the tests directly with detailed output."""
+    import sys
+
+    print("\n=== Running Image Coordinates Tests ===\n")
+
+    # Run the tests with verbose output
+    import pytest
+    result = pytest.main(["-v", __file__])
+
+    if result == 0:
+        print("\n✅ All image coordinates tests passed successfully!")
+    else:
+        print("\n❌ Some image coordinates tests failed. See details above.")
+
+    sys.exit(result)

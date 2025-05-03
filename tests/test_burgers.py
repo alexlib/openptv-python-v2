@@ -115,12 +115,19 @@ class TestTracker(unittest.TestCase):
         # the C code.
 
     def tearDown(self):
+        # Clean up file system resources
         if os.path.exists("tests/testing_fodder/burgers/res/"):
             shutil.rmtree("tests/testing_fodder/burgers/res/")
         if os.path.exists("tests/testing_fodder/burgers/img/"):
             shutil.rmtree("tests/testing_fodder/burgers/img/")
-            # print("there is a /res folder\n")
-            # pass
+
+        # Clean up object references
+        self.cals = None
+        self.cpar = None
+        self.vpar = None
+        self.tpar = None
+        self.spar = None
+        self.tracker = None
 
 
 if __name__ == "__main__":

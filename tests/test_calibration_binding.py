@@ -120,4 +120,17 @@ class Test_Calibration(unittest.TestCase):
         self.assertRaises(ValueError, self.cal.set_glass_vec, numpy.ones(1))
 
 if __name__ == "__main__":
-    unittest.main()
+    """Run the tests directly with detailed output."""
+    import sys
+
+    print("\n=== Running Calibration Binding Tests ===\n")
+
+    # Run the tests with verbose output
+    result = pytest.main(["-v", __file__])
+
+    if result == 0:
+        print("\n✅ All calibration binding tests passed successfully!")
+    else:
+        print("\n❌ Some calibration binding tests failed. See details above.")
+
+    sys.exit(result)

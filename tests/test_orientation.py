@@ -244,6 +244,12 @@ class Test_Orientation(unittest.TestCase):
             targs_plain, self.control, calibs, 25., 1.)
         self.assertTrue(tf_too_long > tf_len > tf)
 
+    def tearDown(self):
+        # Clean up object references
+        self.calibration = None
+        self.control = None
+        self.vpar = None
+
 
 class TestGradientDescent(unittest.TestCase):
     # Based on the C tests in liboptv/tests/check_orientation.c
@@ -316,5 +322,25 @@ class TestGradientDescent(unittest.TestCase):
             self.cal.get_pos(), self.orig_cal.get_pos(),
             decimal=3)
 
+    def tearDown(self):
+        # Clean up object references
+        self.cal = None
+        self.orig_cal = None
+        self.control = None
+
 if __name__ == "__main__":
-    unittest.main()
+    """Run the tests directly with detailed output."""
+    import sys
+
+    print("\n=== Running Orientation Tests ===\n")
+
+    # Run the tests with verbose output
+    import pytest
+    result = pytest.main(["-v", __file__])
+
+    if result == 0:
+        print("\n✅ All orientation tests passed successfully!")
+    else:
+        print("\n❌ Some orientation tests failed. See details above.")
+
+    sys.exit(result)
