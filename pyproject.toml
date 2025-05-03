@@ -23,9 +23,8 @@ skip = ["cp36-*", "pp*", "*-musllinux*"]
 # Install dependencies required for building
 before-build = "pip install 'numpy>=1.19.0,<2.0' 'cython>=0.29.21'"
 
-# Build wheels with both gui and dev extras
-package-dir = "."
-build = "pip wheel --no-deps -w {dest} {package_dir}[gui,dev]"
+# Build wheels with extras
+environment = { PIP_EXTRA_INDEX_URL = "https://pypi.org/simple" }
 
 # Test the wheels after building
 test-command = "python {package}/tests/test_wheel_install.py"
