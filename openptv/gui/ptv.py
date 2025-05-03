@@ -50,7 +50,7 @@ from openptv import (
 
 # PyPTV imports
 from openptv.gui.parameters import PftVersionParams
-from openptv.gui.pyptv import parameters as par
+from openptv.gui import parameters as par
 
 # Print which implementation we're using
 print(f"Using Cython implementation: {using_cython()}")

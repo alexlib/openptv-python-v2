@@ -50,7 +50,7 @@ from skimage.color import rgb2gray
 from skimage.io import imread
 
 # Update imports to use the high-level API
-from openptv.gui.pyptv import parameters as par
+from openptv.gui import parameters as par
 from openptv.gui import ptv
 from openptv.gui.calibration_gui import CalibrationGUI
 from openptv.gui.directory_editor import DirectoryEditorDialog
@@ -58,7 +58,7 @@ from openptv.gui.parameter_gui import Experiment, Paramset
 from openptv.gui.quiverplot import QuiverPlot
 from openptv.gui.detection_gui import DetectionGUI
 from openptv.gui.mask_gui import MaskGUI
-from openptv.gui.pyptv import __version__
+from openptv.gui import __version__
 
 # Import GUI parameter classes with explicit names
 from openptv.gui.parameters import (
