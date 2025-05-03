@@ -813,7 +813,7 @@ cdef class TargetParams:
         if len(gvthresh) > 4:
             raise ValueError("Can't store more than 4 grey-level thresholds.")
         
-        for gvx in xrange(len(gvthresh)):
+        for gvx in range(len(gvthresh)):
             self._targ_par.gvthres[gvx] = gvthresh[gvx]
     
     def get_pixel_count_bounds(self):

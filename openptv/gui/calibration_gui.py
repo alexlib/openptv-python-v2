@@ -31,6 +31,7 @@ from chaco.tools.image_inspector_tool import ImageInspectorTool
 from chaco.tools.better_zoom import BetterZoom as SimpleZoom
 
 # from chaco.tools.simple_zoom import SimpleZoom
+from openptv.gui.parameters import CalOriParams, MultiPlaneParams, OrientParams, copy_params_dir
 from openptv.gui.text_box_overlay import TextBoxOverlay
 from openptv.gui.code_editor import oriEditor, addparEditor
 from chaco.api import QuiverPlot
@@ -1049,7 +1050,7 @@ args=(self.cals[i_cam],
 
         cal.set_radial_distortion(x)
         targets = convert_arr_metric_to_pixel(
-            image_coordinates(XYZ, cal, cget_multimedia_params()),
+            image_coordinates(XYZ, cal, self.cpar.get_multimedia_params()),
             cpar
         )
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])
@@ -1061,7 +1062,7 @@ args=(self.cals[i_cam],
         """Residuals due to decentering """
         cal.set_decentering(x)
         targets = convert_arr_metric_to_pixel(
-            image_coordinates(XYZ, cal, cget_multimedia_params()),
+            image_coordinates(XYZ, cal, self.cpar.get_multimedia_params()),
             cpar
         )
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])
@@ -1072,7 +1073,7 @@ args=(self.cals[i_cam],
         """Residuals due to decentering """
         cal.set_affine_trans(x)
         targets = convert_arr_metric_to_pixel(
-            image_coordinates(XYZ, cal, cget_multimedia_params()),
+            image_coordinates(XYZ, cal, self.cpar.get_multimedia_params()),
             cpar
         )
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])
@@ -1087,7 +1088,7 @@ args=(self.cals[i_cam],
         cal.set_affine_trans(x[5:])
 
         targets = convert_arr_metric_to_pixel(
-            image_coordinates(XYZ, cal, cget_multimedia_params()),
+            image_coordinates(XYZ, cal, self.cpar.get_multimedia_params()),
             cpar
         )
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])

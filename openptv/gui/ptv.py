@@ -49,6 +49,7 @@ from openptv import (
 )
 
 # PyPTV imports
+from openptv.gui.parameters import PftVersionParams
 from openptv.gui.pyptv import parameters as par
 
 # Print which implementation we're using
@@ -225,7 +226,7 @@ def py_detection_proc_c(list_of_images: List[np.ndarray],
     """
     # Read PFT version parameters
     param_dir = Path("parameters")
-    pft_version_params = par.PftVersionParams(path=param_dir)
+    pft_version_params = PftVersionParams(path=param_dir)
     pft_version_params.read()
     existing_target = bool(pft_version_params.Existing_Target)
 
@@ -307,7 +308,7 @@ def py_determination_proc_c(n_cams: int,
         print_corresp = sorted_corresp
 
     # Save positions to a temporary file
-    fname = (default_naming["corres"].decode() + '.' + str(DEFAULT_FRAME_NUM)).encode()
+    fname = default_naming["corres"] + '.' + str(DEFAULT_FRAME_NUM)
 
     print(f'Prepared {fname} to write positions')
 

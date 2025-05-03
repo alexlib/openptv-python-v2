@@ -11,6 +11,7 @@ see http://www.openptv.net for more details.
 """
 
 from traits.etsconfig.api import ETSConfig
+
 ETSConfig.toolkit = 'qt4'
 
 import os
@@ -23,6 +24,8 @@ import numpy as np
 # Import directly from openptv instead of using the compatibility layer
 import openptv
 from openptv import using_cython
+from openptv import epipolar_curve
+
 from traits.api import HasTraits, Int, Bool, Instance, List, Enum, Any
 from traitsui.api import (
     View,
@@ -1273,7 +1276,7 @@ class MainGUI(HasTraits):
                 for j in range(self.n_cams):
                     if i == j:
                         continue
-                    pts = optv.epipolar.epipolar_curve(
+                    pts = epipolar_curve(
                         point,
                         self.cals[i],
                         self.cals[j],

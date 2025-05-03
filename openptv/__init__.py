@@ -178,6 +178,15 @@ if _using_cython:
 else:
     from openptv.pyoptv.tracker import Tracker, default_naming
 
+# Epipolar geometry
+if _using_cython:
+    try:
+        from openptv.binding.epipolar import epipolar_curve
+    except ImportError:
+        from openptv.pyoptv.epi import epipolar_curve
+else:
+    from openptv.pyoptv.epi import epipolar_curve
+
 # Import constants from binding modules
 if _using_cython:
     try:
