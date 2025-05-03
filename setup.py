@@ -109,6 +109,7 @@ setup(
         "numpy>=1.19.0,<2.0",
         "scipy>=1.5.0",
         "tqdm>=4.60.0",  # Add tqdm as a dependency
+        "imagecodecs>=2021.0.0",  # Add imagecodecs for image processing
     ],
     extras_require={
         "dev": [

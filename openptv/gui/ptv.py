@@ -395,7 +395,7 @@ def py_sequence_loop(exp) -> None:
     # spar.read_sequence_par("parameters/sequence.par", n_cams)
 
 
-    pftVersionParams = par.PftVersionParams(path=Path("parameters"))
+    pftVersionParams = PftVersionParams(path=Path("parameters"))
     pftVersionParams.read()
     Existing_Target = np.bool8(pftVersionParams.Existing_Target)
 
@@ -495,7 +495,7 @@ def py_sequence_loop(exp) -> None:
             print_corresp = sorted_corresp
 
         # Save rt_is
-        rt_is_filename = default_naming["corres"].decode()
+        rt_is_filename = default_naming["corres"]
         # rt_is_filename = f'{rt_is_filename}.{frame:04d}'
         rt_is_filename = f'{rt_is_filename}.{frame}'
         with open(rt_is_filename, "w", encoding="utf8") as rt_is:
@@ -801,10 +801,10 @@ def read_targets(file_base: str, frame: int=123456789) -> TargetArray:
     # buffer = TargetArray()
     # buffer = []
 
-    # if file_base has an extension, remove it
-    file_base = file_base.split(".")[0]
+    # # if file_base has an extension, remove it
+    # file_base = file_base.split(".")[0]
 
-    file_base = replace_format_specifiers(file_base) # remove %d
+    # file_base = replace_format_specifiers(file_base) # remove %d
     filename = file_base_to_filename(file_base, frame)
 
     print(f" filename: {filename}")

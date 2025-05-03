@@ -572,11 +572,11 @@ class CalibrationGUI(HasTraits):
         ) = ptv.py_start_proc_c(self.n_cams)
 
         print("reset grey scale thresholds for calibration:\n")
-        self.tread("parameters/detect_plate.par")
-        print(self.tget_grey_thresholds())
+        self.tpar.read("parameters/detect_plate.par")
+        print(self.tpar.get_grey_thresholds())
 
 
-        if self.eCombine_Flag is True:
+        if self.epar.Combine_Flag is True:
             print("Combine Flag is On")
             self.MultiParams = MultiPlaneParams()
             self.MultiParams.read()
@@ -589,7 +589,7 @@ class CalibrationGUI(HasTraits):
         # read calibration images
         self.cal_images = []
         for i in range(len(self.camera)):
-            imname = self.cget_cal_img_base_name(i)
+            imname = self.cpar.get_cal_img_base_name(i)
             im = imread(imname)
             # im = ImageData.fromfile(imname).data
             if im.ndim > 2:
@@ -620,7 +620,7 @@ class CalibrationGUI(HasTraits):
         print(" Detection procedure \n")
         self.status_text = "Detection procedure"
 
-        if self.cget_hp_flag():
+        if self.cpar.get_hp_flag():
             self.cal_images = ptv.py_pre_processing_c(
                 self.cal_images, self.cpar
             )
@@ -713,7 +713,7 @@ class CalibrationGUI(HasTraits):
         self.cals = []
         for i_cam in range(self.n_cams):
             cal = Calibration()
-            tmp = self.cget_cal_img_base_name(i_cam)
+            tmp = self.cpar.get_cal_img_base_name(i_cam)
             cal.from_file(tmp + ".ori", tmp + ".addpar")
             self.cals.append(cal)
 
@@ -726,7 +726,7 @@ class CalibrationGUI(HasTraits):
             projected = image_coordinates(
                 np.atleast_2d(row["pos"]),
                 self.cals[i_cam],
-                self.cget_multimedia_params(),
+                self.cpar.get_multimedia_params(),
             )
             pos = convert_arr_metric_to_pixel(projected, self.cpar)
 
@@ -849,7 +849,7 @@ class CalibrationGUI(HasTraits):
 
         for i_cam in range(self.n_cams):  # iterate over all cameras
 
-            if self.eCombine_Flag:
+            if self.epar.Combine_Flag:
 
                 self.status_text = "Multiplane calibration."
                 """ Performs multiplane calibration, in which for all cameras the
@@ -1121,8 +1121,8 @@ args=(self.cals[i_cam],
             addpar = "tmp.addpar"
 
         print("Saving:", ori, addpar)
-        self.cals[i_cam].write(ori.encode(), addencode())
-        if self.eExamine_Flag and not self.eCombine_Flag:
+        self.cals[i_cam].write(ori.encode(), addpar.encode())
+        if self.epar.Examine_Flag and not self.epar.Combine_Flag:
             self.save_point_sets(i_cam)
 
     def save_point_sets(self, i_cam):
@@ -1297,7 +1297,7 @@ args=(self.cals[i_cam],
     def protect_ori_files(self):
         # backup ORI/ADDPAR files to the backup_cal directory
 
-        for f in calOriParams.img_ori[: self.n_cams]:
+        for f in CalOriParams.img_ori[: self.n_cams]:
             with open(f, "r") as d:
                 d.read().split()
                 if not np.all(

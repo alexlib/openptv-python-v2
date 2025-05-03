@@ -437,7 +437,7 @@ class MaskGUI(HasTraits):
         # read Mask images
         self.images = []
         for i in range(len(self.camera)):
-            imname = self.cget_img_base_name(i)
+            imname = self.cpar.get_img_base_name(i)
             im = imread(imname)
             # im = ImageData.fromfile(imname).data
             if im.ndim > 2:
