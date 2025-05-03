@@ -63,8 +63,8 @@ class Test_TrackingParams(unittest.TestCase):
     def test_TrackingParams_read_from_file(self):
         """Filling a TrackingParams object by reading file"""
 
-        # Skip this test for now as it causes segmentation faults
-        self.skipTest("Skipping test_TrackingParams_read_from_file test due to segmentation faults")
+        # Read tracking parameters from file
+        self.track_obj1.read_track_par(self.input_tracking_par_file_name)
 
         # check that the values of track_obj1 are equal to values in tracking parameters file
         # the check is performed according to the order the parameters were read from same file

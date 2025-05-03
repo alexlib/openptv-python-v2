@@ -26,8 +26,29 @@ framebuf_naming = {
 
 class TestTracker(unittest.TestCase):
     def setUp(self):
-        # Skip these tests for now as they cause segmentation faults
-        self.skipTest("Skipping test_burgers.py tests due to segmentation faults")
+        with open("tests/testing_fodder/burgers/conf.yaml") as f:
+            yaml_conf = yaml.load(f, Loader=yaml.FullLoader)
+        seq_cfg = yaml_conf['sequence']
+
+        self.cals = []
+        img_base = []
+        print((yaml_conf['cameras']))
+        for cix, cam_spec in enumerate(yaml_conf['cameras']):
+            cam_spec.setdefault('addpar_file', None)
+            cal = Calibration()
+            cal.from_file(cam_spec['ori_file'].encode(),
+                          cam_spec['addpar_file'].encode())
+            self.cals.append(cal)
+            img_base.append(seq_cfg['targets_template'].format(cam=cix + 1))
+
+        self.cpar = ControlParams(len(yaml_conf['cameras']), **yaml_conf['scene'])
+        self.vpar = VolumeParams(**yaml_conf['correspondences'])
+        self.tpar = TrackingParams(**yaml_conf['tracking'])
+        self.spar = SequenceParams(
+            image_base=img_base,
+            frame_range=(seq_cfg['first'], seq_cfg['last']))
+
+        self.tracker = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, framebuf_naming)
 
     def test_forward(self):
         """Manually running a full forward tracking run."""

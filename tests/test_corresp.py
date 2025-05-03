@@ -38,8 +38,10 @@ class TestMatchedCoords(unittest.TestCase):
 class TestCorresp(unittest.TestCase):
     def test_full_corresp(self):
         """Full scene correspondences"""
-        # Skip these tests for now as they cause segmentation faults
-        self.skipTest("Skipping test_full_corresp test due to segmentation faults")
+        cpar = ControlParams(4)
+        cpar.read_control_par("tests/testing_fodder/corresp/control.par")
+        vpar = VolumeParams()
+        vpar.read_volume_par("tests/testing_fodder/corresp/criteria.par")
 
         # Cameras are at so high angles that opposing cameras don't see each
         # other in the normal air-glass-water setting.
@@ -52,8 +54,8 @@ class TestCorresp(unittest.TestCase):
         for c in range(4):
             cal = Calibration()
             cal.from_file(
-                "testing_fodder/calibration/sym_cam%d.tif.ori" % (c + 1),
-                "testing_fodder/calibration/cam1.tif.addpar")
+                ("tests/testing_fodder/calibration/sym_cam%d.tif.ori" % (c + 1)).encode(),
+                "tests/testing_fodder/calibration/cam1.tif.addpar".encode())
             cals.append(cal)
 
             # Generate test targets.
@@ -84,8 +86,10 @@ class TestCorresp(unittest.TestCase):
 
     def test_single_cam_corresp(self):
         """Single camera correspondence"""
-        # Skip these tests for now as they cause segmentation faults
-        self.skipTest("Skipping test_single_cam_corresp test due to segmentation faults")
+        cpar = ControlParams(1)
+        cpar.read_control_par("tests/testing_fodder/single_cam/parameters/ptv.par")
+        vpar = VolumeParams()
+        vpar.read_volume_par("tests/testing_fodder/single_cam/parameters/criteria.par")
 
         # Cameras are at so high angles that opposing cameras don't see each
         # other in the normal air-glass-water setting.
@@ -97,8 +101,8 @@ class TestCorresp(unittest.TestCase):
         corrected = []
         cal = Calibration()
         cal.from_file(
-            "testing_fodder/single_cam/calibration/cam_1.tif.ori",
-            "testing_fodder/single_cam/calibration/cam_1.tif.addpar")
+            "tests/testing_fodder/single_cam/calibration/cam_1.tif.ori".encode(),
+            "tests/testing_fodder/single_cam/calibration/cam_1.tif.addpar".encode())
         cals.append(cal)
 
         # Generate test targets.

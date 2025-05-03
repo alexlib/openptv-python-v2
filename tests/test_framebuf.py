@@ -29,8 +29,12 @@ class TestTargets(unittest.TestCase):
 
     def test_read_targets(self):
         """Reading a targets file from Python."""
-        # Skip this test as the sample file doesn't exist
-        self.skipTest("Sample file doesn't exist")
+        targs = read_targets("tests/testing_fodder/frame/cam1.", 333)
+
+        self.assertEqual(len(targs), 13)
+        self.assertEqual([targ.tnr() for targ in targs][0], -1)
+        self.assertEqual([targ.pos()[0] for targ in targs][0], 900.0)
+        self.assertEqual([targ.pos()[1] for targ in targs][0], 123.0)
 
     def test_sort_y(self):
         """sorting on the Y coordinate in place"""
@@ -43,8 +47,17 @@ class TestTargets(unittest.TestCase):
 
     def test_write_targets(self):
         """Round-trip test of writing targets."""
-        # Skip this test as the sample file doesn't exist
-        self.skipTest("Sample file doesn't exist")
+        targs = read_targets("tests/testing_fodder/frame/cam1.", 333)
+        targs.write("tests/testing_fodder/round_trip.".encode(), 1)
+        tback = read_targets("tests/testing_fodder/round_trip.", 1)
+
+        self.assertEqual(len(targs), len(tback))
+        self.assertEqual([targ.tnr() for targ in targs],
+            [targ.tnr() for targ in tback])
+        self.assertEqual([targ.pos()[0] for targ in targs],
+            [targ.pos()[0] for targ in tback])
+        self.assertEqual([targ.pos()[1] for targ in targs],
+            [targ.pos()[1] for targ in tback])
 
     def tearDown(self):
         filename = "tests/testing_fodder/round_trip.0001_targets"
