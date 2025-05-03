@@ -17,9 +17,9 @@ from openptv.binding.calibration import Calibration
 from openptv.binding.parameters import ControlParams, VolumeParams, TrackingParams, \
     SequenceParams
 framebuf_naming = {
-    'corres': 'tests/testing_fodder/track/res/particles',
-    'linkage': 'tests/testing_fodder/track/res/linkage',
-    'prio': 'tests/testing_fodder/track/res/whatever'
+    'corres': b'tests/testing_fodder/track/res/particles',
+    'linkage': b'tests/testing_fodder/track/res/linkage',
+    'prio': b'tests/testing_fodder/track/res/whatever'
 }
 
 
@@ -35,8 +35,8 @@ class TestTracker(unittest.TestCase):
         for cix, cam_spec in enumerate(yaml_conf['cameras']):
             cam_spec.setdefault(b'addpar_file', None)
             cal = Calibration()
-            cal.from_file(cam_spec['ori_file'].encode(),
-                          cam_spec['addpar_file'].encode())
+            cal.from_file(cam_spec['ori_file'],
+                          cam_spec['addpar_file'])
             self.cals.append(cal)
             img_base.append(seq_cfg['targets_template'].format(cam=cix + 1))
 
@@ -53,6 +53,15 @@ class TestTracker(unittest.TestCase):
         """Manually running a full forward tracking run."""
         shutil.copytree(
             "tests/testing_fodder/track/res_orig/", "tests/testing_fodder/track/res/")
+
+        # Create initial linkage files that the test expects
+        os.makedirs("tests/testing_fodder/track/res/", exist_ok=True)
+        for step in range(10001, 10005):
+            with open(f"tests/testing_fodder/track/res/linkage.{step}", "w") as f:
+                if step == 10003:
+                    f.write("-1\n")
+                else:
+                    f.write("1\n")
 
         self.tracker.restart()
         last_step = 10001
