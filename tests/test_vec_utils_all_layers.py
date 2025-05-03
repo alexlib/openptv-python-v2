@@ -71,7 +71,7 @@ def test_python_implementation():
 def test_package_interface():
     """Test the package interface that automatically selects implementation."""
     try:
-        from openptv import py_vec_cmp, py_vec_copy, using_cython
+        from openptv import vec_cmp, vec_copy, using_cython
 
         # Print which implementation we're using
         print(f"Using Cython implementation: {using_cython()}")
@@ -82,12 +82,23 @@ def test_package_interface():
         vec3 = np.array([4.0, 5.0, 6.0], dtype=np.float64)
 
         # Test comparison
-        assert py_vec_cmp(vec1, vec2) == 1, "Equal vectors should return 1"
-        assert py_vec_cmp(vec1, vec3) == 0, "Different vectors should return 0"
+        if using_cython():
+            # Cython implementation returns 1 for equal, 0 for not equal
+            assert vec_cmp(vec1, vec2) == 1, "Equal vectors should return 1"
+            assert vec_cmp(vec1, vec3) == 0, "Different vectors should return 0"
+        else:
+            # Python implementation returns True for equal, False for not equal
+            assert vec_cmp(vec1, vec2, tol=1e-6), "Equal vectors should return True"
+            assert not vec_cmp(vec1, vec3, tol=1e-6), "Different vectors should return False"
 
         # Test copy
-        copied = py_vec_copy(vec1)
+        copied = vec_copy(vec1)
         assert np.array_equal(vec1, copied), "Copied vector should equal original"
+
+        # Modify original to verify copy is independent
+        original_value = vec1[0]
+        vec1[0] = 10.0
+        assert copied[0] == original_value, "Modifying original should not affect copy"
 
         print("Package interface test passed!")
         assert True, "Package interface available"

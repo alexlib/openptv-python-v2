@@ -17,18 +17,6 @@ def test_using_cython():
     assert using_cython() is True, "Cython implementation should be available"
 
 
-def test_track_particles():
-    """Test the high-level track_particles function."""
-    # Skip this test as the high-level API is not yet implemented
-    pytest.skip("High-level track_particles API not yet implemented")
-
-
-def test_find_correspondences():
-    """Test the high-level find_correspondences function."""
-    # Skip this test as the high-level API is not yet implemented
-    pytest.skip("High-level find_correspondences API not yet implemented")
-
-
 if __name__ == "__main__":
     # This allows running the tests directly with python
     import sys

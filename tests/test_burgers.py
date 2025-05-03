@@ -18,9 +18,9 @@ from openptv.binding.parameters import ControlParams, VolumeParams, TrackingPara
     SequenceParams
 
 framebuf_naming = {
-    'corres': 'tests/testing_fodder/burgers/res/rt_is',
-    'linkage': 'tests/testing_fodder/burgers/res/ptv_is',
-    'prio': 'tests/testing_fodder/burgers/res/whatever'
+    'corres': b'tests/testing_fodder/burgers/res/rt_is',
+    'linkage': b'tests/testing_fodder/burgers/res/ptv_is',
+    'prio': b'tests/testing_fodder/burgers/res/whatever'
 }
 
 
