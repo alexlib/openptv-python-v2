@@ -100,25 +100,25 @@ class TestTracker(unittest.TestCase):
         """Test that Tracker handles both strings and bytes correctly"""
         # Using regular strings - will be encoded automatically
         naming_strings = {
-            'corres': 'res/rt_is',
-            'linkage': 'res/ptv_is',
-            'prio': 'res/added'
+            'corres': 'tests/testing_fodder/track/res/rt_is',
+            'linkage': 'tests/testing_fodder/track/res/ptv_is',
+            'prio': 'tests/testing_fodder/track/res/added'
         }
         tracker1 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_strings)
 
         # Using bytes directly - will be passed through
         naming_bytes = {
-            'corres': b'res/rt_is',
-            'linkage': b'res/ptv_is',
-            'prio': b'res/added'
+            'corres': b'tests/testing_fodder/track/res/rt_is',
+            'linkage': b'tests/testing_fodder/track/res/ptv_is',
+            'prio': b'tests/testing_fodder/track/res/added'
         }
         tracker2 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_bytes)
 
         # Using mixed - both will work
         naming_mixed = {
-            'corres': 'res/rt_is',  # string
-            'linkage': b'res/ptv_is',  # bytes
-            'prio': 'res/added'  # string
+            'corres': 'tests/testing_fodder/track/res/rt_is',  # string
+            'linkage': b'tests/testing_fodder/track/res/ptv_is',  # bytes
+            'prio': 'tests/testing_fodder/track/res/added'  # string
         }
         tracker3 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_mixed)
 
