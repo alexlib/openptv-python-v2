@@ -10,25 +10,11 @@ eval "$(conda shell.bash hook)"
 # Activate the environment
 conda activate openptv2
 
-# Install core dependencies with specific versions
-conda install -y numpy=1.26.4
-conda install -y scipy cython pyyaml
-
-# Install GUI dependencies
-conda install -y -c conda-forge traits traitsui chaco enable pyface
-
-# Install additional dependencies
-conda install -y matplotlib
-conda install -y -c conda-forge pytest pytest-cov black flake8
-
-# Install PySide6 for GUI backend
-pip install pyside6
-
 # Install the package in development mode with GUI dependencies
 pip install -e .[gui]
 
 # Build the Cython extensions
-python setup.py build_ext --inplace
+# python setup.py build_ext --inplace
 
 # Verify installation
 python -c "import openptv; print(f'OpenPTV installed. Using Cython: {openptv.using_cython()}')"

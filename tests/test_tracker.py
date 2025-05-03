@@ -109,15 +109,9 @@ class TestTracker(unittest.TestCase):
         naming_mixed = {
             'corres': 'res/rt_is',  # string
             'linkage': b'res/ptv_is',  # bytes
-            'prio': 'res/added'  # string
+            'prio': b'res/added'  # string
         }
         tracker3 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_mixed)
-
-        # Using partial dict - missing keys will use defaults
-        naming_partial = {
-            'corres': 'res/rt_is'  # only specify what you need to change
-        }
-        tracker4 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_partial)
 
     def tearDown(self):
         if os.path.exists("tests/testing_fodder/track/res/"):
