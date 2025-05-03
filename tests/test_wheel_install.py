@@ -9,33 +9,13 @@ import importlib.util
 def test_imports():
     """Test importing key modules from the package."""
     modules_to_test = [
+        "openptv",
         "openptv.binding.calibration",
         "openptv.binding.parameters",
         "openptv.binding.tracking_framebuf",
         "openptv.binding.transforms",
     ]
     
-    # Try to import PyYAML, but don't fail if it's not available
-    try:
-        import yaml
-        print("✅ Successfully imported yaml")
-    except ImportError as e:
-        print(f"⚠️ Warning: PyYAML not available: {str(e)}")
-        print("⚠️ This is expected in the test environment, but should be installed in production")
-    
-    # Try to import openptv, but don't fail if it can't import yaml
-    try:
-        import openptv
-        print(f"✅ Successfully imported openptv")
-    except ImportError as e:
-        if "No module named 'yaml'" in str(e):
-            print(f"⚠️ Warning: openptv import failed due to missing yaml: {str(e)}")
-            print("⚠️ This is expected in the test environment, but should be installed in production")
-        else:
-            print(f"❌ Failed to import openptv: {str(e)}")
-            return False
-    
-    # Test importing the binding modules
     for module_name in modules_to_test:
         try:
             importlib.import_module(module_name)

@@ -94,11 +94,11 @@ for pyx_file in cython_files:
 # Package metadata
 setup(
     name="openptv-python",
-    version="0.1.0",
+    version="0.1.1",
     description="Python package for Particle Tracking Velocimetry",
     author="OpenPTV Contributors",
-    author_email="your.email@example.com",
-    url="https://github.com/yourusername/openptv-python-v2",
+    author_email="alex@libptv.org",
+    url="https://github.com/alexlib/openptv-python-v2",
     packages=find_packages(),
     ext_modules=extensions,
     include_dirs=[numpy.get_include()],

@@ -29,36 +29,37 @@ openptv-python/
 
 ## Installation
 
-### Basic Installation
+### Using pre-built wheels (recommended)
+
+Pre-built binary wheels are available for Windows, macOS, and Linux:
 
 ```bash
-# For users (when available on PyPI)
 pip install openptv-python
 ```
 
-### Development Installation
+This will automatically download and install the appropriate wheel for your platform.
+
+### From source
+
+If you need to install from source:
+
+```bash
+# Install build dependencies
+pip install numpy cython
+
+# Install the package
+pip install openptv-python
+```
+
+### For development
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/openptv-python-v2.git
+git clone https://github.com/alexlib/openptv-python-v2.git
 cd openptv-python-v2
-
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install in development mode
 pip install -e .
-
-# Build the Cython extensions
-python setup.py build_ext --inplace
-```
-
-### With GUI Dependencies
-
-```bash
-# Install with GUI dependencies
-pip install openptv-python[gui]
 ```
 
 ## Development
@@ -68,34 +69,27 @@ The package supports two development workflows:
 1. **C/Cython Development**: For performance-critical components
 2. **Python Development**: For rapid prototyping and algorithm development
 
-See the [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) for more details on the development workflow.
+See the documentation for more details on the development workflow.
 
-## Running the GUI
+### Building Wheels
 
-```bash
-# Run the GUI application
-openptv-gui
-
-# Or directly
-python -m openptv.gui.main
-```
-
-See [GUI_README.md](GUI_README.md) for more information on the GUI components.
-
-## Testing
+To build binary wheels for distribution:
 
 ```bash
-# Run all tests
-python -m pytest tests/
+# Install cibuildwheel
+pip install cibuildwheel
 
-# Run specific tests
-python -m pytest tests/test_tracking.py
+# Build wheels for the current platform
+python -m cibuildwheel --output-dir wheelhouse
 ```
 
-## Git Workflow
+The GitHub Actions workflow will automatically build wheels for all supported platforms when:
+- A tag starting with 'v' is pushed (e.g., v0.1.1)
+- Changes are pushed to the 'build_wheels' branch
+- The workflow is manually triggered
 
-See [GIT_WORKFLOW.md](GIT_WORKFLOW.md) for information on the Git workflow for this project.
+The wheels will be uploaded as artifacts and can be downloaded from the GitHub Actions page.
 
 ## License
 
-[Add license information here]
+This project is licensed under the MIT License - see the LICENSE file for details.

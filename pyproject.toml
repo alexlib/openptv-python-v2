@@ -25,7 +25,7 @@ before-build = "pip install 'numpy>=1.19.0,<2.0' 'cython>=0.29.21'"
 
 # Test the wheels after building
 test-command = "python {package}/tests/test_wheel_install.py"
-test-requires = ["pytest>=6.0.0", "PyYAML>=6.0"]
+test-requires = ["pytest>=6.0.0"]
 
 # Environment variables for specific platforms
 [tool.cibuildwheel.linux]
