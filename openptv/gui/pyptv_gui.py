@@ -58,6 +58,21 @@ from openptv.gui.detection_gui import DetectionGUI
 from openptv.gui.mask_gui import MaskGUI
 from openptv.gui.pyptv import __version__
 
+# Import GUI parameter classes with explicit names
+from openptv.gui.parameters import (
+    PtvParams as GuiPtvParams,
+    TrackingParams as GuiTrackingParams,
+    # ... other GUI parameter classes
+)
+
+# Import core parameter classes from main package
+from openptv import (
+    MultimediaParams,
+    TrackingParams,
+    SequenceParams,
+    # ... other core parameter classes
+)
+
 # Print which implementation we're using
 print(f"Using Cython implementation: {using_cython()}")
 

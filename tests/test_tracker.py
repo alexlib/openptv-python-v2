@@ -17,9 +17,9 @@ from openptv.binding.calibration import Calibration
 from openptv.binding.parameters import ControlParams, VolumeParams, TrackingParams, \
     SequenceParams
 framebuf_naming = {
-    'corres': b'tests/testing_fodder/track/res/particles',
-    'linkage': b'tests/testing_fodder/track/res/linkage',
-    'prio': b'tests/testing_fodder/track/res/whatever'
+    'corres': 'tests/testing_fodder/track/res/particles',
+    'linkage': 'tests/testing_fodder/track/res/linkage',
+    'prio': 'tests/testing_fodder/track/res/whatever'
 }
 
 
@@ -109,7 +109,7 @@ class TestTracker(unittest.TestCase):
         naming_mixed = {
             'corres': 'res/rt_is',  # string
             'linkage': b'res/ptv_is',  # bytes
-            'prio': b'res/added'  # string
+            'prio': 'res/added'  # string
         }
         tracker3 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_mixed)
 

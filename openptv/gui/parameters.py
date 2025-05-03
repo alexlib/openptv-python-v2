@@ -8,9 +8,12 @@ from traits.api import HasTraits, Str, Float, Int, List, Bool
 
 import yaml
 
+# Import constants from the standalone constants module
+from openptv.constants import TR_MAX_CAMS
+
 # Temporary path for parameters (active run will be copied here)
 par_dir_prefix = str("parameters")
-max_cam = int(4)
+max_cam = TR_MAX_CAMS
 
 
 def g(f):

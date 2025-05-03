@@ -10,6 +10,9 @@ from cpython.ref cimport PyObject, Py_INCREF
 from libc.stdlib cimport malloc, free
 from libc.string cimport strncpy
 
+# Add this import for encode_if_needed
+from openptv.binding.utils import encode_if_needed, decode_if_needed
+
 # Declare the NumPy C-API function we need
 cdef extern from "numpy/arrayobject.h":
     int PyArray_SetBaseObject(np.ndarray arr, PyObject* obj) except -1
@@ -204,7 +207,7 @@ cdef class TrackingParams:
         Reads tracking parameters from an old-style .par file having the
         objects' arguments ordered one per line.
         """
-        self._filename_bytes = filename.encode('utf-8')
+        self._filename_bytes = encode_if_needed(filename)
         # Cast away const
         cdef char* c_filename = <char*><char*>self._filename_bytes
         free(self._track_par)
@@ -372,7 +375,7 @@ cdef class SequenceParams:
             filename: path to the parameter file
             num_cams: number of cameras
         """
-        self._filename_bytes = filename.encode('utf-8')
+        self._filename_bytes = encode_if_needed(filename)
         cdef char* c_filename = <char*><char*>self._filename_bytes
         
         if self._sequence_par != NULL:
@@ -386,11 +389,11 @@ cdef class SequenceParams:
         cdef char * c_str = self._sequence_par[0].img_base_name[cam]
         if c_str is NULL:
             return None
-        return c_str.decode('utf-8')
+        return c_str.decode('utf-8')  # Always return string
     
     # Set image base name for camera #cam
     def set_img_base_name(self, cam, str new_img_name):
-        py_byte_string = new_img_name.encode('UTF-8')
+        py_byte_string = encode_if_needed(new_img_name)
         cdef char * c_string = py_byte_string
         strncpy(self._sequence_par[0].img_base_name[cam], c_string, len(new_img_name) + 1)
     
@@ -526,7 +529,7 @@ cdef class VolumeParams:
             filename: path to the parameter file
         """
         # Store the bytes object as an instance attribute to prevent garbage collection
-        self._filename_bytes = filename.encode('utf-8')
+        self._filename_bytes = encode_if_needed(filename)
         cdef char* c_filename = <char*><char*>self._filename_bytes
         
         # Free existing volume_par if it exists
@@ -689,7 +692,7 @@ cdef class ControlParams:
         Arguments:
             filename: path to the parameter file
         """
-        self._filename_bytes = filename.encode('utf-8')
+        self._filename_bytes = encode_if_needed(filename)
         cdef char* c_filename = <char*><char*>self._filename_bytes
         
         if self._control_par != NULL:
@@ -706,11 +709,11 @@ cdef class ControlParams:
         cdef char * c_str = self._control_par[0].img_base_name[cam]
         if c_str is NULL:
             return None
-        return c_str.decode('utf-8')
+        return decode_if_needed(c_str)  # Always return string
     
     # Set image base name for camera #cam
     def set_img_base_name(self, cam, str new_img_name):
-        py_byte_string = new_img_name.encode('UTF-8')
+        py_byte_string = encode_if_needed(new_img_name)
         cdef char * c_string = py_byte_string
         strncpy(self._control_par[0].img_base_name[cam], c_string, len(new_img_name) + 1)
     
@@ -720,11 +723,11 @@ cdef class ControlParams:
         cdef char * c_str = self._control_par[0].cal_img_base_name[cam]
         if c_str is NULL:
             return None
-        return c_str.decode('utf-8')
+        return decode_if_needed(c_str)  # Always return string
     
     # Set calibration image base name for camera #cam
     def set_cal_img_base_name(self, cam, str new_img_name):
-        py_byte_string = new_img_name.encode('UTF-8')
+        py_byte_string = encode_if_needed(new_img_name)
         cdef char * c_string = py_byte_string
         strncpy(self._control_par[0].cal_img_base_name[cam], c_string, len(new_img_name) + 1)
     
@@ -892,7 +895,7 @@ cdef class TargetParams:
         Fills up the fields of the object from the file and returns.
         """
         # Convert the string to bytes and store it
-        self._filename_bytes = inp_filename.encode('utf-8')
+        self._filename_bytes = encode_if_needed(inp_filename)
         
         # Get a pointer to the underlying buffer
         cdef char* c_filename = <char*><char*>self._filename_bytes

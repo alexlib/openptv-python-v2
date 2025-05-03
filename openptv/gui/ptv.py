@@ -520,9 +520,15 @@ def py_trackcorr_init(exp):
         print(f' Renaming {img_base_name} to {short_name} before C library tracker')
         exp.spar.set_img_base_name(cam_id, short_name)
 
+    # Use string naming dictionary (not bytes)
+    naming = {
+        'corres': 'res/rt_is',
+        'linkage': 'res/ptv_is',
+        'prio': 'res/added'
+    }
+
     # Use the high-level API which will select the appropriate implementation
-    tracker = Tracker(exp.cpar, exp.vpar, exp.track_par, exp.spar, exp.cals,
-                    default_naming)
+    tracker = Tracker(exp.cpar, exp.vpar, exp.track_par, exp.spar, exp.cals, naming)
 
     return tracker
 
@@ -801,10 +807,16 @@ def read_targets(file_base: str, frame: int=123456789) -> TargetArray:
     # buffer = TargetArray()
     # buffer = []
 
-    # # if file_base has an extension, remove it
-    # file_base = file_base.split(".")[0]
+    # if file_base has an extension, remove it
+    file_base = file_base.split(".")[0]
 
-    # file_base = replace_format_specifiers(file_base) # remove %d
+    # Use strings consistently in the GUI
+    framebuf_naming = {
+        'corres': 'res/rt_is',  # String instead of bytes
+        'linkage': 'res/ptv_is',
+        'prio': 'res/added'
+    }
+
     filename = file_base_to_filename(file_base, frame)
 
     print(f" filename: {filename}")

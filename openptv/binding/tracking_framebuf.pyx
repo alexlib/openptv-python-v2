@@ -1,14 +1,18 @@
-# Implementation of the trackin_frame_buf minimal interface.
+# cython: language_level=3
+# distutils: language = c
 
-from libc.stdlib cimport malloc, free
-cimport numpy as np
 import numpy as np
-np.import_array()
+cimport numpy as np
+from libc.stdlib cimport malloc, free
+from cpython.ref cimport PyObject, Py_INCREF
 
-DTYPE = np.float64
-ctypedef np.float64_t DTYPE_t
+# Import encode_if_needed
+from openptv.binding.utils import encode_if_needed, decode_if_needed
 
-from openptv.binding.vec_utils cimport vec3d, vec_copy
+# import vec_copy from binding.vec_utils
+from openptv.binding.vec_utils cimport vec_copy
+
+# Implementation of the trackin_frame_buf minimal interface.
 
 cdef extern from "../liboptv/include/tracking_frame_buf.h":
     int c_read_targets "read_targets" (target buffer[], \
@@ -219,8 +223,8 @@ def read_targets(basename, int frame_num):
         TargetArray ret = TargetArray()
         char* c_string
     
-    # Using Python strings requires some boilerplate:
-    py_byte_string = basename.encode('UTF-8')
+    # Use encode_if_needed to handle string conversion
+    py_byte_string = encode_if_needed(basename)
     c_string = py_byte_string
     
     num_targets = c_read_targets(tarr, c_string, frame_num)

@@ -61,30 +61,51 @@ else:
     from openptv.pyoptv.calibration import Calibration
 
 # Parameters
-if _using_cython:
-    try:
-        from openptv.binding.parameters import (
-            ControlParams, VolumeParams, TrackingParams, SequenceParams, TargetParams
-        )
-    except ImportError:
-        from openptv.pyoptv.parameters import (
-            ControlPar as ControlParams, 
-            VolumePar as VolumeParams, 
-            TrackPar as TrackingParams, 
-            SequencePar as SequenceParams, 
-            TargetPar as TargetParams,
-        )
-else:
-    from openptv.pyoptv.parameters import (
-        ControlPar as ControlParams, 
-        VolumePar as VolumeParams, 
-        TrackPar as TrackingParams, 
-        SequencePar as SequenceParams, 
-        TargetPar as TargetParams,
+# Explicitly import and rename to avoid confusion
+try:
+    # Import Cython binding parameters with explicit names
+    from openptv.binding.parameters import (
+        MultimediaParams as CythonMultimediaParams,
+        TrackingParams as CythonTrackingParams,
+        SequenceParams as CythonSequenceParams,
+        VolumeParams as CythonVolumeParams,
+        ControlParams as CythonControlParams,
+        TargetParams as CythonTargetParams
     )
+    _using_cython = True
+    
+    # Set default parameter classes to Cython versions
+    MultimediaParams = CythonMultimediaParams
+    TrackingParams = CythonTrackingParams
+    SequenceParams = CythonSequenceParams
+    VolumeParams = CythonVolumeParams
+    ControlParams = CythonControlParams
+    TargetParams = CythonTargetParams
+    
+except ImportError:
+    # Import Python implementations with explicit names
+    from openptv.pyoptv.parameters import (
+        MultimediaPar as PythonMultimediaParams,
+        TrackPar as PythonTrackingParams,
+        SequencePar as PythonSequenceParams,
+        VolumePar as PythonVolumeParams,
+        ControlPar as PythonControlParams,
+        TargetPar as PythonTargetParams
+    )
+    _using_cython = False
+    
+    # Set default parameter classes to Python versions
+    MultimediaParams = PythonMultimediaParams
+    TrackingParams = PythonTrackingParams
+    SequenceParams = PythonSequenceParams
+    VolumeParams = PythonVolumeParams
+    ControlParams = PythonControlParams
+    TargetParams = PythonTargetParams
 
-# Import Python-only components
+# Import Python-only parameters that don't have Cython equivalents
 from openptv.pyoptv.parameters import ExaminePar as ExamineParams
+
+# No GUI parameters imported here
 
 # Import GUI components if available
 try:

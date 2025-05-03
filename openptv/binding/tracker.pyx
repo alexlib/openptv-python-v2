@@ -10,6 +10,8 @@ from openptv.binding.parameters cimport ControlParams, TrackingParams, SequenceP
     VolumeParams
 from openptv.binding.orientation cimport cal_list2arr
 from openptv.binding.tracking_framebuf cimport fb_free
+from openptv.binding.utils import encode_if_needed
+
 
 # External C functions from tracking_run.h should be declared in tracker.pxd
 from openptv.binding.tracker cimport (
@@ -17,14 +19,8 @@ from openptv.binding.tracker cimport (
     trackcorr_c_finish, trackback_c, TR_BUFSPACE, MAX_TARGETS
 )
 
-def _encode_if_needed(s):
-    """Helper function to encode strings to bytes if needed"""
-    if isinstance(s, str):
-        return s.encode('utf-8')
-    return s  # Already bytes or None
-
 default_naming = {
-    'corres': 'res/rt_is',
+    'corres': 'res/rt_is',  # Use strings consistently
     'linkage': 'res/ptv_is',
     'prio': 'res/added'
 }
@@ -61,7 +57,7 @@ cdef class Tracker:
         else:
             # Create new dict with encoded values
             naming = {
-                k: _encode_if_needed(v)
+                k: encode_if_needed(v)
                 for k, v in naming.items()
             }
             
