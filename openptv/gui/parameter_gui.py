@@ -332,7 +332,7 @@ class Tracking_Params(HasTraits):
         self.dvzmax = track_params.dvzmax
         self.angle = track_params.angle
         self.dacc = track_params.dacc
-        self.flagNewParticles = np.bool8(track_params.flagNewParticles)
+        self.flagNewParticles = np.bool_(track_params.flagNewParticles)
 
     Tracking_Params_View = View(
         HGroup(
@@ -655,11 +655,11 @@ class Main_Params(HasTraits):
         self.Refr_Glass = ptvParams.mmp_n2
         self.Refr_Water = ptvParams.mmp_n3
         self.Thick_Glass = ptvParams.mmp_d
-        self.Accept_OnlyAllCameras = np.bool8(ptvParams.allcam_flag)
+        self.Accept_OnlyAllCameras = np.bool_(ptvParams.allcam_flag)
         self.Num_Cam = ptvParams.n_img
-        self.HighPass = np.bool8(ptvParams.hp_flag)
+        self.HighPass = np.bool_(ptvParams.hp_flag)
         # load unused
-        self.tiff_flag = np.bool8(ptvParams.tiff_flag)
+        self.tiff_flag = np.bool_(ptvParams.tiff_flag)
         self.imx = ptvParams.imx
         self.imy = ptvParams.imy
         self.pix_x = ptvParams.pix_x
@@ -670,7 +670,7 @@ class Main_Params(HasTraits):
         calOriParams = CalOriParams(ptvParams.n_img, path=self.par_path)
         calOriParams.read()
 
-        self.pair_Flag = np.bool8(calOriParams.pair_flag)
+        self.pair_Flag = np.bool_(calOriParams.pair_flag)
         self.img_cal_name = calOriParams.img_cal_name
         self.img_ori = calOriParams.img_ori
         self.fixp_name = calOriParams.fixp_name
@@ -699,7 +699,7 @@ class Main_Params(HasTraits):
         # load pft_version
         pftVersionParams = PftVersionParams(path=self.par_path)
         pftVersionParams.read()
-        self.Existing_Target = np.bool8(pftVersionParams.Existing_Target)
+        self.Existing_Target = np.bool_(pftVersionParams.Existing_Target)
 
         # load sequence_par
         sequenceParams = SequenceParams(
@@ -1109,8 +1109,8 @@ class Calib_Params(HasTraits):
 
         self.n_img = ptvParams.n_img
         self.img_name = ptvParams.img_name
-        self.hp_flag = np.bool8(ptvParams.hp_flag)
-        self.allcam_flag = np.bool8(ptvParams.allcam_flag)
+        self.hp_flag = np.bool_(ptvParams.hp_flag)
+        self.allcam_flag = np.bool_(ptvParams.allcam_flag)
         self.mmp_n1 = ptvParams.mmp_n1
         self.mmp_n2 = ptvParams.mmp_n2
         self.mmp_n3 = ptvParams.mmp_n3
@@ -1138,8 +1138,8 @@ class Calib_Params(HasTraits):
                 "self.ori_cam_{0} = calOriParams.img_ori[{1}]".format(i + 1, i)
             )
 
-        self.tiff_head = np.bool8(tiff_flag)
-        self.pair_head = np.bool8(pair_flag)
+        self.tiff_head = np.bool_(tiff_flag)
+        self.pair_head = np.bool_(pair_flag)
         self.fixp_name = fixp_name
         if chfield == 0:
             self.chfield = "Frame"
@@ -1243,17 +1243,17 @@ class Calib_Params(HasTraits):
         )
 
         self.point_number_of_orientation = po_num_of_ori
-        self.cc = np.bool8(cc)
-        self.xh = np.bool8(xh)
-        self.yh = np.bool8(yh)
-        self.k1 = np.bool8(k1)
-        self.k2 = np.bool8(k2)
-        self.k3 = np.bool8(k3)
-        self.p1 = np.bool8(p1)
-        self.p2 = np.bool8(p2)
-        self.scale = np.bool8(scale)
-        self.shear = np.bool8(shear)
-        self.interf = np.bool8(interf)
+        self.cc = np.bool_(cc)
+        self.xh = np.bool_(xh)
+        self.yh = np.bool_(yh)
+        self.k1 = np.bool_(k1)
+        self.k2 = np.bool_(k2)
+        self.k3 = np.bool_(k3)
+        self.p1 = np.bool_(p1)
+        self.p2 = np.bool_(p2)
+        self.scale = np.bool_(scale)
+        self.shear = np.bool_(shear)
+        self.interf = np.bool_(interf)
 
         dumbbellParams = DumbbellParams(path=self.par_path)
         dumbbellParams.read()
