@@ -26,7 +26,7 @@ before-build = [
 ]
 
 # Test the wheels after building
-test-command = "pytest {package}/tests -v"
+test-command = "python {package}/tests/test_wheel_install.py"
 test-requires = ["pytest>=6.0.0"]
 
 # Environment variables for specific platforms
