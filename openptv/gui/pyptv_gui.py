@@ -1541,8 +1541,8 @@ def main():
         # exp_path = software_path.parent / "test_cavity"
         # exp_path = Path('/home/user/Downloads/one-dot-example/working_folder')
         # exp_path = Path('/home/user/Downloads/test_crossing_particle')
-        # exp_path = Path('/home/user/Documents/repos/test_cavity')
-        exp_path = Path('/media/user/ExtremePro/omer/exp2')
+        exp_path = Path('/home/user/Documents/repos/test_cavity')
+        # exp_path = Path('/media/user/ExtremePro/omer/exp2')
         # exp_path = Path('/home/user/Documents/repos/blob_pyptv_folder')
         print(f"Without input, PyPTV fallbacks to a default {exp_path} \n")
 
@@ -1561,6 +1561,21 @@ def main():
 
     os.chdir(software_path)  # get back to the original workdir
 
+def main_cli():
+    """Command-line entry point for PyPTV GUI."""
+    import sys
+    from pathlib import Path
+    
+    # Get directory argument if provided
+    if len(sys.argv) > 1:
+        directory = Path(sys.argv[1]).resolve()
+        # Change to the specified directory before running the GUI
+        os.chdir(directory)
+        main()
+    else:
+        main()
+    
+    return 0
 
 if __name__ == "__main__":
-    main()
+    main_cli()

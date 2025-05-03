@@ -142,8 +142,9 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": [
-            "openptv-gui=openptv.gui.main:main",
+        'console_scripts': [
+            'openptv-gui=openptv.gui.cli:cli',
+            'pyptv=openptv.gui.pyptv_gui:main_cli',
         ],
     },
     classifiers=[
