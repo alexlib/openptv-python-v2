@@ -29,9 +29,8 @@ _gui_import_error = None
 
 # Try to import the Cython bindings
 try:
-    # Import core tracking functions
-    from openptv.binding.vec_utils import py_vec_cmp as vec_cmp
-    from openptv.binding.vec_utils import py_vec_copy as vec_copy
+    # Import core tracking functions from tracking_framebuf as a test for Cython availability
+    from openptv.binding.tracking_framebuf import TargetArray, Target
     
     _using_cython = True
 
@@ -42,7 +41,7 @@ except ImportError as e:
         "This may be significantly slower for large datasets."
     )
 
-    from openptv.pyoptv.vec_utils import vec_cmp as vec_cmp, vec_copy as vec_copy
+    from openptv.pyoptv.tracking_frame_buf import TargetArray, Target
 
     _using_cython = False
 
