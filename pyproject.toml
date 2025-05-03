@@ -21,9 +21,7 @@ python_files = "test_*.py"
 skip = ["cp36-*", "pp*", "*-musllinux*"]
 
 # Install dependencies required for building
-before-build = [
-    "pip install numpy>=1.19.0,<2.0 cython>=0.29.21"
-]
+before-build = "pip install 'numpy>=1.19.0,<2.0' 'cython>=0.29.21'"
 
 # Test the wheels after building
 test-command = "python {package}/tests/test_wheel_install.py"
