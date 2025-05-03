@@ -15,3 +15,27 @@ include = '\.pyx?$'
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+
+[tool.cibuildwheel]
+# Skip Python 3.6 and PyPy
+skip = ["cp36-*", "pp*", "*-musllinux*"]
+
+# Install dependencies required for building
+before-build = [
+    "pip install numpy>=1.19.0,<2.0 cython>=0.29.21"
+]
+
+# Test the wheels after building
+test-command = "pytest {package}/tests -v"
+test-requires = ["pytest>=6.0.0"]
+
+# Environment variables for specific platforms
+[tool.cibuildwheel.linux]
+before-all = "yum install -y gcc gcc-c++"
+environment = { CFLAGS="-O3 -march=x86-64", CXXFLAGS="-O3 -march=x86-64" }
+
+[tool.cibuildwheel.macos]
+environment = { MACOSX_DEPLOYMENT_TARGET="10.14", CFLAGS="-O3", CXXFLAGS="-O3" }
+
+[tool.cibuildwheel.windows]
+environment = { CFLAGS="/O2", CXXFLAGS="/O2" }

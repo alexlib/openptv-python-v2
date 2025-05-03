@@ -29,12 +29,37 @@ openptv-python/
 
 ## Installation
 
-```bash
-# For development installation
-pip install -e .
+### Using pre-built wheels (recommended)
 
-# For users
+Pre-built binary wheels are available for Windows, macOS, and Linux:
+
+```bash
 pip install openptv-python
+```
+
+This will automatically download and install the appropriate wheel for your platform.
+
+### From source
+
+If you need to install from source:
+
+```bash
+# Install build dependencies
+pip install numpy cython
+
+# Install the package
+pip install openptv-python
+```
+
+### For development
+
+```bash
+# Clone the repository
+git clone https://github.com/alexlib/openptv-python-v2.git
+cd openptv-python-v2
+
+# Install in development mode
+pip install -e .
 ```
 
 ## Development
@@ -46,6 +71,25 @@ The package supports two development workflows:
 
 See the documentation for more details on the development workflow.
 
+### Building Wheels
+
+To build binary wheels for distribution:
+
+```bash
+# Install cibuildwheel
+pip install cibuildwheel
+
+# Build wheels for the current platform
+python -m cibuildwheel --output-dir wheelhouse
+```
+
+The GitHub Actions workflow will automatically build wheels for all supported platforms when:
+- A tag starting with 'v' is pushed (e.g., v0.1.1)
+- Changes are pushed to the 'build_wheels' branch
+- The workflow is manually triggered
+
+The wheels will be uploaded as artifacts and can be downloaded from the GitHub Actions page.
+
 ## License
 
-[Add license information here]
+This project is licensed under the MIT License - see the LICENSE file for details.
