@@ -72,7 +72,7 @@ if _using_cython:
             VolumePar as VolumeParams, 
             TrackPar as TrackingParams, 
             SequencePar as SequenceParams, 
-            TargetPar as TargetParams
+            TargetPar as TargetParams,
         )
 else:
     from openptv.pyoptv.parameters import (
@@ -80,20 +80,11 @@ else:
         VolumePar as VolumeParams, 
         TrackPar as TrackingParams, 
         SequencePar as SequenceParams, 
-        TargetPar as TargetParams
+        TargetPar as TargetParams,
     )
 
-# Add ExaminePar to the high-level API
-if _using_cython:
-    try:
-        from openptv.binding.parameters import ExaminePar
-    except ImportError:
-        from openptv.pyoptv.parameters import ExaminePar
-else:
-    from openptv.pyoptv.parameters import ExaminePar
-
-# Make it available as ExamineParams for consistency
-ExamineParams = ExaminePar
+# exists only in Python 
+from openptv.pyoptv.parameters import ExaminePar as ExamineParams
 
 # Import GUI components if available
 try:

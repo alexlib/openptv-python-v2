@@ -1177,7 +1177,7 @@ class MainGUI(HasTraits):
                     editor=ListEditor(
                         use_notebook=True,
                         deletable=False,
-                        dock_style="ta",
+                        dock_style="tab",
                         page_name=".name",
                         selected="selected",
                     ),

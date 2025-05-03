@@ -25,10 +25,10 @@ from skimage.color import rgb2gray
 
 # from optv import segmentation
 from openptv.binding.segmentation import target_recognition
-from pyptv import ptv
+from openptv.gui import ptv
 
-from pyptv.text_box_overlay import TextBoxOverlay
-from pyptv.quiverplot import QuiverPlot
+from openptv.gui.text_box_overlay import TextBoxOverlay
+from openptv.gui.quiverplot import QuiverPlot
 
 
 
@@ -384,7 +384,7 @@ class DetectionGUI(HasTraits):
             Item('camera', style='custom',
                  editor=ListEditor(use_notebook=True,
                                    deletable=False,
-                                   dock_style='ta',
+                                   dock_style='tab',
                                    page_name='.name',
                                    ),
                  show_label=False

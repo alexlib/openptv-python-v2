@@ -32,9 +32,10 @@ from chaco.tools.image_inspector_tool import ImageInspectorTool
 from chaco.tools.better_zoom import BetterZoom as SimpleZoom
 
 # from chaco.tools.simple_zoom import SimpleZoom
-from pyptv.text_box_overlay import TextBoxOverlay
-from pyptv.code_editor import oriEditor, addparEditor
-from pyptv.quiverplot import QuiverPlot
+from openptv.gui.parameters import CalOriParams, copy_params_dir
+from openptv.gui.text_box_overlay import TextBoxOverlay
+from openptv.gui.code_editor import oriEditor, addparEditor
+from openptv.gui.quiverplot import QuiverPlot
 
 
 from openptv.binding.imgcoord import image_coordinates
@@ -43,7 +44,8 @@ from openptv.binding.orientation import match_detection_to_ref
 from openptv.binding.tracking_framebuf import TargetArray
 
 
-from pyptv import ptv, parameter_gui, parameters as par
+from openptv.gui import ptv
+
 
 from scipy.optimize import minimize
 
@@ -351,7 +353,7 @@ class MaskGUI(HasTraits):
         self.man_ori_dat_path = self.working_folder / "man_ori.dat"
 
         print(" Copying parameters inside Mask GUI: \n")
-        par.copy_params_dir(self.active_path, self.par_path)
+        copy_params_dir(self.active_path, self.par_path)
 
         
         os.chdir(self.working_folder)
@@ -361,7 +363,7 @@ class MaskGUI(HasTraits):
         with open(self.par_path / "ptv.par", "r") as f:
             self.n_cams = int(f.readline())
 
-        self.calParams = par.CalOriParams(self.n_cams, path=self.par_path)
+        self.calParams = CalOriParams(self.n_cams, path=self.par_path)
         self.calParams.read()
 
         self.camera = [PlotWindow() for i in range(self.n_cams)]
@@ -394,7 +396,7 @@ class MaskGUI(HasTraits):
                 editor=ListEditor(
                     use_notebook=True,
                     deletable=False,
-                    dock_style="ta",
+                    dock_style="tab",
                     page_name=".name",
                 ),
                 show_label=False,
@@ -418,7 +420,7 @@ class MaskGUI(HasTraits):
         # Initialize what is needed, copy necessary things
 
         # copy parameters from active to default folder parameters/
-        par.copy_params_dir(self.active_path, self.par_path)
+        copy_params_dir(self.active_path, self.par_path)
 
         # read from parameters
         (
@@ -435,7 +437,7 @@ class MaskGUI(HasTraits):
         # read Mask images
         self.images = []
         for i in range(len(self.camera)):
-            imname = self.cpar.get_img_base_name(i)
+            imname = self.cget_img_base_name(i)
             im = imread(imname)
             # im = ImageData.fromfile(imname).data
             if im.ndim > 2:

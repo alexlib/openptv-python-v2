@@ -44,7 +44,7 @@ from openptv.binding.calibration import Calibration
 from openptv.binding.tracking_framebuf import TargetArray
 
 
-from pyptv import ptv, parameter_gui, parameters as par
+from openptv.gui import ptv, parameter_gui
 
 from scipy.optimize import minimize
 
@@ -369,7 +369,7 @@ class CalibrationGUI(HasTraits):
         self.man_ori_dat_path = self.working_folder / "man_ori.dat"
 
         print(" Copying parameters inside Calibration GUI: \n")
-        par.copy_params_dir(self.active_path, self.par_path)
+        copy_params_dir(self.active_path, self.par_path)
 
         
         os.chdir(self.working_folder)
@@ -379,7 +379,7 @@ class CalibrationGUI(HasTraits):
         with open(self.par_path / "ptv.par", "r") as f:
             self.n_cams = int(f.readline())
 
-        self.calParams = par.CalOriParams(self.n_cams, path=self.par_path)
+        self.calParams = CalOriParams(self.n_cams, path=self.par_path)
         self.calParams.read()
 
         self.camera = [PlotWindow() for i in range(self.n_cams)]
@@ -507,7 +507,7 @@ class CalibrationGUI(HasTraits):
                 editor=ListEditor(
                     use_notebook=True,
                     deletable=False,
-                    dock_style="ta",
+                    dock_style="tab",
                     page_name=".name",
                 ),
                 show_label=False,
@@ -529,7 +529,7 @@ class CalibrationGUI(HasTraits):
         cp.edit_traits(kind="modal")
 
         # at the end of a modification, copy the parameters
-        par.copy_params_dir(self.par_path, self.active_path)
+        copy_params_dir(self.par_path, self.active_path)
         # and read again from the disk
         (
             self.cpar,
@@ -548,7 +548,7 @@ class CalibrationGUI(HasTraits):
         # Initialize what is needed, copy necessary things
 
         # copy parameters from active to default folder parameters/
-        par.copy_params_dir(self.active_path, self.par_path)
+        copy_params_dir(self.active_path, self.par_path)
 
         print("\n Copying man_ori.dat \n")
         if os.path.isfile(os.path.join(self.par_path, "man_ori.dat")):
@@ -571,13 +571,13 @@ class CalibrationGUI(HasTraits):
         ) = ptv.py_start_proc_c(self.n_cams)
 
         print("reset grey scale thresholds for calibration:\n")
-        self.tpar.read("parameters/detect_plate.par")
-        print(self.tpar.get_grey_thresholds())
+        self.tread("parameters/detect_plate.par")
+        print(self.tget_grey_thresholds())
 
 
-        if self.epar.Combine_Flag is True:
+        if self.eCombine_Flag is True:
             print("Combine Flag is On")
-            self.MultiParams = par.MultiPlaneParams()
+            self.MultiParams = MultiPlaneParams()
             self.MultiParams.read()
             for i in range(self.MultiParams.n_planes):
                 print(self.MultiParams.plane_name[i])
@@ -588,7 +588,7 @@ class CalibrationGUI(HasTraits):
         # read calibration images
         self.cal_images = []
         for i in range(len(self.camera)):
-            imname = self.cpar.get_cal_img_base_name(i)
+            imname = self.cget_cal_img_base_name(i)
             im = imread(imname)
             # im = ImageData.fromfile(imname).data
             if im.ndim > 2:
@@ -619,7 +619,7 @@ class CalibrationGUI(HasTraits):
         print(" Detection procedure \n")
         self.status_text = "Detection procedure"
 
-        if self.cpar.get_hp_flag():
+        if self.cget_hp_flag():
             self.cal_images = ptv.py_pre_processing_c(
                 self.cal_images, self.cpar
             )
@@ -691,7 +691,7 @@ class CalibrationGUI(HasTraits):
         man_ori_par_path = os.path.join(self.par_path, "man_ori.par")
         f = open(man_ori_par_path, "r")
         if f is None:
-            self.status_text = "Error loading man_ori.par."
+            self.status_text = "Error loading man_ori."
         else:
             for i in range(self.n_cams):
                 for j in range(4):
@@ -712,7 +712,7 @@ class CalibrationGUI(HasTraits):
         self.cals = []
         for i_cam in range(self.n_cams):
             cal = Calibration()
-            tmp = self.cpar.get_cal_img_base_name(i_cam)
+            tmp = self.cget_cal_img_base_name(i_cam)
             cal.from_file(tmp + ".ori", tmp + ".addpar")
             self.cals.append(cal)
 
@@ -725,7 +725,7 @@ class CalibrationGUI(HasTraits):
             projected = image_coordinates(
                 np.atleast_2d(row["pos"]),
                 self.cals[i_cam],
-                self.cpar.get_multimedia_params(),
+                self.cget_multimedia_params(),
             )
             pos = convert_arr_metric_to_pixel(projected, self.cpar)
 
@@ -841,14 +841,14 @@ class CalibrationGUI(HasTraits):
         # backup the ORI/ADDPAR files first
         self.backup_ori_files()
 
-        op = par.OrientParams()
+        op = OrientParams()
         op.read()
 
         flags = [name for name in NAMES if getattr(op, name) == 1]
 
         for i_cam in range(self.n_cams):  # iterate over all cameras
 
-            if self.epar.Combine_Flag:
+            if self.eCombine_Flag:
 
                 self.status_text = "Multiplane calibration."
                 """ Performs multiplane calibration, in which for all cameras the
@@ -1049,7 +1049,7 @@ args=(self.cals[i_cam],
 
         cal.set_radial_distortion(x)
         targets = convert_arr_metric_to_pixel(
-            image_coordinates(XYZ, cal, cpar.get_multimedia_params()),
+            image_coordinates(XYZ, cal, cget_multimedia_params()),
             cpar
         )
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])
@@ -1061,7 +1061,7 @@ args=(self.cals[i_cam],
         """Residuals due to decentering """
         cal.set_decentering(x)
         targets = convert_arr_metric_to_pixel(
-            image_coordinates(XYZ, cal, cpar.get_multimedia_params()),
+            image_coordinates(XYZ, cal, cget_multimedia_params()),
             cpar
         )
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])
@@ -1072,7 +1072,7 @@ args=(self.cals[i_cam],
         """Residuals due to decentering """
         cal.set_affine_trans(x)
         targets = convert_arr_metric_to_pixel(
-            image_coordinates(XYZ, cal, cpar.get_multimedia_params()),
+            image_coordinates(XYZ, cal, cget_multimedia_params()),
             cpar
         )
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])
@@ -1087,7 +1087,7 @@ args=(self.cals[i_cam],
         cal.set_affine_trans(x[5:])
 
         targets = convert_arr_metric_to_pixel(
-            image_coordinates(XYZ, cal, cpar.get_multimedia_params()),
+            image_coordinates(XYZ, cal, cget_multimedia_params()),
             cpar
         )
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])
@@ -1120,8 +1120,8 @@ args=(self.cals[i_cam],
             addpar = "tmp.addpar"
 
         print("Saving:", ori, addpar)
-        self.cals[i_cam].write(ori.encode(), addpar.encode())
-        if self.epar.Examine_Flag and not self.epar.Combine_Flag:
+        self.cals[i_cam].write(ori.encode(), addencode())
+        if self.eExamine_Flag and not self.eCombine_Flag:
             self.save_point_sets(i_cam)
 
     def save_point_sets(self, i_cam):
@@ -1168,7 +1168,7 @@ args=(self.cals[i_cam],
         seq_first = sp.shaking_first_frame
         seq_last = sp.shaking_last_frame
 
-        base_names = [self.spar.get_img_base_name(i).decode() for i in range(self.n_cams)]
+        base_names = [self.sget_img_base_name(i).decode() for i in range(self.n_cams)]
 
 
         for i_cam in range(self.n_cams):
@@ -1274,7 +1274,7 @@ args=(self.cals[i_cam],
 
     def backup_ori_files(self):
         """backup ORI/ADDPAR files to the backup_cal directory"""
-        calOriParams = par.CalOriParams(self.n_cams, path=self.par_path)
+        calOriParams = CalOriParams(self.n_cams, path=self.par_path)
         calOriParams.read()
         for f in calOriParams.img_ori[: self.n_cams]:
             print(f"Backing up {f}")
@@ -1284,7 +1284,7 @@ args=(self.cals[i_cam],
 
     def restore_ori_files(self):
         # backup ORI/ADDPAR files to the backup_cal directory
-        calOriParams = par.CalOriParams(self.n_cams, path=self.par_path)
+        calOriParams = CalOriParams(self.n_cams, path=self.par_path)
         calOriParams.read()
 
         for f in calOriParams.img_ori[: self.n_cams]:
