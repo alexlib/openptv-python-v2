@@ -1,50 +1,37 @@
-import numpy as np
 import pytest
+import numpy as np
+from openptv.binding.vec_utils import py_vec_cmp, py_vec_copy
 
-def test_vec_utils_import():
-    """Test that we can import the vector utilities from Python."""
-    try:
-        from openptv.binding.vec_utils import py_vec_cmp, py_vec_copy
-        print("Successfully imported vector utilities")
-    except ImportError as e:
-        pytest.fail(f"Failed to import vector utilities: {e}")
-
-def test_vec_cmp():
-    """Test the vector comparison function."""
-    from openptv.binding.vec_utils import py_vec_cmp
-    
-    # Create test vectors
+def test_py_vec_cmp():
+    """Test vector comparison function."""
     vec1 = np.array([1.0, 2.0, 3.0], dtype=np.float64)
     vec2 = np.array([1.0, 2.0, 3.0], dtype=np.float64)
-    vec3 = np.array([4.0, 5.0, 6.0], dtype=np.float64)
+    vec3 = np.array([1.0, 2.0, 3.001], dtype=np.float64)
     
-    # Test comparison
-    assert py_vec_cmp(vec1, vec2) == 1, "Equal vectors should return 1"
-    assert py_vec_cmp(vec1, vec3) == 0, "Different vectors should return 0"
+    # Identical vectors should return 1
+    assert py_vec_cmp(vec1, vec2, 1e-10) == 1
     
-    print("Vector comparison test passed")
+    # Different vectors with tolerance smaller than difference should return 0
+    assert py_vec_cmp(vec1, vec3, 1e-10) == 0
+    
+    # Different vectors with tolerance larger than difference should return 1
+    assert py_vec_cmp(vec1, vec3, 0.01) == 1
 
-def test_vec_copy():
-    """Test the vector copy function."""
-    from openptv.binding.vec_utils import py_vec_copy
+def test_py_vec_copy():
+    """Test vector copy function."""
+    src = np.array([1.0, 2.0, 3.0], dtype=np.float64)
     
-    # Create test vector
-    vec = np.array([1.0, 2.0, 3.0], dtype=np.float64)
+    # Copy the vector
+    dest = py_vec_copy(src)
     
-    # Copy vector
-    result = py_vec_copy(vec)
+    # Check that the copy is equal to the original
+    assert np.array_equal(src, dest)
     
-    # Check result
-    assert np.array_equal(vec, result), "Copied vector should equal original"
-    
-    # Modify original to verify copy is independent
-    vec[0] = 10.0
-    assert not np.array_equal(vec, result), "Modifying original should not affect copy"
-    
-    print("Vector copy test passed")
+    # Modify the original and check that the copy is unchanged
+    src[0] = 10.0
+    assert dest[0] == 1.0
 
 if __name__ == "__main__":
-    test_vec_utils_import()
-    test_vec_cmp()
-    test_vec_copy()
+    test_py_vec_cmp()
+    test_py_vec_copy()
     print("All tests passed!")
