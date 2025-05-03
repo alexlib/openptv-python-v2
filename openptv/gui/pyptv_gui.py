@@ -25,6 +25,8 @@ import numpy as np
 import openptv
 from openptv import using_cython
 from openptv import epipolar_curve
+from openptv.binding.imgcoord import image_coordinates
+from openptv.binding.transforms import convert_arr_metric_to_pixel
 
 from traits.api import HasTraits, Int, Bool, Instance, List, Enum, Any
 from traitsui.api import (
@@ -874,12 +876,12 @@ class TreeMenuHandler(Handler):
                 # head_x.append(pos[0][0])
                 # head_y.append(pos[0][1])
 
-                projected = optv.imgcoord.image_coordinates(
+                projected = image_coordinates(
                     np.atleast_2d(traj.pos() * 1000),
                     info.object.cals[i_cam],
                     info.object.cpar.get_multimedia_params(),
                 )
-                pos = optv.transforms.convert_arr_metric_to_pixel(
+                pos = convert_arr_metric_to_pixel(
                     projected, info.object.cpar
                 )
 

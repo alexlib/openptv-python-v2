@@ -42,11 +42,14 @@ def preprocess_image(np.ndarray[ndim=2, dtype=np.uint8_t] input_img,
     else:
         output_img = np.empty_like(input_img)
     
-    cdef char* c_filter_file = NULL
+    # cdef char* filter_file_bytes = NULL
+    
     if filter_file is not None:
         # Convert string to bytes if needed
         filter_file_bytes = encode_if_needed(filter_file)
-        # c_filter_file = filter_file_bytes
+    else:
+        # Empty bytes string for when filter_file is None
+        filter_file_bytes = b""
     
     for arr in (input_img, output_img):
         if not arr.flags['C_CONTIGUOUS']:
