@@ -36,8 +36,8 @@ class TestTracker(unittest.TestCase):
         for cix, cam_spec in enumerate(yaml_conf['cameras']):
             cam_spec.setdefault('addpar_file', None)
             cal = Calibration()
-            cal.from_file(cam_spec['ori_file'].encode(),
-                          cam_spec['addpar_file'].encode())
+            cal.from_file(cam_spec['ori_file'],
+                          cam_spec['addpar_file'])
             self.cals.append(cal)
             img_base.append(seq_cfg['targets_template'].format(cam=cix + 1))
 
@@ -124,4 +124,18 @@ class TestTracker(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    """Run the tests directly with detailed output."""
+    import sys
+
+    print("\n=== Running Burgers Vortex Tracker Tests ===\n")
+
+    # Run the tests with verbose output
+    import pytest
+    result = pytest.main(["-v", __file__])
+
+    if result == 0:
+        print("\n✅ All Burgers vortex tracker tests passed successfully!")
+    else:
+        print("\n❌ Some Burgers vortex tracker tests failed. See details above.")
+
+    sys.exit(result)

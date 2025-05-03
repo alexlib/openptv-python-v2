@@ -1163,7 +1163,7 @@ args=(self.cals[i_cam],
         # Graphics:
         # parameters:
 
-        from pyptv.parameters import ShakingParams
+        from openptv.gui.parameters import ShakingParams
         sp = ShakingParams()
         sp.read()
         seq_first = sp.shaking_first_frame

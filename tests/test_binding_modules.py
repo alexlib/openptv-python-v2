@@ -158,6 +158,17 @@ def test_image_processing():
 
 
 if __name__ == "__main__":
-    # This allows running the tests directly with python
+    """Run the tests directly with detailed output."""
     import sys
-    sys.exit(pytest.main(["-v", __file__]))
+
+    print("\n=== Running Binding Modules Tests ===\n")
+
+    # Run the tests with verbose output
+    result = pytest.main(["-v", __file__])
+
+    if result == 0:
+        print("\n✅ All binding modules tests passed successfully!")
+    else:
+        print("\n❌ Some binding modules tests failed. See details above.")
+
+    sys.exit(result)

@@ -18,13 +18,18 @@ class Test_transforms(unittest.TestCase):
         self.input_add_file_name = "tests/testing_fodder/calibration/cam2.tif.addpar"
 
         self.calibration = Calibration()
-        self.calibration.from_file(self.input_ori_file_name.encode(), self.input_add_file_name.encode())
+        self.calibration.from_file(self.input_ori_file_name, self.input_add_file_name)
+
+    def tearDown(self):
+        # Clean up resources
+        self.control = None
+        self.calibration = None
 
     def test_transforms_typecheck(self):
         """Transform bindings check types"""
         # Assert TypeError is raised when passing a non (n,2) shaped numpy ndarray
         with self.assertRaises(TypeError):
-            list = [[0 for x in range(2)] for x in range(10)]  # initialize a 10x2 list (but not numpy matrix)
+            list = [[0 for _ in range(2)] for _ in range(10)]  # initialize a 10x2 list (but not numpy matrix)
             convert_arr_pixel_to_metric(list, self.control, out=None)
         with self.assertRaises(TypeError):
             convert_arr_pixel_to_metric(np.empty((10, 3)), self.control, out=None)
@@ -83,7 +88,7 @@ class Test_transforms(unittest.TestCase):
     def test_brown_affine_types(self):
         # Assert TypeError is raised when passing a non (n,2) shaped numpy ndarray
         with self.assertRaises(TypeError):
-            list = [[0 for x in range(2)] for x in range(10)]  # initialize a 10x2 list (but not numpy matrix)
+            list = [[0 for _ in range(2)] for _ in range(10)]  # initialize a 10x2 list (but not numpy matrix)
             correct_arr_brown_affine(list, self.calibration, out=None)
         with self.assertRaises(TypeError):
             correct_arr_brown_affine(np.empty((10, 3)), self.calibration, out=None)
@@ -171,6 +176,20 @@ class Test_transforms(unittest.TestCase):
         corrected = distorted_to_flat(distorted, cal) # default tight tolerance
         np.testing.assert_array_almost_equal(ref_pos, corrected, decimal=5)
 
-if __name__ == '__main__':
-  unittest.main()
+if __name__ == "__main__":
+    """Run the tests directly with detailed output."""
+    import sys
+
+    print("\n=== Running Transform Bindings Tests ===\n")
+
+    # Run the tests with verbose output
+    import pytest
+    result = pytest.main(["-v", __file__])
+
+    if result == 0:
+        print("\n✅ All transform bindings tests passed successfully!")
+    else:
+        print("\n❌ Some transform bindings tests failed. See details above.")
+
+    sys.exit(result)
 

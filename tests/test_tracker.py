@@ -33,7 +33,7 @@ class TestTracker(unittest.TestCase):
         img_base = []
         print((yaml_conf['cameras']))
         for cix, cam_spec in enumerate(yaml_conf['cameras']):
-            cam_spec.setdefault(b'addpar_file', None)
+            cam_spec.setdefault('addpar_file', None)
             cal = Calibration()
             cal.from_file(cam_spec['ori_file'],
                           cam_spec['addpar_file'])
@@ -98,34 +98,66 @@ class TestTracker(unittest.TestCase):
 
     def test_tracker_string_handling(self):
         """Test that Tracker handles both strings and bytes correctly"""
-        # Using regular strings - will be encoded automatically
-        naming_strings = {
-            'corres': 'tests/testing_fodder/track/res/rt_is',
-            'linkage': 'tests/testing_fodder/track/res/ptv_is',
-            'prio': 'tests/testing_fodder/track/res/added'
-        }
-        tracker1 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_strings)
+        print("\nTesting tracker string handling...")
+        try:
+            # Using regular strings - will be encoded automatically
+            naming_strings = {
+                'corres': 'tests/testing_fodder/track/res/rt_is',
+                'linkage': 'tests/testing_fodder/track/res/ptv_is',
+                'prio': 'tests/testing_fodder/track/res/added'
+            }
+            tracker1 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_strings)
+            assert tracker1 is not None, "Failed to create tracker with string paths"
 
-        # Using bytes directly - will be passed through
-        naming_bytes = {
-            'corres': b'tests/testing_fodder/track/res/rt_is',
-            'linkage': b'tests/testing_fodder/track/res/ptv_is',
-            'prio': b'tests/testing_fodder/track/res/added'
-        }
-        tracker2 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_bytes)
+            # Using bytes directly - will be passed through
+            naming_bytes = {
+                'corres': b'tests/testing_fodder/track/res/rt_is',
+                'linkage': b'tests/testing_fodder/track/res/ptv_is',
+                'prio': b'tests/testing_fodder/track/res/added'
+            }
+            tracker2 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_bytes)
+            assert tracker2 is not None, "Failed to create tracker with byte paths"
 
-        # Using mixed - both will work
-        naming_mixed = {
-            'corres': 'tests/testing_fodder/track/res/rt_is',  # string
-            'linkage': b'tests/testing_fodder/track/res/ptv_is',  # bytes
-            'prio': 'tests/testing_fodder/track/res/added'  # string
-        }
-        tracker3 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_mixed)
+            # Using mixed - both will work
+            naming_mixed = {
+                'corres': 'tests/testing_fodder/track/res/rt_is',  # string
+                'linkage': b'tests/testing_fodder/track/res/ptv_is',  # bytes
+                'prio': 'tests/testing_fodder/track/res/added'  # string
+            }
+            tracker3 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_mixed)
+            assert tracker3 is not None, "Failed to create tracker with mixed paths"
+
+            print("✓ Tracker string handling test passed!")
+        except Exception as e:
+            self.fail(f"Tracker string handling test failed with error: {str(e)}")
 
     def tearDown(self):
+        # Clean up resources
         if os.path.exists("tests/testing_fodder/track/res/"):
             shutil.rmtree("tests/testing_fodder/track/res/")
 
+        # Clean up object references
+        self.cals = None
+        self.cpar = None
+        self.vpar = None
+        self.tpar = None
+        self.spar = None
+        self.tracker = None
+
 
 if __name__ == "__main__":
-    unittest.main()
+    """Run the tests directly with detailed output."""
+    import sys
+
+    print("\n=== Running Tracker Tests ===\n")
+
+    # Run the tests with verbose output
+    import pytest
+    result = pytest.main(["-v", __file__])
+
+    if result == 0:
+        print("\n✅ All tracker tests passed successfully!")
+    else:
+        print("\n❌ Some tracker tests failed. See details above.")
+
+    sys.exit(result)
