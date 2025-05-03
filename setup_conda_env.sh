@@ -2,14 +2,14 @@
 # Script to set up a fresh conda environment for OpenPTV Python
 
 # Create a new conda environment
-conda create -y -n openptv2 python=3.10
+conda create -y -n openptv2 python=3.11
 
 # Activate the environment
 conda activate openptv2
 
 # Install core dependencies with specific versions
 conda install -y numpy=1.26.4
-conda install -y scipy cython
+conda install -y scipy cython pyyaml
 
 # Install GUI dependencies
 conda install -y -c conda-forge traits traitsui chaco enable pyface
