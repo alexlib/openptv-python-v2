@@ -14,11 +14,8 @@ build/
 *.egg-info/
 
 # Cython generated files
-*.c
 *.cpp
-!liboptv/src/*.c
-!openptv/binding/optv.c
-!openptv/c_src/src/*.c
+openptv/binding/*.c
 
 # IDE files
 .idea/
