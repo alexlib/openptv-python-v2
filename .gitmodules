@@ -1,6 +1,0 @@
-[submodule "liboptv"]
-	path = liboptv
-	url = https://github.com/openptv/openptv.git
-[submodule "pyptv-gui"]
-	path = pyptv-gui
-	url = https://github.com/alexlib/pyptv.git
