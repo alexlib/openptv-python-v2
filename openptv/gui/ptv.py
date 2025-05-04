@@ -75,7 +75,7 @@ def negative(img: np.ndarray) -> np.ndarray:
 
 def simple_highpass(img: np.ndarray, cpar: ControlParams) -> np.ndarray:
     """Apply a simple highpass filter to an image.
-    
+
     This function will automatically use the appropriate implementation
     (Cython or pure Python) based on availability.
 
@@ -118,16 +118,17 @@ def _read_calibrations(cpar: ControlParams, n_cams: int) -> List[Calibration]:
     return cals
 
 
-def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeParams,
+def py_start_proc_c(n_cams: int, param_dir: str = "parameters") -> Tuple[ControlParams, SequenceParams, VolumeParams,
                                     TrackingParams, TargetParams, List[Calibration],
                                     ExamineParams]:
     """Read all parameters needed for processing.
 
-    This function reads all parameter files from the parameters directory and initializes
+    This function reads all parameter files from the specified parameters directory and initializes
     the necessary objects for processing.
 
     Args:
         n_cams: Number of cameras
+        param_dir: Path to the parameters directory (default: "parameters")
 
     Returns:
         Tuple containing:
@@ -140,12 +141,13 @@ def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeP
             - epar: Examine parameters
     """
     # Get parameter file paths
-    ptv_par_path = Path("parameters/ptv.par")
-    sequence_par_path = Path("parameters/sequence.par")
-    criteria_par_path = Path("parameters/criteria.par")
-    track_par_path = Path("parameters/track.par")
-    targ_rec_par_path = Path("parameters/targ_rec.par")
-    examine_par_path = Path("parameters/examine.par")
+    param_path = Path(param_dir)
+    ptv_par_path = param_path / "ptv.par"
+    sequence_par_path = param_path / "sequence.par"
+    criteria_par_path = param_path / "criteria.par"
+    track_par_path = param_path / "track.par"
+    targ_rec_par_path = param_path / "targ_rec.par"
+    examine_par_path = param_path / "examine.par"
 
     try:
         # Control parameters
@@ -253,7 +255,7 @@ def py_detection_proc_c(list_of_images: List[np.ndarray],
 
 def py_correspondences_proc_c(exp):
     """Provides correspondences using the high-level API.
-    
+
     Inputs:
         exp = info.object from the pyptv_gui
     Outputs:
@@ -269,14 +271,15 @@ def py_correspondences_proc_c(exp):
     for i_cam in range(exp.n_cams):
         base_name = exp.spar.get_img_base_name(i_cam)
         write_targets(exp.detections[i_cam], base_name, frame)
-        
+
     return sorted_pos, sorted_corresp, num_targs
 
 
 def py_determination_proc_c(n_cams: int,
                          sorted_pos: List[np.ndarray],
                          sorted_corresp: np.ndarray,
-                         corrected: List[MatchedCoords]) -> None:
+                         corrected: List[MatchedCoords],
+                         param_dir: str = "parameters") -> None:
     """Calculate 3D positions from 2D correspondences and save to file.
 
     Args:
@@ -284,9 +287,10 @@ def py_determination_proc_c(n_cams: int,
         sorted_pos: List of sorted positions for each camera
         sorted_corresp: Array of correspondence indices
         corrected: List of corrected coordinates
+        param_dir: Path to the parameters directory (default: "parameters")
     """
     # Get parameters
-    cpar, _, vpar, _, _, cals, _ = py_start_proc_c(n_cams)
+    cpar, _, vpar, _, _, cals, _ = py_start_proc_c(n_cams, param_dir)
 
     # Concatenate sorted positions (distinction between quad/trip irrelevant here)
     sorted_pos = np.concatenate(sorted_pos, axis=1)
@@ -368,7 +372,7 @@ def run_plugin(exp) -> None:
 
 
 
-def py_sequence_loop(exp) -> None:
+def py_sequence_loop(exp, param_dir: str = "parameters") -> None:
     """Run a sequence of detection, stereo-correspondence, and determination.
 
     This function processes a sequence of frames, performing detection, stereo-correspondence,
@@ -377,6 +381,7 @@ def py_sequence_loop(exp) -> None:
 
     Args:
         exp: Experiment object containing configuration and parameters
+        param_dir: Path to the parameters directory (default: "parameters")
     """
 
     # Sequence parameters
@@ -395,7 +400,7 @@ def py_sequence_loop(exp) -> None:
     # spar.read_sequence_par("parameters/sequence.par", n_cams)
 
 
-    pftVersionParams = PftVersionParams(path=Path("parameters"))
+    pftVersionParams = PftVersionParams(path=Path(param_dir))
     pftVersionParams.read()
     Existing_Target = np.bool_(pftVersionParams.Existing_Target)
 
@@ -510,15 +515,27 @@ def py_sequence_loop(exp) -> None:
 def py_trackcorr_init(exp):
     """Reads all the necessary stuff into Tracker using the high-level API."""
 
+    # Create a copy of the sequence parameters to avoid modifying the original
+    spar_copy = SequenceParams(num_cams=exp.cpar.get_num_cams())
+
+    # Copy all sequence parameters
     for cam_id in range(exp.cpar.get_num_cams()):
         img_base_name = exp.spar.get_img_base_name(cam_id)
-        # print(img_base_name)
-        short_name = img_base_name.split('%')[0]
-        if short_name[-1] == '_':
-            short_name = short_name[:-1]+'.'
-        # print(short_name)
-        print(f' Renaming {img_base_name} to {short_name} before C library tracker')
-        exp.spar.set_img_base_name(cam_id, short_name)
+
+        # Check if the image base name already has a format specifier
+        if '%' in img_base_name:
+            short_name = img_base_name.split('%')[0]
+            if short_name[-1] == '_':
+                short_name = short_name[:-1]+'.'
+            print(f' Using {short_name} for C library tracker (original: {img_base_name})')
+            spar_copy.set_img_base_name(cam_id, short_name)
+        else:
+            # If no format specifier, use as is
+            spar_copy.set_img_base_name(cam_id, img_base_name)
+
+    # Copy other sequence parameters
+    spar_copy.set_first(exp.spar.get_first())
+    spar_copy.set_last(exp.spar.get_last())
 
     # Use string naming dictionary (not bytes)
     naming = {
@@ -528,7 +545,8 @@ def py_trackcorr_init(exp):
     }
 
     # Use the high-level API which will select the appropriate implementation
-    tracker = Tracker(exp.cpar, exp.vpar, exp.track_par, exp.spar, exp.cals, naming)
+    # Use the copy of sequence parameters instead of modifying the original
+    tracker = Tracker(exp.cpar, exp.vpar, exp.track_par, spar_copy, exp.cals, naming)
 
     return tracker
 

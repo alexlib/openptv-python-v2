@@ -536,6 +536,13 @@ class TreeMenuHandler(Handler):
         mainGui.create_plots(mainGui.orig_image, is_float=False)
         # mainGui.set_images(mainGui.orig_image)
 
+        # Get the parameters directory from the active experiment
+        param_dir = "parameters"  # Default
+        if hasattr(info.object, 'exp1') and hasattr(info.object.exp1, 'active_params'):
+            if hasattr(info.object.exp1.active_params, 'par_path'):
+                param_dir = str(info.object.exp1.active_params.par_path)
+                print(f"Using parameters from: {param_dir}")
+
         (
             info.object.cpar,
             info.object.spar,
@@ -544,7 +551,7 @@ class TreeMenuHandler(Handler):
             info.object.tpar,
             info.object.cals,
             info.object.epar,
-        ) = ptv.py_start_proc_c(info.object.n_cams)
+        ) = ptv.py_start_proc_c(info.object.n_cams, param_dir)
         mainGui.pass_init = True
         print("Read all the parameters and calibrations successfully ")
 
@@ -711,10 +718,18 @@ class TreeMenuHandler(Handler):
         """
 
         extern_sequence = info.object.plugins.sequence_alg
+
+        # Get the parameters directory from the active experiment
+        param_dir = "parameters"  # Default
+        if hasattr(info.object, 'exp1') and hasattr(info.object.exp1, 'active_params'):
+            if hasattr(info.object.exp1.active_params, 'par_path'):
+                param_dir = str(info.object.exp1.active_params.par_path)
+                print(f"Using parameters from: {param_dir}")
+
         if extern_sequence != "default":
             ptv.run_plugin(info.object)
         else:
-            ptv.py_sequence_loop(info.object)
+            ptv.py_sequence_loop(info.object, param_dir)
 
     def track_no_disp_action(self, info):
         """track_no_disp_action uses ptv.py_trackcorr_loop(..) binding to
@@ -761,11 +776,20 @@ class TreeMenuHandler(Handler):
 
     def three_d_positions(self, info):
         """Extracts and saves 3D positions from the list of correspondences"""
+
+        # Get the parameters directory from the active experiment
+        param_dir = "parameters"  # Default
+        if hasattr(info.object, 'exp1') and hasattr(info.object.exp1, 'active_params'):
+            if hasattr(info.object.exp1.active_params, 'par_path'):
+                param_dir = str(info.object.exp1.active_params.par_path)
+                print(f"Using parameters from: {param_dir}")
+
         ptv.py_determination_proc_c(
             info.object.n_cams,
             info.object.sorted_pos,
             info.object.sorted_corresp,
             info.object.corrected,
+            param_dir
         )
 
     # def multigrid_demo(self, info):
@@ -1582,7 +1606,7 @@ def main_cli():
     """Command-line entry point for PyPTV GUI."""
     import sys
     from pathlib import Path
-    
+
     # Get directory argument if provided
     if len(sys.argv) > 1:
         directory = Path(sys.argv[1]).resolve()
@@ -1591,7 +1615,7 @@ def main_cli():
         main()
     else:
         main()
-    
+
     return 0
 
 if __name__ == "__main__":
