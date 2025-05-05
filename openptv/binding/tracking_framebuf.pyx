@@ -194,6 +194,11 @@ cdef class TargetArray:
         return ret
     
     def __len__(self):
+        """
+        Returns the number of targets in the array.
+        """
+        if self._num_targets < 0:
+            return 0
         return self._num_targets
     
     def __dealloc__(self):
@@ -219,15 +224,24 @@ def read_targets(basename, int frame_num):
         TargetArray ret = TargetArray()
         bytes py_byte_string
     
+    if tarr == NULL:
+        raise MemoryError("Could not allocate memory for targets")
+    
     # Using Python strings requires some boilerplate:
     if isinstance(basename, str):
         py_byte_string = basename.encode('UTF-8')
     elif isinstance(basename, bytes):
         py_byte_string = basename
     else:
+        free(tarr)
         raise TypeError("basename must be a string or bytes")
     
     num_targets = c_read_targets(tarr, py_byte_string, frame_num)
+    
+    if num_targets < 0:
+        free(tarr)
+        raise IOError(f"Failed to read targets from {basename}, frame {frame_num}")
+    
     ret.set(tarr, num_targets, 1)
     
     return ret
