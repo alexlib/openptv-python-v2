@@ -217,13 +217,17 @@ def read_targets(basename, int frame_num):
         int num_targets
         target *tarr = <target *>malloc(MAX_TARGETS * sizeof(target))
         TargetArray ret = TargetArray()
-        char* c_string
+        bytes py_byte_string
     
     # Using Python strings requires some boilerplate:
-    py_byte_string = basename.encode('UTF-8')
-    c_string = py_byte_string
+    if isinstance(basename, str):
+        py_byte_string = basename.encode('UTF-8')
+    elif isinstance(basename, bytes):
+        py_byte_string = basename
+    else:
+        raise TypeError("basename must be a string or bytes")
     
-    num_targets = c_read_targets(tarr, c_string, frame_num)
+    num_targets = c_read_targets(tarr, py_byte_string, frame_num)
     ret.set(tarr, num_targets, 1)
     
     return ret
