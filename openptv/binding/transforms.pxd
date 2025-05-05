@@ -19,17 +19,17 @@ cdef extern from "../liboptv/include/trafo.h":
                          , double y
                          , ap_52 ap
                          , double * x1
-                         , double * y1);                        
+                         , double * y1);
     void distort_brown_affin (double x
                          , double y
                          , ap_52 ap
                          , double * x1
                          , double * y1);
-    
-    void correct_brown_affine_exact(double x, double y, ap_52 ap, 
-    double *x1, double *y1, double tol)
-    
-    void flat_to_dist(double flat_x, double flat_y, calibration *cal, 
-        double *dist_x, double *dist_y)
+
+    void correct_brown_affine_exact(double x, double y, ap_52 ap,
+        double *x1, double *y1, double tol);
+
+    void flat_to_dist(double flat_x, double flat_y, calibration *cal,
+        double *dist_x, double *dist_y);
     void dist_to_flat(double dist_x, double dist_y, calibration *cal,
-        double *flat_x, double *flat_y, double tol)
+        double *flat_x, double *flat_y, double tol);

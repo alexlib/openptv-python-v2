@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 
 # Import the functions from the original file
-from openptv.gui.test_calibration import (
+from tests.test_calibration import (
     read_dt_lsq,
     read_calblock,
     pair_cal_points,
