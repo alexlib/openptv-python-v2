@@ -2,7 +2,6 @@ from openptv.binding.parameters cimport ControlParams, control_par
 import numpy as np
 cimport numpy as np
 from typing import Union
-from openptv.binding.utils import encode_if_needed
 
 def preprocess_image(np.ndarray[ndim=2, dtype=np.uint8_t] input_img,
                    int filter_hp,
@@ -42,15 +41,12 @@ def preprocess_image(np.ndarray[ndim=2, dtype=np.uint8_t] input_img,
     else:
         output_img = np.empty_like(input_img)
     
-    # cdef char* filter_file_bytes = NULL
-    
-    if filter_file is not None:
-        # Convert string to bytes if needed
-        filter_file_bytes = encode_if_needed(filter_file)
+    if filter_hp == 2:
+        if filter_file == None or not isinstance(filter_file, str):
+            raise ValueError("Expecting a filter file name, received None or non-string.")
     else:
-        # Empty bytes string for when filter_file is None
-        filter_file_bytes = b""
-    
+        filter_file=b""
+        
     for arr in (input_img, output_img):
         if not arr.flags['C_CONTIGUOUS']:
             np.ascontiguousarray(arr)
@@ -59,7 +55,7 @@ def preprocess_image(np.ndarray[ndim=2, dtype=np.uint8_t] input_img,
                             < unsigned char *> output_img.data,
                             lowpass_dim,
                             filter_hp,
-                            filter_file_bytes,
+                            filter_file,
                             control._control_par)):
         raise Exception("prepare_image C function failed: "
                       + "failure of memory allocation or filter file reading")
