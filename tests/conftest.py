@@ -26,8 +26,10 @@ os.environ['QT_API'] = 'pyside6'
 
 # Skip GUI tests when running headless
 @pytest.fixture(scope="session", autouse=True)
-def check_display():
-    if "DISPLAY" not in os.environ and "WAYLAND_DISPLAY" not in os.environ:
+def check_display(request):
+    # Only skip if the test is marked as requiring a display
+    if request.node.get_closest_marker("requires_display") and \
+       "DISPLAY" not in os.environ and "WAYLAND_DISPLAY" not in os.environ:
         pytest.skip("GUI tests require a display")
 
 

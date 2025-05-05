@@ -43,6 +43,8 @@ def create_extension(name, sources):
         extra_link_args.extend(['-Wl,-rpath,$ORIGIN'])
     else:
         extra_compile_args.append('/W4')
+        # Add output directory for Windows
+        extra_link_args.append(f'/OUT:{os.path.join(os.path.dirname(os.path.abspath(__file__)), "openptv", "binding", os.path.basename(name))}.cp{sys.version_info.major}{sys.version_info.minor}-win_amd64.pyd')
 
     include_dirs = [
         numpy.get_include(),
