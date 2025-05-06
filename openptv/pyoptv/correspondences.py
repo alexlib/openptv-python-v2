@@ -11,10 +11,26 @@ from .constants import (
     NMAX,
     PT_UNUSED,
 )
-from .epi import epi_mm
+from .epi import epi_mm, Coord2d_dtype
 from .find_candidate import find_candidate
 from .parameters import ControlPar, VolumePar
 from .tracking_frame_buf import Frame, Target, n_tupel_dtype
+
+
+class MatchedCoords:
+    """A class for matched coordinates."""
+
+    def __init__(self, num_points: int = 0):
+        """Initialize a MatchedCoords object."""
+        self.arr = np.recarray(num_points, dtype=Coord2d_dtype)
+
+    def __getitem__(self, index):
+        """Get an item from the array."""
+        return self.arr[index]
+
+    def __len__(self):
+        """Get the length of the array."""
+        return len(self.arr)
 
 Correspond_dtype = np.dtype([
     ('p1', np.int32),  # PT_UNUSED

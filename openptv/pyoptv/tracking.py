@@ -5,8 +5,28 @@ This module provides Python implementations of the same functionality
 available in the C library, serving as a fallback and development environment.
 """
 
+import os
 import numpy as np
 from scipy.spatial import cKDTree
+
+# Define dummy functions for compatibility with the C library
+def tr_new():
+    """Create a new tracker object."""
+    return {}
+
+def tr_free(tr):
+    """Free a tracker object."""
+    pass
+
+def tr_write(tr, filename):
+    """Write tracker data to a file."""
+    with open(filename, 'w') as f:
+        f.write("Dummy tracker data\n")
+
+def tr_write_ascii_data(tr, filename):
+    """Write tracker data to an ASCII file."""
+    with open(filename, 'w') as f:
+        f.write("Dummy tracker ASCII data\n")
 
 def track_particles(particles, max_link_distance=1.0, min_trajectory_length=3,
                  max_acceleration=1.0, frame_rate=1.0):

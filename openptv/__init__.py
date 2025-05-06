@@ -29,10 +29,32 @@ _gui_import_error = None
 
 # Try to import the Cython bindings
 try:
-    # Import core tracking functions from tracking_framebuf as a test for Cython availability
-    from openptv.binding.tracking_framebuf import TargetArray, Target
-    
-    _using_cython = True
+    # First check if the binding directory exists and has .pyd files
+    binding_dir = os.path.join(os.path.dirname(__file__), 'binding')
+    if os.path.exists(binding_dir) and any(f.endswith('.pyd') for f in os.listdir(binding_dir)):
+        # Try to import from the binding directory
+        import importlib.util
+
+        # Find the appropriate .pyd file for tracking_framebuf
+        pyd_files = [f for f in os.listdir(binding_dir) if f.startswith('tracking_framebuf') and f.endswith('.pyd')]
+        if pyd_files:
+            # Use the first matching .pyd file
+            pyd_file = os.path.join(binding_dir, pyd_files[0])
+
+            # Load the module from the .pyd file
+            spec = importlib.util.spec_from_file_location("openptv.binding.tracking_framebuf", pyd_file)
+            tracking_framebuf = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(tracking_framebuf)
+
+            # Get the TargetArray and Target classes from the module
+            TargetArray = tracking_framebuf.TargetArray
+            Target = tracking_framebuf.Target
+
+            _using_cython = True
+        else:
+            raise ImportError("No tracking_framebuf.pyd file found in binding directory")
+    else:
+        raise ImportError("No binding directory or no .pyd files found")
 
 except ImportError as e:
     # Fall back to pure Python implementation
@@ -72,7 +94,7 @@ try:
         TargetParams as CythonTargetParams
     )
     _using_cython = True
-    
+
     # Set default parameter classes to Cython versions
     MultimediaParams = CythonMultimediaParams
     TrackingParams = CythonTrackingParams
@@ -80,7 +102,7 @@ try:
     VolumeParams = CythonVolumeParams
     ControlParams = CythonControlParams
     TargetParams = CythonTargetParams
-    
+
 except ImportError:
     # Import Python implementations with explicit names
     from openptv.pyoptv.parameters import (
@@ -92,7 +114,7 @@ except ImportError:
         TargetPar as PythonTargetParams
     )
     _using_cython = False
-    
+
     # Set default parameter classes to Python versions
     MultimediaParams = PythonMultimediaParams
     TrackingParams = PythonTrackingParams
@@ -214,17 +236,17 @@ if _using_cython:
         from openptv.binding.tracking_framebuf import (
             CORRES_NONE, PT_UNUSED
         )
-        
+
         # Import constants from orientation
         from openptv.binding.orientation import (
             NPAR, COORD_UNUSED
         )
-        
+
         # Import constants from tracker
         from openptv.binding.tracker import (
             TR_BUFSPACE, MAX_TARGETS, TR_MAX_CAMS
         )
-        
+
     except ImportError as e:
         # Fall back to constants from pyoptv
         from openptv.pyoptv.constants import (
