@@ -49,3 +49,4 @@ Thumbs.db
 # Comments
 .comments/
 oldtest/*
+tests/test_cavity/res/*
