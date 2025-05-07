@@ -13,16 +13,16 @@ from pathlib import Path
 from openptv.gui.parameters import par_dir_prefix, copy_params_dir
 
 # Re-export these for backward compatibility
-__all__ = ['par_dir_prefix', 'copy_params_dir', 'bool_to_int', 'int_to_bool']
+__all__ = ['par_dir_prefix', 'copy_params_dir', 'bool_to_int', 'int_to_bool', 'read_line', 'write_line']
 
 
 def bool_to_int(value):
     """
     Convert a boolean value to an integer (0 or 1).
-    
+
     Args:
         value: A boolean value or an integer.
-    
+
     Returns:
         int: 1 if value is True, 0 if value is False.
     """
@@ -34,10 +34,10 @@ def bool_to_int(value):
 def int_to_bool(value):
     """
     Convert an integer value (0 or 1) to a boolean.
-    
+
     Args:
         value: An integer value or a boolean.
-    
+
     Returns:
         bool: True if value is non-zero, False if value is zero.
     """
@@ -49,10 +49,10 @@ def int_to_bool(value):
 def g(f):
     """
     Read a line from a file and strip whitespace.
-    
+
     Args:
         f: A file object.
-    
+
     Returns:
         str: The line read from the file, with whitespace stripped.
     """
@@ -62,13 +62,13 @@ def g(f):
 def encode_if_needed(s):
     """
     Encode a string to bytes if it's a string, otherwise return it unchanged.
-    
+
     This function is used to ensure that strings are properly encoded to bytes
     before being passed to C functions that expect byte strings.
-    
+
     Args:
         s: A string or bytes object, or None
-        
+
     Returns:
         bytes: The encoded string if s was a string, or s unchanged if it was
                already bytes or None
@@ -84,13 +84,13 @@ def encode_if_needed(s):
 def decode_if_needed(b):
     """
     Decode bytes to a string if it's bytes, otherwise return it unchanged.
-    
+
     This function is used to ensure that byte strings returned from C functions
     are properly decoded to Python strings.
-    
+
     Args:
         b: A bytes or string object, or None
-        
+
     Returns:
         str: The decoded bytes if b was bytes, or b unchanged if it was
              already a string or None
@@ -101,3 +101,27 @@ def decode_if_needed(b):
         return b.decode('utf-8')
     else:
         return b
+
+
+def read_line(f):
+    """
+    Read a line from a file and strip whitespace.
+
+    Args:
+        f: A file object.
+
+    Returns:
+        str: The line read from the file, with whitespace stripped.
+    """
+    return f.readline().strip()
+
+
+def write_line(f, line):
+    """
+    Write a line to a file, adding a newline character.
+
+    Args:
+        f: A file object.
+        line: The line to write.
+    """
+    f.write(f"{line}\n")
