@@ -75,7 +75,7 @@ def negative(img: np.ndarray) -> np.ndarray:
 
 def simple_highpass(img: np.ndarray, cpar: ControlParams) -> np.ndarray:
     """Apply a simple highpass filter to an image.
-    
+
     This function will automatically use the appropriate implementation
     (Cython or pure Python) based on availability.
 
@@ -253,7 +253,7 @@ def py_detection_proc_c(list_of_images: List[np.ndarray],
 
 def py_correspondences_proc_c(exp):
     """Provides correspondences using the high-level API.
-    
+
     Inputs:
         exp = info.object from the pyptv_gui
     Outputs:
@@ -269,7 +269,7 @@ def py_correspondences_proc_c(exp):
     for i_cam in range(exp.n_cams):
         base_name = exp.spar.get_img_base_name(i_cam)
         write_targets(exp.detections[i_cam], base_name, frame)
-        
+
     return sorted_pos, sorted_corresp, num_targs
 
 
@@ -308,7 +308,14 @@ def py_determination_proc_c(n_cams: int,
         print_corresp = sorted_corresp
 
     # Save positions to a temporary file
-    fname = default_naming["corres"] + '.' + str(DEFAULT_FRAME_NUM)
+    # Use the new naming utilities
+    from openptv.utils import ensure_naming_directories, get_path_with_frame
+
+    # Ensure directories exist
+    ensure_naming_directories()
+
+    # Get the path with frame number
+    fname = get_path_with_frame('corres', DEFAULT_FRAME_NUM)
 
     print(f'Prepared {fname} to write positions')
 
@@ -495,10 +502,16 @@ def py_sequence_loop(exp) -> None:
             print_corresp = sorted_corresp
 
         # Save rt_is
-        rt_is_filename = default_naming["corres"]
-        # rt_is_filename = f'{rt_is_filename}.{frame:04d}'
-        rt_is_filename = f'{rt_is_filename}.{frame}'
-        with open(rt_is_filename, "w", encoding="utf8") as rt_is:
+        # Use the new naming utilities
+        from openptv.utils import ensure_naming_directories, get_path_with_frame
+
+        # Ensure directories exist
+        ensure_naming_directories()
+
+        # Get the path with frame number
+        rt_is_path = get_path_with_frame('corres', frame)
+
+        with open(rt_is_path, "w", encoding="utf8") as rt_is:
             rt_is.write(str(pos.shape[0]) + "\n")
             for pix, pt in enumerate(pos):
                 pt_args = (pix + 1, ) + tuple(pt) + tuple(print_corresp[:, pix])
@@ -520,12 +533,14 @@ def py_trackcorr_init(exp):
         print(f' Renaming {img_base_name} to {short_name} before C library tracker')
         exp.spar.set_img_base_name(cam_id, short_name)
 
-    # Use string naming dictionary (not bytes)
-    naming = {
-        'corres': 'res/rt_is',
-        'linkage': 'res/ptv_is',
-        'prio': 'res/added'
-    }
+    # Use the new naming utilities
+    from openptv.utils import get_default_naming_str, ensure_naming_directories
+
+    # Ensure directories exist
+    ensure_naming_directories()
+
+    # Get string naming dictionary
+    naming = get_default_naming_str()
 
     # Use the high-level API which will select the appropriate implementation
     tracker = Tracker(exp.cpar, exp.vpar, exp.track_par, exp.spar, exp.cals, naming)
@@ -662,10 +677,16 @@ def py_calibration(selection, exp):
         all_known = []
         all_detected = [[] for c in range(num_cams)]
 
+        # Use the new naming utilities
+        from openptv.utils import get_default_naming
+
+        # Get bytes naming dictionary for C code
+        naming = get_default_naming()
+
         for frm_num in range(sp.shaking_first_frame, sp.shaking_last_frame + 1):
             frame = Frame(exp.cpar.get_num_cams(),
-                corres_file_base = ('res/rt_is').encode(),
-                linkage_file_base= ('res/ptv_is').encode(),
+                corres_file_base = naming['corres'],
+                linkage_file_base = naming['linkage'],
                 target_file_base = targ_files,
                 frame_num = frm_num)
 
@@ -810,12 +831,13 @@ def read_targets(file_base: str, frame: int=123456789) -> TargetArray:
     # if file_base has an extension, remove it
     file_base = file_base.split(".")[0]
 
-    # Use strings consistently in the GUI
-    framebuf_naming = {
-        'corres': 'res/rt_is',  # String instead of bytes
-        'linkage': 'res/ptv_is',
-        'prio': 'res/added'
-    }
+    # We don't need this dictionary anymore as we use the path_config system
+    # This is kept as a comment for reference
+    # framebuf_naming = {
+    #     'corres': 'res/rt_is',
+    #     'linkage': 'res/ptv_is',
+    #     'prio': 'res/added'
+    # }
 
     filename = file_base_to_filename(file_base, frame)
 
@@ -917,7 +939,7 @@ def read_rt_is_file(filename) -> List[List[float]]:
                 if len(values) != 8:
                     raise ValueError("Incorrect number of values in line")
 
-                row_number = int(values[0])
+                # Parse values directly into the data array
                 x = float(values[1])
                 y = float(values[2])
                 z = float(values[3])

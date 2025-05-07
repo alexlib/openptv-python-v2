@@ -1,0 +1,50 @@
+"""
+OpenPTV Python package for Particle Tracking Velocimetry.
+
+This package provides tools for PTV analysis with a flexible architecture:
+- High-performance C implementation (liboptv)
+- Cython bindings for Python access to C functions
+- Pure Python implementation for development and fallback
+- GUI components based on TraitsUI/Chaco/Enable/Pyface
+"""
+
+import importlib.util
+import sys
+import warnings
+import os
+
+__version__ = '0.1.0'
+
+# Import constants from the standalone module
+from openptv.constants import (
+    TR_BUFSPACE, TR_MAX_CAMS, MAX_TARGETS,
+    CORRES_NONE, PT_UNUSED,
+    NPAR, COORD_UNUSED
+)
+
+# Initialize flags for available implementations
+_using_cython = False
+_gui_available = True
+_gui_import_error = None
+
+# # Try to import the Cython bindings
+try:
+    # Import core tracking functions from tracking_framebuf as a test for Cython availability
+    from openptv.binding.tracking_framebuf import TargetArray, Target
+    
+    _using_cython = True
+
+except ImportError as e:
+    # Fall back to pure Python implementation
+    warnings.warn(
+        f"Cython bindings not available ({e}), using pure Python implementation. "
+        "This may be significantly slower for large datasets."
+    )
+
+    # from openptv.backup_pyoptv.tracking_frame_buf import TargetArray, Target
+
+    _using_cython = False
+
+def using_cython():
+    """Return True if using Cython bindings, False if using pure Python."""
+    return _using_cython
