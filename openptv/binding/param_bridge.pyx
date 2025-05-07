@@ -1,12 +1,12 @@
+# cython: language_level=3
+# distutils: language = c
+
 """
 Bridge between Python parameter objects and C parameter structs.
 
 This module provides functions for converting between Python parameter objects
 and C parameter structs.
 """
-
-# cython: language_level=3
-# distutils: language = c
 
 from libc.stdlib cimport malloc, free
 from libc.string cimport strncpy

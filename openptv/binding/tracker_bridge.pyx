@@ -1,11 +1,11 @@
+# cython: language_level=3
+# distutils: language = c
+
 """
 Bridge between Python and C tracking functions.
 
 This module provides functions for calling C tracking functions with Python parameter objects.
 """
-
-# cython: language_level=3
-# distutils: language = c
 
 from libc.stdlib cimport malloc, free
 
