@@ -20,7 +20,7 @@ class Parameters:
     """
 
     # Default path for parameter files
-    default_path = Path(par_dir_prefix)
+    default_path = Path(par_dir_prefix())
 
     def __init__(self, path=None):
         """
