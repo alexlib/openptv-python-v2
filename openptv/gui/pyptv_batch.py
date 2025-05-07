@@ -62,8 +62,7 @@ def run_batch(new_seq_first: int, new_seq_last: int):
     py_sequence_loop(exp)
     tracker = py_trackcorr_init(exp)
     tracker.full_forward()
-
-#
+    tracker.full_backward()  # Add this line to enable backward tracking
 
 
 def main(exp_path, first, last, repetitions=1):
