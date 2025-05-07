@@ -1,6 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
+import warnings
 from pathlib import Path
 import shutil
 from tqdm import tqdm
@@ -10,6 +11,15 @@ import yaml
 
 # Import constants from the standalone constants module
 from openptv.constants import TR_MAX_CAMS
+
+# Deprecation warning
+warnings.warn(
+    "The openptv.gui.parameters module is deprecated and will be removed in a future version. "
+    "Please use the openptv.parameters module instead. "
+    "See the migration guide for more information: docs/migration_guide.md",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 # Temporary path for parameters (active run will be copied here)
 par_dir_prefix = str("parameters")
@@ -32,9 +42,9 @@ class Parameters(HasTraits):
         HasTraits.__init__(self)
         if isinstance(path, str):
             path = Path(path)
-            
+
         self.path = path.resolve()
-        self.exp_path = self.path.parent 
+        self.exp_path = self.path.parent
 
     # returns the name of the specific params file
     def filename(self):
@@ -124,17 +134,17 @@ def readParamsDir(par_path):
 
 
 def copy_params_dir(src: Path, dest: Path):
-    """ Copying all parameter files from /src folder to /dest 
+    """ Copying all parameter files from /src folder to /dest
         including .dat, .par and .yaml files
     """
     ext_set = ("*.dat", "*.par", "*.yaml")
     files = []
     for ext in ext_set:
         files.extend(src.glob(ext))
-        
-    # print(f'List of parameter files in {src} is \n {files} \n')    
+
+    # print(f'List of parameter files in {src} is \n {files} \n')
     # print(f'Destination folder is {dest.resolve()}')
-    # files = [f for f in src.iterdir() if str(f.parts[-1]).endswith(ext_set)]    
+    # files = [f for f in src.iterdir() if str(f.parts[-1]).endswith(ext_set)]
 
     if not dest.is_dir():
         print(f"Destination folder does not exist, creating it")

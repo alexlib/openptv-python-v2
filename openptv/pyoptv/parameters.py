@@ -1,4 +1,5 @@
 """Parameters for OpenPTV-Python."""
+import warnings
 from collections import namedtuple
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -8,6 +9,15 @@ import yaml
 
 # Import constants from the standalone constants module
 from openptv.constants import TR_MAX_CAMS
+
+# Deprecation warning
+warnings.warn(
+    "The openptv.pyoptv.parameters module is deprecated and will be removed in a future version. "
+    "Please use the openptv.parameters module instead. "
+    "See the migration guide for more information: docs/migration_guide.md",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 TrackParTuple = namedtuple('TrackParTuple',
                            ['dvxmin',
@@ -825,10 +835,10 @@ class MultiPlanesPar(Parameters):
 @dataclass
 class ExaminePar(Parameters):
     """Examine parameters for multi-plane calibration."""
-    
+
     Examine_Flag: bool = False
     Combine_Flag: bool = False
-    
+
     @classmethod
     def from_file(cls, file_path):
         """Read from examine.par file."""
@@ -843,7 +853,7 @@ class ExaminePar(Parameters):
             with open(file_path, "w", encoding="utf-8") as file:
                 file.write("0\n")  # Examine_Flag
                 file.write("0\n")  # Combine_Flag
-        
+
         return ret
 
 def read_examine_par(file_path: Path) -> ExaminePar:
