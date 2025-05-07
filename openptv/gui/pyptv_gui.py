@@ -485,12 +485,26 @@ class TreeMenuHandler(Handler):
         print("not implemented")
 
     def open_action(self, info):
+        """Open a new experiment directory"""
         directory_dialog = DirectoryEditorDialog()
         directory_dialog.edit_traits()
-        exp_path = directory_dialog.dir_name
+        exp_path = Path(directory_dialog.dir_name).resolve()
         print(f"Changing experimental path to {exp_path}")
+
+        # Change to the new directory
         os.chdir(exp_path)
+        print(f"Working directory is now: {Path.cwd()}")
+
+        # Update the experiment path in the main GUI object
+        info.object.exp_path = exp_path
+
+        # Populate the runs from the new directory
         info.object.exp1.populate_runs(exp_path)
+
+        # Reset the tracker to ensure it will be reinitialized with the new paths
+        if hasattr(info.object, 'tracker'):
+            info.object.tracker = None
+            print("Tracker reset for the new experiment directory")
 
     def exit_action(self, info):
         print("not implemented")
@@ -709,39 +723,113 @@ class TreeMenuHandler(Handler):
         1) initialization - bonded by ptv.py_sequence_init(..) function
         2) main loop processing - bonded by ptv.py_sequence_loop(..) function
         """
+        # Save the current working directory to restore it later if needed
+        original_dir = Path.cwd().resolve()
+        print(f"Current working directory before sequence processing: {original_dir}")
 
-        extern_sequence = info.object.plugins.sequence_alg
-        if extern_sequence != "default":
-            ptv.run_plugin(info.object)
-        else:
-            ptv.py_sequence_loop(info.object)
+        # Make sure we're in the experiment directory
+        if hasattr(info.object, 'exp_path') and info.object.exp_path is not None:
+            exp_path = info.object.exp_path
+            if not Path.cwd().samefile(exp_path):
+                print(f"Changing to experiment directory: {exp_path}")
+                os.chdir(exp_path)
+                print(f"Working directory is now: {Path.cwd()}")
+
+        try:
+            # Ensure the res directory exists
+            res_path = Path("res")
+            if not res_path.is_dir():
+                print("'res' folder not found. creating one")
+                res_path.mkdir(parents=True, exist_ok=True)
+
+            # Make sure the path_config is properly set up
+            from openptv.utils.naming import ensure_naming_directories
+
+            # Ensure all directories exist
+            ensure_naming_directories()
+
+            extern_sequence = info.object.plugins.sequence_alg
+            if extern_sequence != "default":
+                print(f"Running external sequence plugin: {extern_sequence}")
+                ptv.run_plugin(info.object)
+            else:
+                print("Running default sequence processing")
+                ptv.py_sequence_loop(info.object)
+
+            print("Sequence processing completed successfully")
+        except Exception as e:
+            print(f"Error in sequence processing: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            raise
+        finally:
+            # Restore the original working directory if it was changed
+            if not Path.cwd().samefile(original_dir):
+                print(f"Restoring original working directory: {original_dir}")
+                os.chdir(original_dir)
 
     def track_no_disp_action(self, info):
         """track_no_disp_action uses ptv.py_trackcorr_loop(..) binding to
         call tracking without display"""
-        extern_tracker = info.object.plugins.track_alg
-        if extern_tracker != "default":
-            try:
-                os.chdir(info.exp1.object.software_path)
-                track = importlib.import_module(extern_tracker)
-            except BaseException:
-                print(
-                    "Error loading "
-                    + extern_tracker
-                    + ". Falling back to default tracker"
-                )
-                extern_tracker = "default"
-            os.chdir(info.exp1.object.exp_path)  # change back to working path
-        if extern_tracker == "default":
-            print("Using default liboptv tracker")
-            info.object.tracker = ptv.py_trackcorr_init(info.object)
-            info.object.tracker.full_forward()
-        else:
-            print("Tracking by using " + extern_tracker)
-            tracker = track.Tracking(ptv=ptv, exp1=info.object.exp1)
-            tracker.do_tracking()
+        # Save current directory and ensure we're in experiment directory
+        original_dir = Path.cwd().resolve()
+        
+        # Make sure we're in the experiment directory for relative paths
+        if hasattr(info.object, 'exp_path') and info.object.exp_path is not None:
+            exp_path = info.object.exp_path
+            if original_dir != exp_path:
+                print(f"Changing to experiment directory: {exp_path}")
+                os.chdir(exp_path)
+                print(f"Working directory is now: {Path.cwd()}")
 
-        print("tracking without display finished")
+        try:
+            # Ensure the res directory exists (similar to pyptv_batch.py)
+            res_path = Path("res")
+            if not res_path.is_dir():
+                print("'res' folder not found. creating one")
+                res_path.mkdir(parents=True, exist_ok=True)
+
+            # Make sure the path_config is properly set up
+            from openptv.utils.naming import ensure_naming_directories
+
+            # Ensure all directories exist
+            ensure_naming_directories()
+
+            extern_tracker = info.object.plugins.track_alg
+            if extern_tracker != "default":
+                try:
+                    if hasattr(info.object, 'software_path'):
+                        os.chdir(info.object.software_path)
+                    track = importlib.import_module(extern_tracker)
+                except BaseException as e:
+                    print(f"Error loading {extern_tracker}: {str(e)}. Falling back to default tracker")
+                    extern_tracker = "default"
+
+                # Change back to experiment path
+                if hasattr(info.object, 'exp_path'):
+                    os.chdir(info.object.exp_path)
+
+            if extern_tracker == "default":
+                print("Using default liboptv tracker")
+                info.object.tracker = ptv.py_trackcorr_init(info.object)
+                print("Running full forward tracking...")
+                info.object.tracker.full_forward()
+            else:
+                print(f"Tracking by using {extern_tracker}")
+                tracker = track.Tracking(ptv=ptv, exp1=info.object.exp1)
+                tracker.do_tracking()
+
+            print("Tracking without display finished")
+        except Exception as e:
+            print(f"Error in tracking: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            raise
+        finally:
+            # Restore the original working directory if it was changed
+            if not Path.cwd().samefile(original_dir):
+                print(f"Restoring original working directory: {original_dir}")
+                os.chdir(original_dir)
 
     def track_disp_action(self, info):
         """tracking with display is handled by TrackThread which does
@@ -757,45 +845,19 @@ class TreeMenuHandler(Handler):
     def track_back_action(self, info):
         """tracking back action is handled by ptv.py_trackback_c() binding"""
         print("Starting back tracking")
+
+        # Save current directory and ensure we're in experiment directory
+        original_dir = Path.cwd().resolve()
+        
+        # Make sure we're in the experiment directory for relative paths
+        if hasattr(info.object, 'exp_path') and info.object.exp_path is not None:
+            exp_path = info.object.exp_path
+            if original_dir != exp_path:
+                print(f"Changing to experiment directory: {exp_path}")
+                os.chdir(exp_path)
+                print(f"Working directory is now: {Path.cwd()}")
+
         try:
-            # Make sure the tracker is initialized properly
-            if not hasattr(info.object, 'tracker') or info.object.tracker is None:
-                print("Initializing tracker for backward tracking")
-                info.object.tracker = ptv.py_trackcorr_init(info.object)
-
-            # Ensure file paths are properly set for backward tracking
-            # This is needed because the backward tracking uses the same file paths as forward tracking
-            for cam_id in range(info.object.cpar.get_num_cams()):
-                img_base_name = info.object.spar.get_img_base_name(cam_id)
-                print(f"Checking image base name for camera {cam_id}: {img_base_name}")
-
-                # Make sure the image base name is properly formatted for backward tracking
-                if '%' in img_base_name:
-                    # Split the path into directory and filename parts
-                    path_obj = Path(img_base_name)
-                    dir_part = path_obj.parent
-                    file_part = path_obj.name
-
-                    # Split the filename at the format specifier
-                    base_part = file_part.split('%')[0]
-
-                    # Handle the underscore case
-                    if base_part and base_part[-1] == '_':
-                        base_part = base_part[:-1] + '.'
-                    elif not base_part.endswith('.'):
-                        base_part = base_part + '.'
-
-                    # Reconstruct the path
-                    if str(dir_part) == '.':
-                        # No directory part
-                        short_name = base_part
-                    else:
-                        # Include the directory part
-                        short_name = os.path.join(str(dir_part), base_part)
-
-                    print(f"Renaming {img_base_name} to {short_name} before backward tracking")
-                    info.object.spar.set_img_base_name(cam_id, short_name)
-
             # Ensure the res directory exists
             res_path = Path("res")
             if not res_path.is_dir():
@@ -808,12 +870,41 @@ class TreeMenuHandler(Handler):
             # Ensure all directories exist
             ensure_naming_directories()
 
-            # Run backward tracking
-            info.object.tracker.full_backward()
+            extern_tracker = info.object.plugins.track_alg
+            if extern_tracker != "default":
+                try:
+                    if hasattr(info.object, 'software_path'):
+                        os.chdir(info.object.software_path)
+                    track = importlib.import_module(extern_tracker)
+                except BaseException as e:
+                    print(f"Error loading {extern_tracker}: {str(e)}. Falling back to default tracker")
+                    extern_tracker = "default"
+
+                # Change back to experiment path
+                if hasattr(info.object, 'exp_path'):
+                    os.chdir(info.object.exp_path)
+
+            if extern_tracker == "default":
+                print("Using default liboptv tracker")
+                info.object.tracker = ptv.py_trackcorr_init(info.object)
+                print("Running full backward tracking...")
+                info.object.tracker.full_backward()
+            else:
+                print(f"Backward tracking by using {extern_tracker}")
+                tracker = track.Tracking(ptv=ptv, exp1=info.object.exp1)
+                tracker.do_back_tracking()
+
             print("Backward tracking completed successfully")
         except Exception as e:
             print(f"Error in backward tracking: {str(e)}")
+            import traceback
+            traceback.print_exc()
             raise
+        finally:
+            # Restore the original working directory if it was changed
+            if not Path.cwd().samefile(original_dir):
+                print(f"Restoring original working directory: {original_dir}")
+                os.chdir(original_dir)
 
     def three_d_positions(self, info):
         """Extracts and saves 3D positions from the list of correspondences"""
