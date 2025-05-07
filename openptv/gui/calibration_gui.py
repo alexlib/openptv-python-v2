@@ -17,7 +17,7 @@ from skimage.color import rgb2gray
 from traits.api import HasTraits, Str, Int, Bool, Instance, Button
 from traitsui.api import View, Item, HGroup, VGroup, ListEditor
 from enable.component_editor import ComponentEditor
-    
+
 from chaco.api import (
     Plot,
     ArrayPlotData,
@@ -31,7 +31,7 @@ from chaco.tools.image_inspector_tool import ImageInspectorTool
 from chaco.tools.better_zoom import BetterZoom as SimpleZoom
 
 # from chaco.tools.simple_zoom import SimpleZoom
-from openptv.gui.parameters import CalOriParams, MultiPlaneParams, OrientParams, copy_params_dir
+from openptv.parameters import CalOriParams, OrientParams, copy_params_dir
 from openptv.gui.text_box_overlay import TextBoxOverlay
 from openptv.gui.code_editor import oriEditor, addparEditor
 from chaco.api import QuiverPlot
@@ -136,7 +136,7 @@ class PlotWindow(HasTraits):
         print(self._x, self._y)
 
         self.drawcross("coord_x", "coord_y", self._x, self._y, "red", 5)
-        
+
         if self._plot.overlays is not None:
             self._plot.overlays.clear() # type: ignore
         self.plot_num_overlay(self._x, self._y, self.man_ori)
@@ -242,7 +242,7 @@ class PlotWindow(HasTraits):
             #     ep_index=np.array(x2) * scale,
             #     ep_value=np.array(y2) * scale,
             # )
-            vectors = np.array(((np.array(x2)-np.array(x1))/scale, 
+            vectors = np.array(((np.array(x2)-np.array(x1))/scale,
                                 (np.array(y2)-np.array(y1))/scale)).T
             self._plot_data.set_data("index", x1)
             self._plot_data.set_data("value", y1)
@@ -254,7 +254,7 @@ class PlotWindow(HasTraits):
                 line_color="red"
                 )
             # self._plot.overlays.append(quiverplot)
-        
+
     def remove_short_lines(self, x1, y1, x2, y2, min_length=2):
         """removes short lines from the array of lines
         parameters:
@@ -309,7 +309,7 @@ class PlotWindow(HasTraits):
             self._plot_data.set_data("imagedata", image.astype(float))
         else:
             self._plot_data.set_data("imagedata", image.astype(np.uint8))
-            
+
         # Alex added to plot the image here from update image
         self._img_plt = self._plot.img_plot("imagedata", colormap=gray)[0]
 
@@ -366,16 +366,16 @@ class CalibrationGUI(HasTraits):
         self.active_path = active_path
         self.working_folder = self.active_path.parent
         self.par_path = self.working_folder / "parameters"
-        
+
         self.man_ori_dat_path = self.working_folder / "man_ori.dat"
 
         print(" Copying parameters inside Calibration GUI: \n")
         copy_params_dir(self.active_path, self.par_path)
 
-        
+
         os.chdir(self.working_folder)
         print(f"Inside a folder: {Path.cwd()}")
-        
+
         # read parameters
         with open(self.par_path / "ptv.par", "r") as f:
             self.n_cams = int(f.readline())
@@ -498,7 +498,7 @@ class CalibrationGUI(HasTraits):
                         label="Orientation with particles",
                         show_label=False,
                         enabled_when="pass_init",
-                    ),                    
+                    ),
                     show_left=False,
                 ),
             ),
@@ -578,10 +578,11 @@ class CalibrationGUI(HasTraits):
 
         if self.epar.Combine_Flag is True:
             print("Combine Flag is On")
-            self.MultiParams = MultiPlaneParams()
-            self.MultiParams.read()
-            for i in range(self.MultiParams.n_planes):
-                print(self.MultiParams.plane_name[i])
+            # TODO: Replace with the new parameter class
+            # self.MultiParams = MultiPlaneParams()
+            # self.MultiParams.read()
+            # for i in range(self.MultiParams.n_planes):
+            #     print(self.MultiParams.plane_name[i])
 
             self.pass_raw_orient = True
             self.status_text = "Multiplane calibration."
@@ -672,7 +673,7 @@ class CalibrationGUI(HasTraits):
             self.reset_show_images()
             self.need_reset = 0
 
-        
+
         with open(self.man_ori_dat_path, "r") as f:
             for i in range(self.n_cams):
                 self.camera[i]._x = []
@@ -684,7 +685,7 @@ class CalibrationGUI(HasTraits):
 
         self.status_text = "man_ori.dat loaded."
         shutil.copyfile(
-            self.man_ori_dat_path, 
+            self.man_ori_dat_path,
             self.par_path / "man_ori.dat",
             )
 
@@ -738,7 +739,7 @@ class CalibrationGUI(HasTraits):
         # y.append(y1)
         self.drawcross("init_x", "init_y", x, y, color, 3, i_cam=i_cam)
         self.camera[i_cam].plot_num_overlay(x, y, pnr)
-    
+
         self.status_text = "Initial guess finished."
 
     def _button_sort_grid_fired(self):
@@ -961,7 +962,7 @@ class CalibrationGUI(HasTraits):
                 # raise
                 # Now project and estimate full residuals
                 self._project_cal_points(i_cam)
-                
+
                 residuals = ptv.full_scipy_calibration(
                                 self.cals[i_cam],
                                 self.cal_points["pos"],
@@ -971,7 +972,7 @@ class CalibrationGUI(HasTraits):
 
                 targ_ix = [t.pnr() for t in targs if t.pnr() != -999]
                 # targ_ix = np.arange(len(all_detected))
-            
+
             # save the results from self.cals[i_cam]
             self._write_ori(i_cam, addpar_flag=True)
 
@@ -1025,7 +1026,7 @@ class CalibrationGUI(HasTraits):
     #     """
     #     residuals = self._residuals_radial(x, cal, XYZ, xy, cpar)
     #     return np.sum(residuals**2)
-    
+
     def _residuals_k(self, x, cal, XYZ, xy, cpar):
         """Residuals due to radial distortion
 
@@ -1037,8 +1038,8 @@ class CalibrationGUI(HasTraits):
             cpar (CPar): Camera parameters.
 
 
-args=(self.cals[i_cam], 
-                                        self.cal_points["pos"], 
+args=(self.cals[i_cam],
+                                        self.cal_points["pos"],
                                         targs,
                                         self.cpar
                                         )
@@ -1068,7 +1069,7 @@ args=(self.cals[i_cam],
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])
         residuals = np.nan_to_num(xyt - targets)
         return np.sum(residuals**2)
-    
+
     def _residuals_s(self, x, cal, XYZ, xy, cpar):
         """Residuals due to decentering """
         cal.set_affine_trans(x)
@@ -1078,7 +1079,7 @@ args=(self.cals[i_cam],
         )
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])
         residuals = np.nan_to_num(xyt - targets)
-        return np.sum(residuals**2)    
+        return np.sum(residuals**2)
 
     def _residuals_combined(self, x, cal, XYZ, xy, cpar):
         """Combined residuals  """
@@ -1093,7 +1094,7 @@ args=(self.cals[i_cam],
         )
         xyt = np.array([t.pos() if t.pnr() != -999 else [np.nan, np.nan] for t in xy])
         residuals = np.nan_to_num(xyt - targets)
-        return residuals           
+        return residuals
 
     def _write_ori(self, i_cam, addpar_flag=False):
         """Writes ORI and ADDPAR files for a single calibration result
@@ -1183,15 +1184,15 @@ args=(self.cals[i_cam],
             # Remove points where either x or y is zero
             x, y = zip(*[(xi, yi) for xi, yi in zip(x, y) if xi != 0 and yi != 0])
 
-            
+
             # clear previous crosses
             self.camera[i_cam]._plot.overlays.clear()
-            
+
             # create overlay images for each camera
             if os.path.exists(base_names[i_cam] % seq_first):
 
                 # read images and create overlay
-                for i_seq in range(seq_first, seq_last + 1):  # loop over sequences                    
+                for i_seq in range(seq_first, seq_last + 1):  # loop over sequences
                         temp_img = []
                         for seq in range(seq_first, seq_last):
                             _ = imread(base_names[i_cam] % seq)
@@ -1200,14 +1201,14 @@ args=(self.cals[i_cam],
                         temp_img = np.array(temp_img)
                         temp_img = np.max(temp_img, axis=0)
 
-                
+
                 self.camera[i_cam].update_image(temp_img)
-                
-                
+
+
             self.drawcross(
                 "orient_x", "orient_y", x, y, "orange", 5, i_cam=i_cam
             )
-            
+
             self.camera[i_cam].drawquiver(
                 x,
                 y,
@@ -1215,7 +1216,7 @@ args=(self.cals[i_cam],
                 y + 5*residuals[: len(x), 1],
                 "red",
             )
-        
+
 
         self.status_text = "Orientation with particles finished."
 
@@ -1245,11 +1246,11 @@ args=(self.cals[i_cam],
             cam._x = []
             cam._y = []
             cam._img_plot.tools = []
-            
-            
+
+
             cam.attach_tools()
             cam._plot.request_redraw()
-           
+
 
     def _button_edit_ori_files_fired(self):
         editor = oriEditor(path=self.par_path)

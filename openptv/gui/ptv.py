@@ -49,8 +49,7 @@ from openptv import (
 )
 
 # PyPTV imports
-from openptv.gui.parameters import PftVersionParams
-from openptv.gui import parameters as par
+from openptv.parameters import PftVersionParams
 
 # Print which implementation we're using
 print(f"Using Cython implementation: {using_cython()}")
@@ -170,7 +169,7 @@ def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeP
 
         # Examine parameters (multiplane vs single plane calibration)
         # Use the high-level API's ExamineParams
-        epar = ExamineParams.from_file(examine_par_path)
+        epar = ExamineParams.read(examine_par_path)
 
         # Read calibration files
         cals = _read_calibrations(cpar, n_cams)

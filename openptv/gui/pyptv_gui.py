@@ -49,8 +49,25 @@ from skimage.util import img_as_ubyte
 from skimage.color import rgb2gray
 from skimage.io import imread
 
-# Update imports to use the high-level API
-from openptv.gui import parameters as par
+# Update imports to use the new parameter module
+from openptv.parameters import (
+    PtvParams,
+    TrackingParams,
+    SequenceParams,
+    CalOriParams,
+    CriteriaParams,
+    TargRecParams,
+    ManOriParams,
+    DetectPlateParams,
+    OrientParams,
+    PftVersionParams,
+    ExamineParams,
+    DumbbellParams,
+    ShakingParams,
+    copy_params_dir,
+    par_dir_prefix,
+)
+
 from openptv.gui import ptv
 from openptv.gui.calibration_gui import CalibrationGUI
 from openptv.gui.directory_editor import DirectoryEditorDialog
@@ -59,21 +76,6 @@ from openptv.gui.quiverplot import QuiverPlot
 from openptv.gui.detection_gui import DetectionGUI
 from openptv.gui.mask_gui import MaskGUI
 from openptv.gui import __version__
-
-# Import GUI parameter classes with explicit names
-from openptv.gui.parameters import (
-    PtvParams as GuiPtvParams,
-    TrackingParams as GuiTrackingParams,
-    # ... other GUI parameter classes
-)
-
-# Import core parameter classes from main package
-from openptv import (
-    MultimediaParams,
-    TrackingParams,
-    SequenceParams,
-    # ... other core parameter classes
-)
 
 # Print which implementation we're using
 print("Using Cython implementation: {}".format(using_cython()))
@@ -378,7 +380,7 @@ class TreeMenuHandler(Handler):
         if paramset.m_params is None:
             # TODO: is it possible that control reaches here? If not, probably
             # the if should be removed.
-            paramset.m_params = par.PtvParams()
+            paramset.m_params = PtvParams()
         else:
             paramset.m_params._reload()
         paramset.m_params.edit_traits(kind="modal")
@@ -390,7 +392,7 @@ class TreeMenuHandler(Handler):
         if paramset.c_params is None:
             # TODO: is it possible that control reaches here? If not, probably
             # the if should be removed.
-            paramset.c_params = par.CalOriParams()  # this is a very questionable line
+            paramset.c_params = CalOriParams()  # this is a very questionable line
         else:
             paramset.c_params._reload()
         paramset.c_params.edit_traits(kind="modal")
@@ -402,7 +404,7 @@ class TreeMenuHandler(Handler):
         if paramset.t_params is None:
             # TODO: is it possible that control reaches here? If not, probably
             # the if should be removed.
-            paramset.t_params = par.TrackingParams()
+            paramset.t_params = TrackingParams()
         paramset.t_params.edit_traits(kind="modal")
 
     def set_active(self, editor, object):
@@ -430,7 +432,7 @@ class TreeMenuHandler(Handler):
         flag = False
         while not flag:
             new_name = f"{paramset.name}_{i}"
-            new_dir_path = Path(f"{par.par_dir_prefix}{new_name}")
+            new_dir_path = Path(f"{par_dir_prefix}{new_name}")
             if not new_dir_path.is_dir():
                 flag = True
             else:
@@ -439,7 +441,7 @@ class TreeMenuHandler(Handler):
         print(f"New parameter set in: {new_name}, {new_dir_path} \n")
 
         # new_dir_path.mkdir() # copy should be in the copy_params_dir
-        par.copy_params_dir(paramset.par_path, new_dir_path)
+        copy_params_dir(paramset.par_path, new_dir_path)
         experiment.addParamset(new_name, new_dir_path)
 
     def rename_set_params(self, editor, object):
@@ -773,7 +775,7 @@ class TreeMenuHandler(Handler):
         call tracking without display"""
         # Save current directory and ensure we're in experiment directory
         original_dir = Path.cwd().resolve()
-        
+
         # Make sure we're in the experiment directory for relative paths
         if hasattr(info.object, 'exp_path') and info.object.exp_path is not None:
             exp_path = info.object.exp_path
@@ -848,7 +850,7 @@ class TreeMenuHandler(Handler):
 
         # Save current directory and ensure we're in experiment directory
         original_dir = Path.cwd().resolve()
-        
+
         # Make sure we're in the experiment directory for relative paths
         if hasattr(info.object, 'exp_path') and info.object.exp_path is not None:
             exp_path = info.object.exp_path

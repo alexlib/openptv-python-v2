@@ -17,7 +17,7 @@ from skimage.color import rgb2gray
 from traits.api import HasTraits, Str, Int, Bool, Instance, Button
 from traitsui.api import View, Item, HGroup, VGroup, ListEditor
 from enable.component_editor import ComponentEditor
-    
+
 from chaco.api import (
     Plot,
     ArrayPlotData,
@@ -32,7 +32,7 @@ from chaco.tools.image_inspector_tool import ImageInspectorTool
 from chaco.tools.better_zoom import BetterZoom as SimpleZoom
 
 # from chaco.tools.simple_zoom import SimpleZoom
-from openptv.gui.parameters import CalOriParams, copy_params_dir
+from openptv.parameters import CalOriParams, copy_params_dir
 from openptv.gui.text_box_overlay import TextBoxOverlay
 from openptv.gui.code_editor import oriEditor, addparEditor
 from openptv.gui.quiverplot import QuiverPlot
@@ -123,7 +123,7 @@ class PlotWindow(HasTraits):
         self.face_alpha = 0.5
         self.edge_alpha = 0.5
         self.edge_style = "solid"
-           
+
 
     def left_clicked_event(self):
         """ left click event """
@@ -133,11 +133,11 @@ class PlotWindow(HasTraits):
         print(self._x, self._y)
 
         self.drawcross("coord_x", "coord_y", self._x, self._y, "red", 5)
-        
+
         if self._plot.overlays is not None:
             self._plot.overlays.clear() # type: ignore
 
-        self.plot_num_overlay(self._x, self._y, self.man_ori)          
+        self.plot_num_overlay(self._x, self._y, self.man_ori)
 
 
     def right_clicked_event(self):
@@ -241,7 +241,7 @@ class PlotWindow(HasTraits):
             #     ep_index=np.array(x2) * scale,
             #     ep_value=np.array(y2) * scale,
             # )
-            vectors = np.array(((np.array(x2)-np.array(x1))/scale, 
+            vectors = np.array(((np.array(x2)-np.array(x1))/scale,
                                 (np.array(y2)-np.array(y1))/scale)).T
             self.plot_data.set_data("index", x1)
             self.plot_data.set_data("value", y1)
@@ -253,7 +253,7 @@ class PlotWindow(HasTraits):
                 line_color="red"
                 )
             # self._plot.overlays.append(quiverplot)
-        
+
     def remove_short_lines(self, x1, y1, x2, y2, min_length=2):
         """removes short lines from the array of lines
         parameters:
@@ -308,7 +308,7 @@ class PlotWindow(HasTraits):
             self.plot_data.set_data("imagedata", image.astype(float))
         else:
             self.plot_data.set_data("imagedata", image.astype(np.uint8))
-            
+
         # Alex added to plot the image here from update image
         self._img_plt = self._plot.img_plot("imagedata", colormap=gray)[0]
 
@@ -349,16 +349,16 @@ class MaskGUI(HasTraits):
         self.active_path = active_path
         self.working_folder = self.active_path.parent
         self.par_path = self.working_folder / "parameters"
-        
+
         self.man_ori_dat_path = self.working_folder / "man_ori.dat"
 
         print(" Copying parameters inside Mask GUI: \n")
         copy_params_dir(self.active_path, self.par_path)
 
-        
+
         os.chdir(self.working_folder)
         print(f"Inside a folder: {Path.cwd()}")
-        
+
         # read parameters
         with open(self.par_path / "ptv.par", "r") as f:
             self.n_cams = int(f.readline())
@@ -456,9 +456,9 @@ class MaskGUI(HasTraits):
 
         self.mask_files = [f'mask_{cam}.txt' for cam in range(self.n_cams)]
         print(self.mask_files)
-        
+
         print('Start mask drawing click in some order in each camera')
-        
+
         points_set = True
         for i in range(self.n_cams):
             if len(self.camera[i]._x) < 4:
@@ -475,7 +475,7 @@ class MaskGUI(HasTraits):
                     edge_color=(0, 0, 0),
                     edge_style="solid",
                     alpha=0.5,
-                )                  
+                )
 
         if points_set:
             for cam in range(self.n_cams):
@@ -484,7 +484,7 @@ class MaskGUI(HasTraits):
                             f.write(
                                 "%f %f\n" % (x, y)
                             )
-        
+
                 self.status_text = f"{self.mask_files[cam]} saved."
 
         else:
@@ -525,8 +525,8 @@ class MaskGUI(HasTraits):
             cam._x = []
             cam._y = []
             cam._img_plot.tools = []
-            
-            
+
+
             cam.attach_tools()
             cam._plot.request_redraw()
 

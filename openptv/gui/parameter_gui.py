@@ -18,7 +18,24 @@ from traitsui.api import (
 
 import numpy as np
 
-from openptv.gui.parameters import CalOriParams, CriteriaParams, DetectPlateParams, DumbbellParams, ExamineParams, ManOriParams, OrientParams, PftVersionParams, PtvParams, SequenceParams, ShakingParams, TargRecParams, TrackingParams, copy_params_dir, par_dir_prefix
+# Import from the new parameter module
+from openptv.parameters import (
+    CalOriParams,
+    CriteriaParams,
+    DetectPlateParams,
+    DumbbellParams,
+    ExamineParams,
+    ManOriParams,
+    OrientParams,
+    PftVersionParams,
+    PtvParams,
+    SequenceParams,
+    ShakingParams,
+    TargRecParams,
+    TrackingParams,
+    copy_params_dir,
+    par_dir_prefix,
+)
 
 
 DEFAULT_STRING = "---"
@@ -133,7 +150,7 @@ class ParamHandler(Handler):
                 mainParams.Tol_Band,
                 path=par_path,
             ).write()
-            
+
             # write masking parameters
             masking_dict = {
                 "mask_flag":mainParams.Subtr_Mask,
@@ -732,7 +749,7 @@ class Main_Params(HasTraits):
         self.Sum_gv = criteriaParams.csumg
         self.Min_Weight_corr = criteriaParams.corrmin
         self.Tol_Band = criteriaParams.eps0
-        
+
         # write masking parameters
         masking_filename = Path(self.par_path) / 'masking.json'
         if masking_filename.exists():
@@ -1353,14 +1370,14 @@ class Experiment(HasTraits):
     def populate_runs(self, exp_path: Path):
         # Read all parameters directories from an experiment directory
         self.paramsets = []
-        
+
         # list all directories
         dir_contents = [
             f
             for f in exp_path.iterdir()
             if (exp_path / f).is_dir()
         ]
-        
+
         # choose directories that has 'parameters' in their path
         dir_contents = [
             f for f in dir_contents if str(f.stem).startswith(par_dir_prefix)
