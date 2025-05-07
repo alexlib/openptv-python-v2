@@ -12,6 +12,7 @@ from libc.stdlib cimport malloc, free
 from libc.string cimport strncpy
 
 from openptv.binding.parameters cimport track_par, sequence_par, volume_par, control_par, target_par
+from openptv.binding.parameters cimport orient_par, mm_np, cal_par
 from openptv.binding.parameters cimport SEQ_FNAME_MAX_LEN
 
 from openptv.parameters.tracking import TrackingParams
@@ -19,23 +20,26 @@ from openptv.parameters.sequence import SequenceParams
 from openptv.parameters.volume import VolumeParams
 from openptv.parameters.control import ControlParams
 from openptv.parameters.target import TargetParams
+from openptv.parameters.orient import OrientParams
+from openptv.parameters.calibration import CalOriParams
+from openptv.parameters.utils import encode_if_needed, decode_if_needed
 
 
 cdef track_par* tracking_params_to_c(TrackingParams params):
     """
     Convert a Python TrackingParams object to a C track_par struct.
-    
+
     Args:
         params: A TrackingParams object.
-    
+
     Returns:
         A pointer to a newly allocated track_par struct.
     """
     cdef track_par* c_params = <track_par*>malloc(sizeof(track_par))
-    
+
     # Get parameter values as a dictionary
     param_dict = params.to_c_struct()
-    
+
     # Fill in the C struct
     c_params.dvxmin = param_dict['dvxmin']
     c_params.dvxmax = param_dict['dvxmax']
@@ -50,18 +54,18 @@ cdef track_par* tracking_params_to_c(TrackingParams params):
     c_params.dn = param_dict['dn']
     c_params.dnx = param_dict['dnx']
     c_params.dny = param_dict['dny']
-    
+
     return c_params
 
 
 def tracking_params_from_c(track_par* c_params, path=None):
     """
     Convert a C track_par struct to a Python TrackingParams object.
-    
+
     Args:
         c_params: A pointer to a track_par struct.
         path: Path to the parameter directory.
-    
+
     Returns:
         A TrackingParams object.
     """
@@ -77,9 +81,357 @@ def tracking_params_from_c(track_par* c_params, path=None):
         'dacc': c_params.dacc,
         'add': c_params.add,
     }
-    
+
     # Create a TrackingParams object from the dictionary
     return TrackingParams.from_c_struct(param_dict, path)
 
 
-# Add similar functions for other parameter types as needed
+cdef sequence_par* sequence_params_to_c(SequenceParams params):
+    """
+    Convert a Python SequenceParams object to a C sequence_par struct.
+
+    Args:
+        params: A SequenceParams object.
+
+    Returns:
+        A pointer to a newly allocated sequence_par struct.
+    """
+    cdef sequence_par* c_params = <sequence_par*>malloc(sizeof(sequence_par))
+
+    # Get parameter values as a dictionary
+    param_dict = params.to_c_struct()
+
+    # Fill in the C struct
+    c_params.num_cams = param_dict['num_cams']
+    c_params.first = param_dict['first']
+    c_params.last = param_dict['last']
+
+    # Copy base names
+    for i in range(param_dict['num_cams']):
+        if i < len(param_dict['img_base_name']):
+            base_name = encode_if_needed(param_dict['img_base_name'][i])
+            strncpy(c_params.img_base_name[i], base_name, SEQ_FNAME_MAX_LEN - 1)
+            c_params.img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
+
+    return c_params
+
+
+def sequence_params_from_c(sequence_par* c_params, path=None):
+    """
+    Convert a C sequence_par struct to a Python SequenceParams object.
+
+    Args:
+        c_params: A pointer to a sequence_par struct.
+        path: Path to the parameter directory.
+
+    Returns:
+        A SequenceParams object.
+    """
+    # Create a list of base names
+    base_names = []
+    for i in range(c_params.num_cams):
+        base_names.append(decode_if_needed(c_params.img_base_name[i]))
+
+    # Create a dictionary of parameter values
+    param_dict = {
+        'num_cams': c_params.num_cams,
+        'img_base_name': base_names,
+        'first': c_params.first,
+        'last': c_params.last,
+    }
+
+    # Create a SequenceParams object from the dictionary
+    return SequenceParams.from_c_struct(param_dict, path)
+
+
+cdef volume_par* volume_params_to_c(VolumeParams params):
+    """
+    Convert a Python VolumeParams object to a C volume_par struct.
+
+    Args:
+        params: A VolumeParams object.
+
+    Returns:
+        A pointer to a newly allocated volume_par struct.
+    """
+    cdef volume_par* c_params = <volume_par*>malloc(sizeof(volume_par))
+
+    # Get parameter values as a dictionary
+    param_dict = params.to_c_struct()
+
+    # Fill in the C struct
+    for i in range(2):
+        c_params.X_lay[i] = param_dict['X_lay'][i]
+        c_params.Zmin_lay[i] = param_dict['Zmin_lay'][i]
+        c_params.Zmax_lay[i] = param_dict['Zmax_lay'][i]
+
+    c_params.cnx = param_dict['cnx']
+    c_params.cny = param_dict['cny']
+    c_params.cn = param_dict['cn']
+    c_params.csumg = param_dict['csumg']
+    c_params.corrmin = param_dict['corrmin']
+    c_params.eps0 = param_dict['eps0']
+
+    return c_params
+
+
+def volume_params_from_c(volume_par* c_params, path=None):
+    """
+    Convert a C volume_par struct to a Python VolumeParams object.
+
+    Args:
+        c_params: A pointer to a volume_par struct.
+        path: Path to the parameter directory.
+
+    Returns:
+        A VolumeParams object.
+    """
+    # Create lists for X_lay, Zmin_lay, and Zmax_lay
+    X_lay = [c_params.X_lay[0], c_params.X_lay[1]]
+    Zmin_lay = [c_params.Zmin_lay[0], c_params.Zmin_lay[1]]
+    Zmax_lay = [c_params.Zmax_lay[0], c_params.Zmax_lay[1]]
+
+    # Create a dictionary of parameter values
+    param_dict = {
+        'X_lay': X_lay,
+        'Zmin_lay': Zmin_lay,
+        'Zmax_lay': Zmax_lay,
+        'cnx': c_params.cnx,
+        'cny': c_params.cny,
+        'cn': c_params.cn,
+        'csumg': c_params.csumg,
+        'corrmin': c_params.corrmin,
+        'eps0': c_params.eps0,
+    }
+
+    # Create a VolumeParams object from the dictionary
+    return VolumeParams.from_c_struct(param_dict, path)
+
+
+cdef control_par* control_params_to_c(ControlParams params):
+    """
+    Convert a Python ControlParams object to a C control_par struct.
+
+    Args:
+        params: A ControlParams object.
+
+    Returns:
+        A pointer to a newly allocated control_par struct.
+    """
+    cdef control_par* c_params = <control_par*>malloc(sizeof(control_par))
+
+    # Get parameter values as a dictionary
+    param_dict = params.to_c_struct()
+
+    # Fill in the C struct
+    c_params.num_cams = param_dict['num_cams']
+
+    # Copy base names
+    for i in range(param_dict['num_cams']):
+        if i < len(param_dict['img_base_name']):
+            img_name = encode_if_needed(param_dict['img_base_name'][i])
+            strncpy(c_params.img_base_name[i], img_name, SEQ_FNAME_MAX_LEN - 1)
+            c_params.img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
+
+        if i < len(param_dict['cal_img_base_name']):
+            cal_name = encode_if_needed(param_dict['cal_img_base_name'][i])
+            strncpy(c_params.cal_img_base_name[i], cal_name, SEQ_FNAME_MAX_LEN - 1)
+            c_params.cal_img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
+
+    c_params.hp_flag = param_dict['hp_flag']
+    c_params.allCam_flag = param_dict['allCam_flag']
+    c_params.tiff_flag = param_dict['tiff_flag']
+    c_params.imx = param_dict['imx']
+    c_params.imy = param_dict['imy']
+    c_params.pix_x = param_dict['pix_x']
+    c_params.pix_y = param_dict['pix_y']
+    c_params.chfield = param_dict['chfield']
+
+    # Fill in multimedia parameters
+    c_params.mm.nlay = param_dict['mm']['nlay']
+    c_params.mm.n1 = param_dict['mm']['n1']
+    c_params.mm.n3 = param_dict['mm']['n3']
+
+    for i in range(3):
+        if i < len(param_dict['mm']['n2']):
+            c_params.mm.n2[i] = param_dict['mm']['n2'][i]
+        if i < len(param_dict['mm']['d']):
+            c_params.mm.d[i] = param_dict['mm']['d'][i]
+
+    return c_params
+
+
+def control_params_from_c(control_par* c_params, path=None):
+    """
+    Convert a C control_par struct to a Python ControlParams object.
+
+    Args:
+        c_params: A pointer to a control_par struct.
+        path: Path to the parameter directory.
+
+    Returns:
+        A ControlParams object.
+    """
+    # Create lists for img_base_name and cal_img_base_name
+    img_base_name = []
+    cal_img_base_name = []
+
+    for i in range(c_params.num_cams):
+        img_base_name.append(decode_if_needed(c_params.img_base_name[i]))
+        cal_img_base_name.append(decode_if_needed(c_params.cal_img_base_name[i]))
+
+    # Create multimedia parameters
+    mm_np = {
+        'nlay': c_params.mm.nlay,
+        'n1': c_params.mm.n1,
+        'n2': [c_params.mm.n2[0], c_params.mm.n2[1], c_params.mm.n2[2]],
+        'n3': c_params.mm.n3,
+        'd': [c_params.mm.d[0], c_params.mm.d[1], c_params.mm.d[2]],
+    }
+
+    # Create a dictionary of parameter values
+    param_dict = {
+        'num_cams': c_params.num_cams,
+        'img_base_name': img_base_name,
+        'cal_img_base_name': cal_img_base_name,
+        'hp_flag': c_params.hp_flag,
+        'allCam_flag': c_params.allCam_flag,
+        'tiff_flag': c_params.tiff_flag,
+        'imx': c_params.imx,
+        'imy': c_params.imy,
+        'pix_x': c_params.pix_x,
+        'pix_y': c_params.pix_y,
+        'chfield': c_params.chfield,
+        'mm': mm_np,
+    }
+
+    # Create a ControlParams object from the dictionary
+    return ControlParams.from_c_struct(param_dict, path)
+
+
+cdef target_par* target_params_to_c(TargetParams params):
+    """
+    Convert a Python TargetParams object to a C target_par struct.
+
+    Args:
+        params: A TargetParams object.
+
+    Returns:
+        A pointer to a newly allocated target_par struct.
+    """
+    cdef target_par* c_params = <target_par*>malloc(sizeof(target_par))
+
+    # Get parameter values as a dictionary
+    param_dict = params.to_c_struct()
+
+    # Fill in the C struct
+    for i in range(4):
+        if i < len(param_dict['gvthres']):
+            c_params.gvthres[i] = param_dict['gvthres'][i]
+
+    c_params.discont = param_dict['discont']
+    c_params.nnmin = param_dict['nnmin']
+    c_params.nnmax = param_dict['nnmax']
+    c_params.nxmin = param_dict['nxmin']
+    c_params.nxmax = param_dict['nxmax']
+    c_params.nymin = param_dict['nymin']
+    c_params.nymax = param_dict['nymax']
+    c_params.sumg_min = param_dict['sumg_min']
+    c_params.cr_sz = param_dict['cr_sz']
+
+    return c_params
+
+
+def target_params_from_c(target_par* c_params, path=None):
+    """
+    Convert a C target_par struct to a Python TargetParams object.
+
+    Args:
+        c_params: A pointer to a target_par struct.
+        path: Path to the parameter directory.
+
+    Returns:
+        A TargetParams object.
+    """
+    # Create a list for gvthres
+    gvthres = [c_params.gvthres[0], c_params.gvthres[1], c_params.gvthres[2], c_params.gvthres[3]]
+
+    # Create a dictionary of parameter values
+    param_dict = {
+        'gvthres': gvthres,
+        'discont': c_params.discont,
+        'nnmin': c_params.nnmin,
+        'nnmax': c_params.nnmax,
+        'nxmin': c_params.nxmin,
+        'nxmax': c_params.nxmax,
+        'nymin': c_params.nymin,
+        'nymax': c_params.nymax,
+        'sumg_min': c_params.sumg_min,
+        'cr_sz': c_params.cr_sz,
+    }
+
+    # Create a TargetParams object from the dictionary
+    return TargetParams.from_c_struct(param_dict, path)
+
+
+cdef orient_par* orient_params_to_c(OrientParams params):
+    """
+    Convert a Python OrientParams object to a C orient_par struct.
+
+    Args:
+        params: An OrientParams object.
+
+    Returns:
+        A pointer to a newly allocated orient_par struct.
+    """
+    cdef orient_par* c_params = <orient_par*>malloc(sizeof(orient_par))
+
+    # Get parameter values as a dictionary
+    param_dict = params.to_c_struct()
+
+    # Fill in the C struct
+    c_params.pnfo = param_dict['pnfo']
+    c_params.cc = param_dict['cc']
+    c_params.xh = param_dict['xh']
+    c_params.yh = param_dict['yh']
+    c_params.k1 = param_dict['k1']
+    c_params.k2 = param_dict['k2']
+    c_params.k3 = param_dict['k3']
+    c_params.p1 = param_dict['p1']
+    c_params.p2 = param_dict['p2']
+    c_params.scale = param_dict['scale']
+    c_params.shear = param_dict['shear']
+    c_params.interf = param_dict['interf']
+
+    return c_params
+
+
+def orient_params_from_c(orient_par* c_params, path=None):
+    """
+    Convert a C orient_par struct to a Python OrientParams object.
+
+    Args:
+        c_params: A pointer to an orient_par struct.
+        path: Path to the parameter directory.
+
+    Returns:
+        An OrientParams object.
+    """
+    # Create a dictionary of parameter values
+    param_dict = {
+        'pnfo': c_params.pnfo,
+        'cc': c_params.cc,
+        'xh': c_params.xh,
+        'yh': c_params.yh,
+        'k1': c_params.k1,
+        'k2': c_params.k2,
+        'k3': c_params.k3,
+        'p1': c_params.p1,
+        'p2': c_params.p2,
+        'scale': c_params.scale,
+        'shear': c_params.shear,
+        'interf': c_params.interf,
+    }
+
+    # Create an OrientParams object from the dictionary
+    return OrientParams.from_c_struct(param_dict, path)
