@@ -522,16 +522,47 @@ def py_sequence_loop(exp) -> None:
 
 def py_trackcorr_init(exp):
     """Reads all the necessary stuff into Tracker using the high-level API."""
+    import os
+    from pathlib import Path
 
     for cam_id in range(exp.cpar.get_num_cams()):
         img_base_name = exp.spar.get_img_base_name(cam_id)
-        # print(img_base_name)
-        short_name = img_base_name.split('%')[0]
-        if short_name[-1] == '_':
-            short_name = short_name[:-1]+'.'
-        # print(short_name)
-        print(f' Renaming {img_base_name} to {short_name} before C library tracker')
-        exp.spar.set_img_base_name(cam_id, short_name)
+        print(f"Original image base name: {img_base_name}")
+
+        # Handle the format string more robustly
+        if '%' in img_base_name:
+            # Split the path into directory and filename parts
+            path_obj = Path(img_base_name)
+            dir_part = path_obj.parent
+            file_part = path_obj.name
+
+            # Split the filename at the format specifier
+            base_part = file_part.split('%')[0]
+
+            # Handle the underscore case
+            if base_part and base_part[-1] == '_':
+                base_part = base_part[:-1] + '.'
+            elif not base_part.endswith('.'):
+                base_part = base_part + '.'
+
+            # Reconstruct the path
+            if str(dir_part) == '.':
+                # No directory part
+                short_name = base_part
+            else:
+                # Include the directory part
+                short_name = os.path.join(str(dir_part), base_part)
+
+            print(f"Renaming {img_base_name} to {short_name} before C library tracker")
+            exp.spar.set_img_base_name(cam_id, short_name)
+        else:
+            # If there's no format specifier, ensure it ends with a period
+            if not img_base_name.endswith('.'):
+                short_name = img_base_name + '.'
+                print(f"Renaming {img_base_name} to {short_name} before C library tracker")
+                exp.spar.set_img_base_name(cam_id, short_name)
+            else:
+                print(f"Keeping {img_base_name} as is (already properly formatted)")
 
     # Use the new naming utilities
     from openptv.utils import get_default_naming_str, ensure_naming_directories

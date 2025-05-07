@@ -757,7 +757,12 @@ class TreeMenuHandler(Handler):
     def track_back_action(self, info):
         """tracking back action is handled by ptv.py_trackback_c() binding"""
         print("Starting back tracking")
-        info.object.tracker.full_backward()
+        try:
+            info.object.tracker.full_backward()
+            print("Backward tracking completed successfully")
+        except Exception as e:
+            print(f"Error in backward tracking: {str(e)}")
+            raise
 
     def three_d_positions(self, info):
         """Extracts and saves 3D positions from the list of correspondences"""
@@ -1435,64 +1440,93 @@ class MainGUI(HasTraits):
         """load and set sequence image
 
         Args:
-            seq (_type_): sequance properties
-            update_all (bool, optional): _description_. Defaults to True.
-            display_only (bool, optional): _description_. Defaults to False.
+            seq (int): sequence number
+            update_all (bool, optional): Whether to update all cameras. Defaults to True.
+            display_only (bool, optional): Whether to only display without processing. Defaults to False.
         """
         n_cams = len(self.camera_list)
-        # if not hasattr(self, "base_name"):
+
+        # Get the base names for all cameras
         self.base_name = [
             getattr(self.exp1.active_params.m_params, f"Basename_{i+1}_Seq")
             for i in range(n_cams)
         ]
 
+        # Convert sequence number to string for consistent handling
+        seq_str = str(seq)
+        print(f"Loading sequence image {seq_str}")
 
         if update_all is False:
             j = self.current_camera
-            # img_name = self.base_name[j] + seq_ch
-            # img_name = self.base_name[j].replace("#", seq_ch)
-            img_name = self.base_name[j] % seq # works with jumps from 1 to 10
-            # print(f"Image name in load_set_seq is {img_name}")
-            self.load_disp_image(img_name, j, display_only)
+            try:
+                # Format the filename using % operator for consistent handling
+                img_name = self.base_name[j] % seq
+                print(f"Loading image for camera {j+1}: {img_name}")
+                self.load_disp_image(img_name, j, display_only)
+            except Exception as e:
+                print(f"Error formatting image name for camera {j+1}: {str(e)}")
         else:
             for j in range(n_cams):
-                # img_name = self.base_name[j] + seq_ch
-                # img_name = self.base_name[j].replace("#", seq_ch)
-                img_name = self.base_name[j] % seq # works with jumps from 1 to 10
-                # print(f"Image name in load_set_seq is {img_name}")
-                self.load_disp_image(img_name, j, display_only)
+                try:
+                    # Format the filename using % operator for consistent handling
+                    img_name = self.base_name[j] % seq
+                    print(f"Loading image for camera {j+1}: {img_name}")
+                    self.load_disp_image(img_name, j, display_only)
+                except Exception as e:
+                    print(f"Error formatting image name for camera {j+1}: {str(e)}")
 
 
     def overlay_set_images(self, seq_first: int, seq_last:int):
         """load and set sequence images and overlay them for tracking show
 
         Args:
-            seq (_type_): sequance properties
-            update_all (bool, optional): _description_. Defaults to True.
-            display_only (bool, optional): _description_. Defaults to False.
+            seq_first (int): First sequence number
+            seq_last (int): Last sequence number
         """
-
-
+        print(f"Overlaying images from sequence {seq_first} to {seq_last}")
         n_cams = len(self.camera_list)
-        if not hasattr(self, "base_name"):
-            self.base_name = [
-                getattr(self.exp1.active_params.m_params, f"Basename_{i+1}_Seq")
-                for i in range(len(self.camera_list))
-            ]
 
+        # Get the base names for all cameras
+        self.base_name = [
+            getattr(self.exp1.active_params.m_params, f"Basename_{i+1}_Seq")
+            for i in range(n_cams)
+        ]
 
         for cam_id in range(n_cams):
-            if os.path.exists(self.base_name[cam_id] % seq_first):
-                temp_img = []
-                for seq in range(seq_first, seq_last):
-                    _ = imread(self.base_name[cam_id] % seq)
-                    if _.ndim > 2:
-                        _ = rgb2gray(_)
-                    temp_img.append(img_as_ubyte(_))
+            try:
+                # Format the filename using % operator
+                first_img_path = self.base_name[cam_id] % seq_first
+                print(f"Checking for image: {first_img_path}")
 
-                temp_img = np.array(temp_img)
-                temp_img = np.max(temp_img, axis=0)
-            else:
+                if os.path.exists(first_img_path):
+                    print(f"Found image for camera {cam_id+1}, overlaying sequences")
+                    temp_img = []
+                    for seq in range(seq_first, seq_last):
+                        try:
+                            img_path = self.base_name[cam_id] % seq
+                            print(f"Reading image: {img_path}")
+                            img = imread(img_path)
+                            if img.ndim > 2:
+                                img = rgb2gray(img)
+                            temp_img.append(img_as_ubyte(img))
+                        except Exception as e:
+                            print(f"Error reading image {img_path}: {str(e)}")
+
+                    if temp_img:
+                        temp_img = np.array(temp_img)
+                        temp_img = np.max(temp_img, axis=0)
+                    else:
+                        print(f"No valid images found for camera {cam_id+1}, using blank image")
+                        h_img = self.exp1.active_params.m_params.imx
+                        v_img = self.exp1.active_params.m_params.imy
+                        temp_img = img_as_ubyte(np.zeros((v_img, h_img)))
+                else:
+                    print(f"Image not found for camera {cam_id+1}, using blank image")
+                    h_img = self.exp1.active_params.m_params.imx
+                    v_img = self.exp1.active_params.m_params.imy
+                    temp_img = img_as_ubyte(np.zeros((v_img, h_img)))
+            except Exception as e:
+                print(f"Error processing camera {cam_id+1}: {str(e)}")
                 h_img = self.exp1.active_params.m_params.imx
                 v_img = self.exp1.active_params.m_params.imy
                 temp_img = img_as_ubyte(np.zeros((v_img, h_img)))
@@ -1505,26 +1539,41 @@ class MainGUI(HasTraits):
         """load and display image
 
         Args:
-            img_name (_type_): filename of the image
-            j (_type_): integer counter
-            display_only (bool, optional): display only. Defaults to False.
+            img_name (str): filename of the image
+            j (int): camera index
+            display_only (bool, optional): If True, only display the image without processing. Defaults to False.
         """
-        # print(f"Setting image: {img_name}")
+        print(f"Loading image: {img_name} for camera {j+1}")
         try:
-            temp_img = imread(img_name)
+            # Convert to Path object for better cross-platform compatibility
+            img_path = Path(img_name)
+            if not img_path.exists():
+                raise FileNotFoundError(f"Image file not found: {img_path}")
+
+            # Read the image
+            temp_img = imread(str(img_path))
             if temp_img.ndim > 2:
                 temp_img = rgb2gray(temp_img)
 
             temp_img = img_as_ubyte(temp_img)
-        except IOError:
-            print("Error reading file, setting zero image")
+            print(f"Successfully loaded image with shape: {temp_img.shape}")
+
+            # Process the image if needed
+            if not display_only:
+                # This is commented out in the original code
+                # ptv.py_set_img(temp_img, j)
+                pass
+
+            # Update the display
+            if len(temp_img) > 0:
+                self.camera_list[j].update_image(temp_img)
+
+        except Exception as e:
+            print(f"Error reading file {img_name}: {str(e)}")
+            print("Setting zero image")
             h_img = self.exp1.active_params.m_params.imx
             v_img = self.exp1.active_params.m_params.imy
             temp_img = img_as_ubyte(np.zeros((v_img, h_img)))
-
-        # if not display_only:
-        #     ptv.py_set_img(temp_img, j)
-        if len(temp_img) > 0:
             self.camera_list[j].update_image(temp_img)
 
 
@@ -1546,52 +1595,76 @@ def main():
     Raises:
         OSError: if software or folder path are missing
     """
-    # Parse inputs:
-    software_path = Path.cwd().resolve()
+    # Get the original working directory (where the script was launched from)
+    original_dir = Path.cwd().resolve()
+    print(f"Original working directory: {original_dir}")
+
+    # Get the software path (where the pyptv_gui.py file is located)
+    software_path = Path(__file__).parent.resolve()
     print(f"Software path is {software_path}")
 
     # Path to the experiment
     if len(sys.argv) > 1:
+        # Get the experiment path from command line arguments
         exp_path = Path(sys.argv[1]).resolve()
-        print(f"Experimental path is {exp_path}")
+        print(f"Experimental path from arguments: {exp_path}")
     else:
-        # exp_path = software_path.parent / "test_cavity"
-        # exp_path = Path('/home/user/Downloads/one-dot-example/working_folder')
-        # exp_path = Path('/home/user/Downloads/test_crossing_particle')
-        exp_path = Path('/home/user/Documents/repos/test_cavity')
-        # exp_path = Path('/media/user/ExtremePro/omer/exp2')
-        # exp_path = Path('/home/user/Documents/repos/blob_pyptv_folder')
+        # Try to find test_cavity in common locations
+        test_cavity_candidates = [
+            original_dir / "tests" / "test_cavity",  # In the tests directory of original dir
+            original_dir / "test_cavity",  # Directly in original dir
+            software_path / "tests" / "test_cavity",  # In the tests directory of software path
+            software_path.parent / "tests" / "test_cavity",  # In tests directory of parent
+            Path("tests/test_cavity"),  # Relative to current directory
+            Path("test_cavity"),  # Directly in current directory
+        ]
+
+        print("Searching for test_cavity in the following locations:")
+        for candidate in test_cavity_candidates:
+            print(f"  - {candidate} {'(exists)' if candidate.exists() and candidate.is_dir() else '(not found)'}")
+
+        # Find the first existing test_cavity directory
+        exp_path = None
+        for candidate in test_cavity_candidates:
+            if candidate.exists() and candidate.is_dir():
+                exp_path = candidate
+                break
+
+        # If no test_cavity found, use the current directory
+        if exp_path is None:
+            exp_path = original_dir
+
         print(f"Without input, PyPTV fallbacks to a default {exp_path} \n")
 
+    # Verify the experiment path exists
     if not exp_path.is_dir() or not exp_path.exists():
         raise OSError(f"Wrong experimental directory {exp_path}")
 
-    # Change directory to the path
+    # Change directory to the experiment path
+    print(f"Changing directory to: {exp_path}")
     os.chdir(exp_path)
 
     try:
         main_gui = MainGUI(exp_path, software_path)
         main_gui.configure_traits()
-    except OSError:
-        print("something wrong with the software or folder")
+    except Exception as e:
+        print(f"Error initializing GUI: {str(e)}")
         printException()
-
-    os.chdir(software_path)  # get back to the original workdir
+    finally:
+        # Always change back to the original directory
+        print(f"Changing back to original directory: {original_dir}")
+        os.chdir(original_dir)
 
 def main_cli():
     """Command-line entry point for PyPTV GUI."""
-    import sys
-    from pathlib import Path
-    
-    # Get directory argument if provided
-    if len(sys.argv) > 1:
-        directory = Path(sys.argv[1]).resolve()
-        # Change to the specified directory before running the GUI
-        os.chdir(directory)
+    try:
+        # Call main with the original arguments
         main()
-    else:
-        main()
-    
+    except Exception as e:
+        print(f"Error running PyPTV: {str(e)}")
+        printException()
+        return 1
+
     return 0
 
 if __name__ == "__main__":

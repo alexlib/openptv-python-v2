@@ -39,12 +39,13 @@ def run_batch(new_seq_first: int, new_seq_last: int):
     # read the number of cameras
     with open("parameters/ptv.par", "r") as f:
         n_cams = int(f.readline())
-    
+
     cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c(n_cams=n_cams)
-    
-    spar.set_first(first)
-    spar.set_last(last)
-    
+
+    # Use the function parameters instead of undefined globals
+    spar.set_first(new_seq_first)
+    spar.set_last(new_seq_last)
+
     exp = {
     'cpar':cpar,
     'spar':spar,
@@ -55,10 +56,10 @@ def run_batch(new_seq_first: int, new_seq_last: int):
     'epar':epar,
     'n_cams':n_cams,
         }
-    
+
     # use dataclass to convert dictionary keys to attributes
     exp = AttrDict(exp)
-    
+
     py_sequence_loop(exp)
     tracker = py_trackcorr_init(exp)
     tracker.full_forward()
@@ -82,7 +83,7 @@ def main(exp_path, first, last, repetitions=1):
         exp_path = Path(exp_path).resolve()
         print(f"Inside main of pyptv_batch, exp_path is {exp_path} \n")
         os.chdir(exp_path)
-        
+
         print(f"double checking that its inside {Path.cwd()} \n")
     except Exception:
         raise ValueError(f"Wrong experimental directory {exp_path}")
@@ -90,7 +91,7 @@ def main(exp_path, first, last, repetitions=1):
     # RON - make a res dir if it not found
 
     res_path = exp_path / "res"
-    
+
     if not res_path.is_dir():
         print(" 'res' folder not found. creating one")
         res_path.mkdir(parents=True, exist_ok=True)
@@ -102,8 +103,10 @@ def main(exp_path, first, last, repetitions=1):
         try:
             print((seq_first, seq_last))
             run_batch(seq_first, seq_last)
-        except Exception:
-            print("something wrong with the batch or the folder")
+        except Exception as e:
+            # Print the actual exception for debugging
+            print(f"Error in batch processing: {str(e)}")
+            raise
 
     end = time.time()
     print("time lapsed %f sec" % (end - start))
@@ -134,7 +137,7 @@ if __name__ == "__main__":
         experiments/exp1 seq_first seq_last"
         )
         # raise ValueError("wrong number of inputs")
-        
+
         exp_path = Path('tests/test_cavity').resolve()
         first = 10000
         last = 10004
