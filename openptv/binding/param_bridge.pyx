@@ -12,7 +12,7 @@ from libc.stdlib cimport malloc, free
 from libc.string cimport strncpy
 
 from openptv.binding.parameters cimport track_par, sequence_par, volume_par, control_par, target_par
-from openptv.binding.parameters cimport orient_par, mm_np, cal_par
+from openptv.binding.parameters cimport orient_par, mm_np, calibration, Glass, Exterior, Interior, ap_52
 from openptv.binding.parameters cimport SEQ_FNAME_MAX_LEN
 
 from openptv.parameters.tracking import TrackingParams
@@ -394,18 +394,18 @@ cdef orient_par* orient_params_to_c(OrientParams params):
     param_dict = params.to_c_struct()
 
     # Fill in the C struct
-    c_params.pnfo = param_dict['pnfo']
-    c_params.cc = param_dict['cc']
-    c_params.xh = param_dict['xh']
-    c_params.yh = param_dict['yh']
-    c_params.k1 = param_dict['k1']
-    c_params.k2 = param_dict['k2']
-    c_params.k3 = param_dict['k3']
-    c_params.p1 = param_dict['p1']
-    c_params.p2 = param_dict['p2']
-    c_params.scale = param_dict['scale']
-    c_params.shear = param_dict['shear']
-    c_params.interf = param_dict['interf']
+    c_params.useflag = param_dict['useflag']
+    c_params.ccflag = param_dict['ccflag']
+    c_params.xhflag = param_dict['xhflag']
+    c_params.yhflag = param_dict['yhflag']
+    c_params.k1flag = param_dict['k1flag']
+    c_params.k2flag = param_dict['k2flag']
+    c_params.k3flag = param_dict['k3flag']
+    c_params.p1flag = param_dict['p1flag']
+    c_params.p2flag = param_dict['p2flag']
+    c_params.scxflag = param_dict['scxflag']
+    c_params.sheflag = param_dict['sheflag']
+    c_params.interfflag = param_dict['interfflag']
 
     return c_params
 
@@ -423,19 +423,141 @@ def orient_params_from_c(orient_par* c_params, path=None):
     """
     # Create a dictionary of parameter values
     param_dict = {
-        'pnfo': c_params.pnfo,
-        'cc': c_params.cc,
-        'xh': c_params.xh,
-        'yh': c_params.yh,
-        'k1': c_params.k1,
-        'k2': c_params.k2,
-        'k3': c_params.k3,
-        'p1': c_params.p1,
-        'p2': c_params.p2,
-        'scale': c_params.scale,
-        'shear': c_params.shear,
-        'interf': c_params.interf,
+        'useflag': c_params.useflag,
+        'ccflag': c_params.ccflag,
+        'xhflag': c_params.xhflag,
+        'yhflag': c_params.yhflag,
+        'k1flag': c_params.k1flag,
+        'k2flag': c_params.k2flag,
+        'k3flag': c_params.k3flag,
+        'p1flag': c_params.p1flag,
+        'p2flag': c_params.p2flag,
+        'scxflag': c_params.scxflag,
+        'sheflag': c_params.sheflag,
+        'interfflag': c_params.interfflag,
     }
 
     # Create an OrientParams object from the dictionary
     return OrientParams.from_c_struct(param_dict, path)
+
+
+cdef calibration* cal_ori_params_to_c(CalOriParams params):
+    """
+    Convert a Python CalOriParams object to a C calibration struct.
+
+    Args:
+        params: A CalOriParams object.
+
+    Returns:
+        A pointer to a newly allocated calibration struct.
+    """
+    cdef calibration* c_params = <calibration*>malloc(sizeof(calibration))
+
+    # Initialize mmlut data to NULL
+    c_params.mmlut.data = NULL
+
+    # Get parameter values as a dictionary
+    param_dict = params.to_c_struct()
+
+    # Fill in the exterior parameters
+    c_params.ext_par.x0 = param_dict['ext_par']['x0']
+    c_params.ext_par.y0 = param_dict['ext_par']['y0']
+    c_params.ext_par.z0 = param_dict['ext_par']['z0']
+    c_params.ext_par.omega = param_dict['ext_par']['omega']
+    c_params.ext_par.phi = param_dict['ext_par']['phi']
+    c_params.ext_par.kappa = param_dict['ext_par']['kappa']
+
+    # Fill in the rotation matrix
+    for i in range(3):
+        for j in range(3):
+            c_params.ext_par.dm[i][j] = param_dict['ext_par']['dm'][i][j]
+
+    # Fill in the interior parameters
+    c_params.int_par.xh = param_dict['int_par']['xh']
+    c_params.int_par.yh = param_dict['int_par']['yh']
+    c_params.int_par.cc = param_dict['int_par']['cc']
+
+    # Fill in the glass parameters
+    c_params.glass_par.vec_x = param_dict['glass_par']['vec_x']
+    c_params.glass_par.vec_y = param_dict['glass_par']['vec_y']
+    c_params.glass_par.vec_z = param_dict['glass_par']['vec_z']
+    c_params.glass_par.n1 = param_dict['glass_par']['n1']
+    c_params.glass_par.n2 = param_dict['glass_par']['n2']
+    c_params.glass_par.n3 = param_dict['glass_par']['n3']
+    c_params.glass_par.d = param_dict['glass_par']['d']
+
+    # Fill in the added parameters
+    c_params.added_par.k1 = param_dict['added_par']['k1']
+    c_params.added_par.k2 = param_dict['added_par']['k2']
+    c_params.added_par.k3 = param_dict['added_par']['k3']
+    c_params.added_par.p1 = param_dict['added_par']['p1']
+    c_params.added_par.p2 = param_dict['added_par']['p2']
+    c_params.added_par.scx = param_dict['added_par']['scx']
+    c_params.added_par.she = param_dict['added_par']['she']
+    c_params.added_par.field = param_dict['added_par']['field']
+
+    return c_params
+
+
+def cal_ori_params_from_c(calibration* c_params, path=None):
+    """
+    Convert a C calibration struct to a Python CalOriParams object.
+
+    Args:
+        c_params: A pointer to a calibration struct.
+        path: Path to the parameter directory.
+
+    Returns:
+        A CalOriParams object.
+    """
+    # Create a dictionary for exterior parameters
+    ext_par = {
+        'x0': c_params.ext_par.x0,
+        'y0': c_params.ext_par.y0,
+        'z0': c_params.ext_par.z0,
+        'omega': c_params.ext_par.omega,
+        'phi': c_params.ext_par.phi,
+        'kappa': c_params.ext_par.kappa,
+        'dm': [[c_params.ext_par.dm[i][j] for j in range(3)] for i in range(3)],
+    }
+
+    # Create a dictionary for interior parameters
+    int_par = {
+        'xh': c_params.int_par.xh,
+        'yh': c_params.int_par.yh,
+        'cc': c_params.int_par.cc,
+    }
+
+    # Create a dictionary for glass parameters
+    glass_par = {
+        'vec_x': c_params.glass_par.vec_x,
+        'vec_y': c_params.glass_par.vec_y,
+        'vec_z': c_params.glass_par.vec_z,
+        'n1': c_params.glass_par.n1,
+        'n2': c_params.glass_par.n2,
+        'n3': c_params.glass_par.n3,
+        'd': c_params.glass_par.d,
+    }
+
+    # Create a dictionary for added parameters
+    added_par = {
+        'k1': c_params.added_par.k1,
+        'k2': c_params.added_par.k2,
+        'k3': c_params.added_par.k3,
+        'p1': c_params.added_par.p1,
+        'p2': c_params.added_par.p2,
+        'scx': c_params.added_par.scx,
+        'she': c_params.added_par.she,
+        'field': c_params.added_par.field,
+    }
+
+    # Create a dictionary of parameter values
+    param_dict = {
+        'ext_par': ext_par,
+        'int_par': int_par,
+        'glass_par': glass_par,
+        'added_par': added_par,
+    }
+
+    # Create a CalOriParams object from the dictionary
+    return CalOriParams.from_c_struct(param_dict, path)

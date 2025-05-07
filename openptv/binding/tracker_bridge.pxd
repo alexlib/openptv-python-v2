@@ -8,3 +8,4 @@ This file contains Cython declarations for the tracker bridge functions.
 """
 
 from openptv.binding.parameters cimport track_par, volume_par
+from openptv.binding.param_bridge cimport tracking_params_to_c, volume_params_to_c

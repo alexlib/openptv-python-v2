@@ -17,6 +17,7 @@ from openptv.parameters.volume import VolumeParams
 from openptv.parameters.control import ControlParams
 from openptv.parameters.target import TargetParams
 from openptv.parameters.orient import OrientParams
+from openptv.parameters.calibration import CalOriParams
 
 # Import bridge functions
 try:
@@ -27,6 +28,7 @@ try:
         control_params_to_c, control_params_from_c,
         target_params_to_c, target_params_from_c,
         orient_params_to_c, orient_params_from_c,
+        cal_ori_params_to_c, cal_ori_params_from_c,
     )
     BRIDGE_AVAILABLE = True
 except ImportError:
@@ -51,13 +53,13 @@ class TestTrackingParamsBridge:
             dacc=0.5,
             flagNewParticles=True,
         )
-        
+
         # Convert to C struct
         c_params = tracking_params_to_c(params)
-        
+
         # Convert back to Python object
         params2 = tracking_params_from_c(c_params)
-        
+
         # Check that parameters match
         assert params2.dvxmin == params.dvxmin
         assert params2.dvxmax == params.dvxmax
@@ -83,13 +85,13 @@ class TestSequenceParamsBridge:
             first=1,
             last=100,
         )
-        
+
         # Convert to C struct
         c_params = sequence_params_to_c(params)
-        
+
         # Convert back to Python object
         params2 = sequence_params_from_c(c_params)
-        
+
         # Check that parameters match
         assert params2.n_img == params.n_img
         assert params2.base_name == params.base_name
@@ -115,13 +117,13 @@ class TestVolumeParamsBridge:
             corrmin=0.5,
             eps0=0.1,
         )
-        
+
         # Convert to C struct
         c_params = volume_params_to_c(params)
-        
+
         # Convert back to Python object
         params2 = volume_params_from_c(c_params)
-        
+
         # Check that parameters match
         assert params2.X_lay == params.X_lay
         assert params2.Zmin_lay == params.Zmin_lay
@@ -161,13 +163,13 @@ class TestControlParamsBridge:
                 'd': [10.0, 0.0, 0.0],
             },
         )
-        
+
         # Convert to C struct
         c_params = control_params_to_c(params)
-        
+
         # Convert back to Python object
         params2 = control_params_from_c(c_params)
-        
+
         # Check that parameters match
         assert params2.n_img == params.n_img
         assert params2.img_base_name == params.img_base_name
@@ -187,7 +189,157 @@ class TestControlParamsBridge:
         assert params2.mm_np['d'][0] == params.mm_np['d'][0]
 
 
-# Add similar test classes for other parameter types
+@pytest.mark.skipif(not BRIDGE_AVAILABLE, reason="Parameter bridge not available")
+class TestTargetParamsBridge:
+    """Tests for the target parameters bridge functions."""
+
+    def test_target_params_roundtrip(self):
+        """Test conversion of TargetParams to C struct and back."""
+        # Create a parameter object
+        params = TargetParams(
+            gvthres=[10, 10, 10, 10],
+            discont=1,
+            nnmin=10,
+            nnmax=100,
+            nxmin=10,
+            nxmax=100,
+            nymin=10,
+            nymax=100,
+            sumg_min=10,
+            cr_sz=10,
+        )
+
+        # Convert to C struct
+        c_params = target_params_to_c(params)
+
+        # Convert back to Python object
+        params2 = target_params_from_c(c_params)
+
+        # Check that parameters match
+        assert params2.gvthres == params.gvthres
+        assert params2.discont == params.discont
+        assert params2.nnmin == params.nnmin
+        assert params2.nnmax == params.nnmax
+        assert params2.nxmin == params.nxmin
+        assert params2.nxmax == params.nxmax
+        assert params2.nymin == params.nymin
+        assert params2.nymax == params.nymax
+        assert params2.sumg_min == params.sumg_min
+        assert params2.cr_sz == params.cr_sz
+
+
+@pytest.mark.skipif(not BRIDGE_AVAILABLE, reason="Parameter bridge not available")
+class TestOrientParamsBridge:
+    """Tests for the orient parameters bridge functions."""
+
+    def test_orient_params_roundtrip(self):
+        """Test conversion of OrientParams to C struct and back."""
+        # Create a parameter object
+        params = OrientParams(
+            useflag=1,
+            ccflag=1,
+            xhflag=1,
+            yhflag=1,
+            k1flag=1,
+            k2flag=1,
+            k3flag=1,
+            p1flag=1,
+            p2flag=1,
+            scxflag=1,
+            sheflag=1,
+            interfflag=1,
+        )
+
+        # Convert to C struct
+        c_params = orient_params_to_c(params)
+
+        # Convert back to Python object
+        params2 = orient_params_from_c(c_params)
+
+        # Check that parameters match
+        assert params2.useflag == params.useflag
+        assert params2.ccflag == params.ccflag
+        assert params2.xhflag == params.xhflag
+        assert params2.yhflag == params.yhflag
+        assert params2.k1flag == params.k1flag
+        assert params2.k2flag == params.k2flag
+        assert params2.k3flag == params.k3flag
+        assert params2.p1flag == params.p1flag
+        assert params2.p2flag == params.p2flag
+        assert params2.scxflag == params.scxflag
+        assert params2.sheflag == params.sheflag
+        assert params2.interfflag == params.interfflag
+
+
+@pytest.mark.skipif(not BRIDGE_AVAILABLE, reason="Parameter bridge not available")
+class TestCalOriParamsBridge:
+    """Tests for the calibration and orientation parameters bridge functions."""
+
+    def test_cal_ori_params_roundtrip(self):
+        """Test conversion of CalOriParams to C struct and back."""
+        # Create a parameter object
+        params = CalOriParams(
+            ext_par={
+                'x0': 0.0,
+                'y0': 0.0,
+                'z0': 0.0,
+                'omega': 0.0,
+                'phi': 0.0,
+                'kappa': 0.0,
+                'dm': [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+            },
+            int_par={
+                'xh': 0.0,
+                'yh': 0.0,
+                'cc': 100.0,
+            },
+            glass_par={
+                'vec_x': 0.0,
+                'vec_y': 0.0,
+                'vec_z': 1.0,
+                'n1': 1.0,
+                'n2': 1.33,
+                'n3': 1.0,
+                'd': 10.0,
+            },
+            added_par={
+                'k1': 0.0,
+                'k2': 0.0,
+                'k3': 0.0,
+                'p1': 0.0,
+                'p2': 0.0,
+                'scx': 1.0,
+                'she': 0.0,
+                'field': 0,
+            },
+        )
+
+        # Convert to C struct
+        c_params = cal_ori_params_to_c(params)
+
+        # Convert back to Python object
+        params2 = cal_ori_params_from_c(c_params)
+
+        # Check that parameters match
+        assert params2.ext_par['x0'] == params.ext_par['x0']
+        assert params2.ext_par['y0'] == params.ext_par['y0']
+        assert params2.ext_par['z0'] == params.ext_par['z0']
+        assert params2.ext_par['omega'] == params.ext_par['omega']
+        assert params2.ext_par['phi'] == params.ext_par['phi']
+        assert params2.ext_par['kappa'] == params.ext_par['kappa']
+        assert params2.int_par['xh'] == params.int_par['xh']
+        assert params2.int_par['yh'] == params.int_par['yh']
+        assert params2.int_par['cc'] == params.int_par['cc']
+        assert params2.glass_par['vec_x'] == params.glass_par['vec_x']
+        assert params2.glass_par['vec_y'] == params.glass_par['vec_y']
+        assert params2.glass_par['vec_z'] == params.glass_par['vec_z']
+        assert params2.added_par['k1'] == params.added_par['k1']
+        assert params2.added_par['k2'] == params.added_par['k2']
+        assert params2.added_par['k3'] == params.added_par['k3']
+        assert params2.added_par['p1'] == params.added_par['p1']
+        assert params2.added_par['p2'] == params.added_par['p2']
+        assert params2.added_par['scx'] == params.added_par['scx']
+        assert params2.added_par['she'] == params.added_par['she']
 
 
 if __name__ == "__main__":
