@@ -14,7 +14,8 @@ from traits.api import (
 from traitsui.api import Item, Group, View, Handler, ListEditor
 
 from pathlib import Path
-from openptv.gui import parameters as par
+import os
+from openptv import parameters as par
 
 
 def get_path(filename):
@@ -32,7 +33,7 @@ def get_code(path: Path):
     """ Read the code from the file """
 
     # print(f"Read from {path}: {path.exists()}")
-    with open(path, "r", encoding="utf-8") as f:    
+    with open(path, "r", encoding="utf-8") as f:
         retCode = f.read()
 
     # print(retCode)
@@ -61,9 +62,9 @@ class codeEditor(HasTraits):
             # print(f"Saving to {self.file_Path}")
             # print(f"Code: {self._Code}")
             f.write(self._Code)
-        
+
         print(f"Saved to {self.file_Path}")
-        
+
     def __init__(self, file_path: Path):
         self.file_Path = file_path
         self._Code = get_code(file_path)
