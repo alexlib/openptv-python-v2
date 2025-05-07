@@ -84,7 +84,7 @@ try:
     from openptv.binding.tracker import Tracker, default_naming
     from openptv.binding.epipolar import epipolar_curve
     from openptv.binding.vec_utils import py_vec_copy, py_vec_cmp
-    from openptv.gui.parameters import ExamineParams
+    from openptv.parameters import ExamineParams
 except ImportError as e:
     # If any of the direct imports fail, log a warning but don't crash
     warnings.warn(f"Some Cython bindings could not be imported: {e}")

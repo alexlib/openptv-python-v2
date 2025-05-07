@@ -684,7 +684,7 @@ def py_calibration(selection, exp):
     if selection == 10:
         """Run the calibration with particles """
         from openptv.binding.tracking_framebuf import Frame
-        from openptv.gui.parameters import OrientParams, ShakingParams
+        from openptv.parameters import OrientParams, ShakingParams
 
         num_cams = exp.cpar.get_num_cams()
 

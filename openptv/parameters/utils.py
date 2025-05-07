@@ -9,8 +9,34 @@ import os
 import shutil
 from pathlib import Path
 
-# Import from gui.parameters to maintain backward compatibility during transition
-from openptv.gui.parameters import par_dir_prefix, copy_params_dir
+# Define these functions here directly
+def par_dir_prefix():
+    """
+    Get the prefix for parameter directories.
+
+    Returns:
+        str: The prefix for parameter directories.
+    """
+    return "parameters"
+
+
+def copy_params_dir(src_path, dst_path):
+    """
+    Copy parameter files from one directory to another.
+
+    Args:
+        src_path: Source directory path.
+        dst_path: Destination directory path.
+    """
+    # Create destination directory if it doesn't exist
+    dst_path = Path(dst_path)
+    dst_path.mkdir(exist_ok=True)
+
+    # Copy parameter files
+    src_path = Path(src_path)
+    for file_path in src_path.glob("*"):
+        if file_path.is_file():
+            shutil.copy(file_path, dst_path / file_path.name)
 
 # Re-export these for backward compatibility
 __all__ = ['par_dir_prefix', 'copy_params_dir', 'bool_to_int', 'int_to_bool', 'read_line', 'write_line']

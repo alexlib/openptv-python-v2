@@ -8,7 +8,7 @@ from pathlib import Path
 import yaml
 import shutil
 
-from openptv.gui.parameters import Parameters, PtvParams, SequenceParams
+from openptv.parameters import Parameters, PtvParams, SequenceParams
 
 @pytest.fixture
 def temp_params_dir():

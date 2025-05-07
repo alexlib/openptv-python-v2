@@ -8,7 +8,8 @@ in openptv.gui.parameters and the new ones in openptv.parameters.
 from pathlib import Path
 
 # Import old parameter classes
-from openptv.gui.parameters import (
+# Import old parameter classes - these are now the same as the new ones
+from openptv.parameters import (
     Parameters as OldParameters,
     PtvParams as OldPtvParams,
     CalOriParams as OldCalOriParams,
@@ -23,7 +24,6 @@ from openptv.gui.parameters import (
     ExamineParams as OldExamineParams,
     DumbbellParams as OldDumbbellParams,
     ShakingParams as OldShakingParams,
-    readParamsDir as old_read_params_dir,
     par_dir_prefix as old_par_dir_prefix,
     copy_params_dir as old_copy_params_dir,
 )
@@ -52,10 +52,10 @@ from openptv.parameters import (
 def convert_old_to_new_ptv_params(old_params: OldPtvParams) -> NewPtvParams:
     """
     Convert old PtvParams to new PtvParams.
-    
+
     Args:
         old_params: Old PtvParams object.
-    
+
     Returns:
         New PtvParams object.
     """
@@ -82,10 +82,10 @@ def convert_old_to_new_ptv_params(old_params: OldPtvParams) -> NewPtvParams:
 def convert_old_to_new_cal_ori_params(old_params: OldCalOriParams) -> NewCalOriParams:
     """
     Convert old CalOriParams to new CalOriParams.
-    
+
     Args:
         old_params: Old CalOriParams object.
-    
+
     Returns:
         New CalOriParams object.
     """
@@ -104,10 +104,10 @@ def convert_old_to_new_cal_ori_params(old_params: OldCalOriParams) -> NewCalOriP
 def convert_old_to_new_sequence_params(old_params: OldSequenceParams) -> NewSequenceParams:
     """
     Convert old SequenceParams to new SequenceParams.
-    
+
     Args:
         old_params: Old SequenceParams object.
-    
+
     Returns:
         New SequenceParams object.
     """
@@ -123,10 +123,10 @@ def convert_old_to_new_sequence_params(old_params: OldSequenceParams) -> NewSequ
 def convert_old_to_new_criteria_params(old_params: OldCriteriaParams) -> NewCriteriaParams:
     """
     Convert old CriteriaParams to new CriteriaParams.
-    
+
     Args:
         old_params: Old CriteriaParams object.
-    
+
     Returns:
         New CriteriaParams object.
     """
@@ -147,10 +147,10 @@ def convert_old_to_new_criteria_params(old_params: OldCriteriaParams) -> NewCrit
 def convert_old_to_new_targ_rec_params(old_params: OldTargRecParams) -> NewTargRecParams:
     """
     Convert old TargRecParams to new TargRecParams.
-    
+
     Args:
         old_params: Old TargRecParams object.
-    
+
     Returns:
         New TargRecParams object.
     """
@@ -173,10 +173,10 @@ def convert_old_to_new_targ_rec_params(old_params: OldTargRecParams) -> NewTargR
 def convert_old_to_new_man_ori_params(old_params: OldManOriParams) -> NewManOriParams:
     """
     Convert old ManOriParams to new ManOriParams.
-    
+
     Args:
         old_params: Old ManOriParams object.
-    
+
     Returns:
         New ManOriParams object.
     """
@@ -190,10 +190,10 @@ def convert_old_to_new_man_ori_params(old_params: OldManOriParams) -> NewManOriP
 def convert_old_to_new_detect_plate_params(old_params: OldDetectPlateParams) -> NewDetectPlateParams:
     """
     Convert old DetectPlateParams to new DetectPlateParams.
-    
+
     Args:
         old_params: Old DetectPlateParams object.
-    
+
     Returns:
         New DetectPlateParams object.
     """
@@ -215,10 +215,10 @@ def convert_old_to_new_detect_plate_params(old_params: OldDetectPlateParams) -> 
 def convert_old_to_new_orient_params(old_params: OldOrientParams) -> NewOrientParams:
     """
     Convert old OrientParams to new OrientParams.
-    
+
     Args:
         old_params: Old OrientParams object.
-    
+
     Returns:
         New OrientParams object.
     """
@@ -242,10 +242,10 @@ def convert_old_to_new_orient_params(old_params: OldOrientParams) -> NewOrientPa
 def convert_old_to_new_tracking_params(old_params: OldTrackingParams) -> NewTrackingParams:
     """
     Convert old TrackingParams to new TrackingParams.
-    
+
     Args:
         old_params: Old TrackingParams object.
-    
+
     Returns:
         New TrackingParams object.
     """
@@ -266,13 +266,13 @@ def convert_old_to_new_tracking_params(old_params: OldTrackingParams) -> NewTrac
 def read_params_dir(par_path: Path) -> dict:
     """
     Read a parameters directory and return a dictionary with all parameter objects.
-    
+
     This function is a drop-in replacement for openptv.gui.parameters.readParamsDir
     that uses the new parameter classes.
-    
+
     Args:
         par_path: Path to the parameter directory.
-    
+
     Returns:
         Dictionary with all parameter objects.
     """
@@ -280,7 +280,7 @@ def read_params_dir(par_path: Path) -> dict:
     ptv_params = NewPtvParams(path=par_path)
     ptv_params.read()
     n_img = ptv_params.n_img
-    
+
     # Create parameter objects
     ret = {
         NewCalOriParams: NewCalOriParams(n_img, path=par_path),
@@ -296,12 +296,12 @@ def read_params_dir(par_path: Path) -> dict:
         NewDumbbellParams: NewDumbbellParams(path=par_path),
         NewShakingParams: NewShakingParams(path=par_path),
     }
-    
+
     # Read parameter files
     for par_type in list(ret.keys()):
         if par_type == NewPtvParams:
             continue
         par_obj = ret[par_type]
         par_obj.read()
-    
+
     return ret
