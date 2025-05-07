@@ -9,22 +9,22 @@ cdef extern from "../liboptv/include/parameters.h":
         double n2[3]
         double d[3]
         double n3
-    
+
     ctypedef struct track_par:
         double dacc, dangle, dvxmax, dvxmin
         double dvymax, dvymin, dvzmax, dvzmin
         int dsumg, dn, dnx, dny, add
-    
+
     ctypedef struct sequence_par:
         char ** img_base_name
         int first, last
-        
+
     ctypedef struct volume_par:
         double X_lay[2]
         double Zmin_lay[2]
         double Zmax_lay[2]
         double cn, cnx, cny, csumg, eps0, corrmin
-        
+
     ctypedef struct control_par:
         int num_cams
         char **img_base_name
@@ -38,7 +38,7 @@ cdef extern from "../liboptv/include/parameters.h":
         double pix_y
         int chfield
         mm_np *mm
-    
+
     ctypedef struct target_par:
         int discont
         int gvthres[4]    # grey value threshold per camera.
@@ -47,7 +47,57 @@ cdef extern from "../liboptv/include/parameters.h":
         int nymin, nymax  # same in y dimension.
         int sumg_min      # minimal sum of grey values in target.
         int cr_sz         # correspondence parameter.
-    
+
+cdef extern from "../liboptv/include/orientation.h":
+    ctypedef struct orient_par:
+        unsigned useflag
+        unsigned ccflag
+        unsigned xhflag
+        unsigned yhflag
+        unsigned k1flag
+        unsigned k2flag
+        unsigned k3flag
+        unsigned p1flag
+        unsigned p2flag
+        unsigned scxflag
+        unsigned sheflag
+        unsigned interfflag
+
+    orient_par* read_orient_par(char *filename)
+
+cdef extern from "../liboptv/include/calibration.h":
+    ctypedef struct Glass:
+        double vec_x, vec_y, vec_z
+        double n1, n2, n3
+        double d
+
+    ctypedef struct Exterior:
+        double x0, y0, z0
+        double omega, phi, kappa
+        double dm[3][3]
+
+    ctypedef struct Interior:
+        double xh, yh
+        double cc
+
+    ctypedef struct ap_52:
+        double k1, k2, k3
+        double p1, p2
+        double scx, she
+        int field
+
+    ctypedef struct mmlut:
+        vec3d origin
+        int nr, nz, rw
+        double *data
+
+    ctypedef struct calibration:
+        Exterior ext_par
+        Interior int_par
+        Glass glass_par
+        ap_52 added_par
+        mmlut mmlut
+
     target_par* read_target_par(char* filename)
     control_par* read_control_par(char* filename)
 
@@ -76,7 +126,7 @@ cdef extern from "../liboptv/include/parameters.h":
 cdef class MultimediaParams:
     cdef mm_np* _mm_np
     cdef void set_mm_np(MultimediaParams self, mm_np * other_mm_np_c_struct)
-    
+
 cdef class TrackingParams:
     cdef track_par* _track_par
     cdef bytes _filename_bytes
