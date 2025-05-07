@@ -76,7 +76,7 @@ from openptv import (
 )
 
 # Print which implementation we're using
-print(f"Using Cython implementation: {using_cython()}")
+print("Using Cython implementation: {}".format(using_cython()))
 
 class Clicker(ImageInspectorTool):
     """
@@ -758,6 +758,57 @@ class TreeMenuHandler(Handler):
         """tracking back action is handled by ptv.py_trackback_c() binding"""
         print("Starting back tracking")
         try:
+            # Make sure the tracker is initialized properly
+            if not hasattr(info.object, 'tracker') or info.object.tracker is None:
+                print("Initializing tracker for backward tracking")
+                info.object.tracker = ptv.py_trackcorr_init(info.object)
+
+            # Ensure file paths are properly set for backward tracking
+            # This is needed because the backward tracking uses the same file paths as forward tracking
+            for cam_id in range(info.object.cpar.get_num_cams()):
+                img_base_name = info.object.spar.get_img_base_name(cam_id)
+                print(f"Checking image base name for camera {cam_id}: {img_base_name}")
+
+                # Make sure the image base name is properly formatted for backward tracking
+                if '%' in img_base_name:
+                    # Split the path into directory and filename parts
+                    path_obj = Path(img_base_name)
+                    dir_part = path_obj.parent
+                    file_part = path_obj.name
+
+                    # Split the filename at the format specifier
+                    base_part = file_part.split('%')[0]
+
+                    # Handle the underscore case
+                    if base_part and base_part[-1] == '_':
+                        base_part = base_part[:-1] + '.'
+                    elif not base_part.endswith('.'):
+                        base_part = base_part + '.'
+
+                    # Reconstruct the path
+                    if str(dir_part) == '.':
+                        # No directory part
+                        short_name = base_part
+                    else:
+                        # Include the directory part
+                        short_name = os.path.join(str(dir_part), base_part)
+
+                    print(f"Renaming {img_base_name} to {short_name} before backward tracking")
+                    info.object.spar.set_img_base_name(cam_id, short_name)
+
+            # Ensure the res directory exists
+            res_path = Path("res")
+            if not res_path.is_dir():
+                print("'res' folder not found. creating one")
+                res_path.mkdir(parents=True, exist_ok=True)
+
+            # Make sure the path_config is properly set up
+            from openptv.utils.naming import ensure_naming_directories
+
+            # Ensure all directories exist
+            ensure_naming_directories()
+
+            # Run backward tracking
             info.object.tracker.full_backward()
             print("Backward tracking completed successfully")
         except Exception as e:
