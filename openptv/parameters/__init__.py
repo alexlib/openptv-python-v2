@@ -22,6 +22,7 @@ from openptv.parameters.dumbbell import DumbbellParams
 from openptv.parameters.shaking import ShakingParams
 from openptv.parameters.pft_version import PftVersionParams
 from openptv.parameters.man_ori import ManOriParams
+from openptv.parameters.multi_plane import MultiPlaneParams
 
 # Re-export utility functions
 from openptv.parameters.utils import copy_params_dir, par_dir_prefix
@@ -45,6 +46,7 @@ __all__ = [
     'ShakingParams',
     'PftVersionParams',
     'ManOriParams',
+    'MultiPlaneParams',
     'copy_params_dir',
     'par_dir_prefix',
 ]

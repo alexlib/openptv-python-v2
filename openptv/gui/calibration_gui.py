@@ -31,7 +31,7 @@ from chaco.tools.image_inspector_tool import ImageInspectorTool
 from chaco.tools.better_zoom import BetterZoom as SimpleZoom
 
 # from chaco.tools.simple_zoom import SimpleZoom
-from openptv.parameters import CalOriParams, OrientParams, copy_params_dir
+from openptv.parameters import CalOriParams, OrientParams, MultiPlaneParams, copy_params_dir
 from openptv.gui.text_box_overlay import TextBoxOverlay
 from openptv.gui.code_editor import oriEditor, addparEditor
 from chaco.api import QuiverPlot
@@ -578,11 +578,10 @@ class CalibrationGUI(HasTraits):
 
         if self.epar.Combine_Flag is True:
             print("Combine Flag is On")
-            # TODO: Replace with the new parameter class
-            # self.MultiParams = MultiPlaneParams()
-            # self.MultiParams.read()
-            # for i in range(self.MultiParams.n_planes):
-            #     print(self.MultiParams.plane_name[i])
+            self.MultiParams = MultiPlaneParams(path=self.par_path)
+            self.MultiParams.read()
+            for i in range(self.MultiParams.n_planes):
+                print(self.MultiParams.plane_name[i])
 
             self.pass_raw_orient = True
             self.status_text = "Multiplane calibration."
