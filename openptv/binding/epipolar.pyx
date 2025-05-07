@@ -1,3 +1,6 @@
+# cython: language_level=3
+# distutils: language = c
+
 """
 not so much a binding for the epipolar code, as a more general implementation
 of epipolar curve finding using a similar algorithm to that in epi.c.
@@ -28,25 +31,25 @@ def epipolar_curve(np.ndarray[ndim=1, dtype=np.float64_t] image_point,
     """
     Get the points lying on the epipolar line from one camera to the other, on
     the edges of the observed volume. Gives pixel coordinates.
-    
+
     Assumes the same volume applies to all cameras.
-    
+
     Arguments:
     np.ndarray[ndim=1, dtype=pos_t] image_point - the 2D point on the image
         plane of the camera seeing the point. Distorted pixel coordinates.
-    Calibration origin_cam - current position and other parameters of the 
+    Calibration origin_cam - current position and other parameters of the
         camera seeing the point.
-    Calibration project_cam - current position and other parameters of the 
+    Calibration project_cam - current position and other parameters of the
         cameraon which the line is projected.
     int num_points - the number of points to generate along the line. Minimum
         is 2 for both endpoints.
     ControlParams cparam - an object holding general control parameters.
     VolumeParams vparam - an object holding observed volume size parameters.
-    
+
     Returns:
     line_points - (num_points,2) array with projection camera image coordinates
-        of points lying on the ray stretching from the minimal Z coordinate of 
-        the observed volume to the maximal Z thereof, and connecting the camera 
+        of points lying on the ray stretching from the minimal Z coordinate of
+        the observed volume to the maximal Z thereof, and connecting the camera
         with the image point on the origin camera.
     """
     cdef:
@@ -57,26 +60,26 @@ def epipolar_curve(np.ndarray[ndim=1, dtype=np.float64_t] image_point,
         double *x
         double *y
         double img_pt[2]
-    
+
     line_points = np.empty((num_points, 2))
-    
+
     # Move from distorted pixel coordinates to straight metric coordinates.
-    pixel_to_metric(img_pt, img_pt + 1, image_point[0], image_point[1], 
+    pixel_to_metric(img_pt, img_pt + 1, image_point[0], image_point[1],
         cparam._control_par)
-    dist_to_flat(img_pt[0], img_pt[1], 
+    dist_to_flat(img_pt[0], img_pt[1],
         origin_cam._calibration, img_pt, img_pt + 1, 0.00001)
-    
+
     ray_tracing(img_pt[0], img_pt[1], origin_cam._calibration,
         cparam._control_par.mm[0], vertex, direct)
-    
-    for pt_ix, Z in enumerate(np.linspace(vparam._volume_par.Zmin_lay[0], 
+
+    for pt_ix, Z in enumerate(np.linspace(vparam._volume_par.Zmin_lay[0],
         vparam._volume_par.Zmax_lay[0], num_points)):
-        
+
         x = <double *>np.PyArray_GETPTR2(line_points, pt_ix, 0)
         y = <double *>np.PyArray_GETPTR2(line_points, pt_ix, 1)
-        
+
         move_along_ray(Z, vertex, direct, pos)
         img_coord(pos, project_cam._calibration, cparam._control_par.mm, x, y)
         metric_to_pixel(x, y, x[0], y[0], cparam._control_par)
-    
+
     return line_points

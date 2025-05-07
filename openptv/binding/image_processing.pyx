@@ -1,4 +1,4 @@
-from openptv.binding.parameters cimport ControlParams, control_par
+# cython: language_level=3\n# distutils: language = c\n\nfrom openptv.binding.parameters cimport ControlParams, control_par
 import numpy as np
 cimport numpy as np
 from typing import Union

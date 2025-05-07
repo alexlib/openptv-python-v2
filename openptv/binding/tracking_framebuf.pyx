@@ -1,4 +1,4 @@
-# Implementation of the trackin_frame_buf minimal interface.
+# cython: language_level=3\n# distutils: language = c\n\n# Implementation of the trackin_frame_buf minimal interface.
 
 from libc.stdlib cimport malloc, free
 cimport numpy as np
@@ -373,4 +373,3 @@ cdef class Frame:
         free_frame(self._frm)
         free(self._frm)
         self._frm = NULL
-

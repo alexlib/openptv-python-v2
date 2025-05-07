@@ -1,4 +1,4 @@
-import numpy as np
+# cython: language_level=3\n# distutils: language = c\n\nimport numpy as np
 cimport numpy as np
 np.import_array()
 
