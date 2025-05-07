@@ -70,19 +70,24 @@ if '_module' in locals():
     del _module
 
 # Direct imports of commonly used classes and functions
-from openptv.binding.calibration import Calibration
-from openptv.binding.parameters import (
-    MultimediaParams, TrackingParams, SequenceParams,
-    VolumeParams, ControlParams, TargetParams
-)
-from openptv.binding.tracking_framebuf import TargetArray, Target, Frame
-from openptv.binding.correspondences import correspondences, MatchedCoords
-from openptv.binding.image_processing import preprocess_image
-from openptv.binding.segmentation import target_recognition
-from openptv.binding.orientation import point_positions, external_calibration, full_calibration
-from openptv.binding.tracker import Tracker, default_naming
-from openptv.binding.epipolar import epipolar_curve
-from openptv.binding.vec_utils import py_vec_copy, py_vec_cmp
+try:
+    from openptv.binding.calibration import Calibration
+    from openptv.binding.parameters import (
+        MultimediaParams, TrackingParams, SequenceParams,
+        VolumeParams, ControlParams, TargetParams
+    )
+    from openptv.binding.tracking_framebuf import TargetArray, Target, Frame
+    from openptv.binding.correspondences import correspondences, MatchedCoords
+    from openptv.binding.image_processing import preprocess_image
+    from openptv.binding.segmentation import target_recognition
+    from openptv.binding.orientation import point_positions, external_calibration, full_calibration
+    from openptv.binding.tracker import Tracker, default_naming
+    from openptv.binding.epipolar import epipolar_curve
+    from openptv.binding.vec_utils import py_vec_copy, py_vec_cmp
+    from openptv.gui.parameters import ExamineParams
+except ImportError as e:
+    # If any of the direct imports fail, log a warning but don't crash
+    warnings.warn(f"Some Cython bindings could not be imported: {e}")
 
 # # Import constants from binding modules
 # if _using_cython:

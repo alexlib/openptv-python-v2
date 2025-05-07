@@ -67,10 +67,19 @@ def create_extension(name, sources):
     )
 
 
-# First, cythonize all .pyx files to generate .c files
+# Create extensions directly from .pyx files
 cython_files = glob.glob('./openptv/binding/*.pyx')
-cythonize(
-    cython_files,
+extensions = []
+
+for pyx_file in cython_files:
+    # Get the module name from the .pyx file path
+    module = os.path.splitext(pyx_file)[0].replace(os.path.sep, '.')
+    # Create an extension for this module
+    extensions.append(create_extension(module, [pyx_file]))
+
+# Use cythonize on the extensions
+ext_modules = cythonize(
+    extensions,
     compiler_directives={
         'language_level': '3',
         'boundscheck': False,
@@ -78,18 +87,6 @@ cythonize(
         'initializedcheck': False,
     }
 )
-
-# Now create extensions from the generated .c files
-extensions = []
-
-# Create extensions for openptv package only
-for pyx_file in cython_files:
-    # Get the module name from the .pyx file path
-    module = os.path.splitext(pyx_file)[0].replace(os.path.sep, '.')
-    # Get the corresponding .c file
-    c_file = os.path.splitext(pyx_file)[0] + '.c'
-    # Create an extension for this module
-    extensions.append(create_extension(module, [c_file]))
 
 # Package metadata
 setup(
@@ -100,7 +97,7 @@ setup(
     author_email="alex@libptv.org",
     url="https://github.com/alexlib/openptv-python-v2",
     packages=find_packages(),
-    ext_modules=extensions,
+    ext_modules=ext_modules,  # Use the cythonized extensions
     include_dirs=[numpy.get_include()],
     cmdclass={
         'build_ext': CustomBuildExt,

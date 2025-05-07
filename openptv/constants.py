@@ -1,14 +1,24 @@
-"""Constants used throughout the OpenPTV package."""
+"""
+Constants used throughout the OpenPTV package.
+"""
 
-# Tracking constants
-TR_BUFSPACE = 4  # 4 frames in the buffer to track
-TR_MAX_CAMS = 4  # 4 cameras in the imaging system
-MAX_TARGETS = 20480  # maximum number of targets
+# Maximum number of cameras
+TR_MAX_CAMS = 4
 
-# Correspondence constants
+# Maximum number of targets per frame
+MAX_TARGETS = 20000
+
+# Buffer space for tracking
+TR_BUFSPACE = 4
+
+# Constants for correspondence
 CORRES_NONE = -1
+
+# Constants for point usage
 PT_UNUSED = -999
 
-# Orientation constants
-NPAR = 19
-COORD_UNUSED = -1e10
+# Number of parameters for calibration
+NPAR = 11
+
+# Unused coordinate value
+COORD_UNUSED = -999.0
