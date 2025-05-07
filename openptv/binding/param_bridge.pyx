@@ -80,6 +80,10 @@ def tracking_params_from_c(track_par* c_params, path=None):
         'dangle': c_params.dangle,
         'dacc': c_params.dacc,
         'add': c_params.add,
+        'dsumg': c_params.dsumg,
+        'dn': c_params.dn,
+        'dnx': c_params.dnx,
+        'dny': c_params.dny,
     }
 
     # Create a TrackingParams object from the dictionary
