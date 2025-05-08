@@ -85,7 +85,8 @@ ext_modules = cythonize(
         'boundscheck': False,
         'wraparound': False,
         'initializedcheck': False,
-    }
+    },
+    include_path=['./openptv/binding/']
 )
 
 # Package metadata
