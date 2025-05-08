@@ -61,7 +61,7 @@ cdef track_par* tracking_params_to_c(object params):
     return c_params
 
 
-def tracking_params_from_c(track_par* c_params, path=None):
+def tracking_params_from_c(object c_params, path=None):
     """
     Convert a C track_par struct to a Python TrackingParams object.
 
@@ -121,7 +121,7 @@ cdef sequence_par* sequence_params_to_c(object params):
     return c_params
 
 
-def sequence_params_from_c(sequence_par* c_params, path=None):
+def sequence_params_from_c(object c_params, path=None):
     """
     Convert a C sequence_par struct to a Python SequenceParams object.
 
@@ -182,7 +182,7 @@ cdef volume_par* volume_params_to_c(object params):
     return c_params
 
 
-def volume_params_from_c(volume_par* c_params, path=None):
+def volume_params_from_c(object c_params, path=None):
     """
     Convert a C volume_par struct to a Python VolumeParams object.
 
@@ -267,7 +267,7 @@ cdef control_par* control_params_to_c(object params):
     return c_params
 
 
-def control_params_from_c(control_par* c_params, path=None):
+def control_params_from_c(object c_params, path=None):
     """
     Convert a C control_par struct to a Python ControlParams object.
 
@@ -350,7 +350,7 @@ cdef target_par* target_params_to_c(object params):
     return c_params
 
 
-def target_params_from_c(target_par* c_params, path=None):
+def target_params_from_c(object c_params, path=None):
     """
     Convert a C target_par struct to a Python TargetParams object.
 
@@ -414,7 +414,7 @@ cdef orient_par* orient_params_to_c(object params):
     return c_params
 
 
-def orient_params_from_c(orient_par* c_params, path=None):
+def orient_params_from_c(object c_params, path=None):
     """
     Convert a C orient_par struct to a Python OrientParams object.
 
@@ -503,7 +503,7 @@ cdef calibration* cal_ori_params_to_c(object params):
     return c_params
 
 
-def cal_ori_params_from_c(calibration* c_params, path=None):
+def cal_ori_params_from_c(object c_params, path=None):
     """
     Convert a C calibration struct to a Python CalOriParams object.
 
