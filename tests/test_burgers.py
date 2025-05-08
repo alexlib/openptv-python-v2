@@ -42,8 +42,14 @@ class TestTracker(unittest.TestCase):
         for cix, cam_spec in enumerate(yaml_conf['cameras']):
             cam_spec.setdefault('addpar_file', None)
             cal = Calibration()
-            cal.from_file(cam_spec['ori_file'],
-                          cam_spec['addpar_file'])
+
+            # Fix paths to be relative to the current directory
+            ori_file = os.path.join(current_dir, cam_spec['ori_file'].replace('tests/', ''))
+            addpar_file = None
+            if cam_spec['addpar_file']:
+                addpar_file = os.path.join(current_dir, cam_spec['addpar_file'].replace('tests/', ''))
+
+            cal.from_file(ori_file, addpar_file)
             self.cals.append(cal)
             img_base.append(seq_cfg['targets_template'].format(cam=cix + 1))
 
