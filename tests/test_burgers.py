@@ -17,16 +17,22 @@ from openptv.binding.calibration import Calibration
 from openptv.binding.parameters import ControlParams, VolumeParams, TrackingParams, \
     SequenceParams
 
+# Will be set in setUp
 framebuf_naming = {
-    'corres': b'tests/testing_fodder/burgers/res/rt_is',
-    'linkage': b'tests/testing_fodder/burgers/res/ptv_is',
-    'prio': b'tests/testing_fodder/burgers/res/whatever'
+    'corres': b'',
+    'linkage': b'',
+    'prio': b''
 }
 
 
 class TestTracker(unittest.TestCase):
     def setUp(self):
-        with open("tests/testing_fodder/burgers/conf.yaml") as f:
+        import os
+        # Get the current directory
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        config_path = os.path.join(current_dir, "testing_fodder/burgers/conf.yaml")
+
+        with open(config_path) as f:
             yaml_conf = yaml.load(f, Loader=yaml.FullLoader)
         seq_cfg = yaml_conf['sequence']
 
@@ -48,6 +54,14 @@ class TestTracker(unittest.TestCase):
             image_base=img_base,
             frame_range=(seq_cfg['first'], seq_cfg['last']))
 
+        # Update framebuf_naming with correct paths
+        global framebuf_naming
+        framebuf_naming = {
+            'corres': os.path.join(current_dir, "testing_fodder/burgers/res/rt_is").encode(),
+            'linkage': os.path.join(current_dir, "testing_fodder/burgers/res/ptv_is").encode(),
+            'prio': os.path.join(current_dir, "testing_fodder/burgers/res/whatever").encode()
+        }
+
         self.tracker = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, framebuf_naming)
 
     def test_forward(self):
@@ -60,20 +74,24 @@ class TestTracker(unittest.TestCase):
         # else:
         #     print("Successfully created the directory %s " % path)
 
-        if os.path.exists("tests/testing_fodder/burgers/res/"):
-            shutil.rmtree("tests/testing_fodder/burgers/res/")
-        if os.path.exists("tests/testing_fodder/burgers/img/"):
-            shutil.rmtree("tests/testing_fodder/burgers/img/")
-        shutil.copytree(
-           "tests/testing_fodder/burgers/res_orig/", "tests/testing_fodder/burgers/res/")
-        shutil.copytree(
-           "tests/testing_fodder/burgers/img_orig/", "tests/testing_fodder/burgers/img/")
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        res_path = os.path.join(current_dir, "testing_fodder/burgers/res/")
+        img_path = os.path.join(current_dir, "testing_fodder/burgers/img/")
+        res_orig_path = os.path.join(current_dir, "testing_fodder/burgers/res_orig/")
+        img_orig_path = os.path.join(current_dir, "testing_fodder/burgers/img_orig/")
+
+        if os.path.exists(res_path):
+            shutil.rmtree(res_path)
+        if os.path.exists(img_path):
+            shutil.rmtree(img_path)
+        shutil.copytree(res_orig_path, res_path)
+        shutil.copytree(img_orig_path, img_path)
 
         self.tracker.restart()
         last_step = 10001
         while self.tracker.step_forward():
             self.assertTrue(self.tracker.current_step() > last_step)
-            with open("tests/testing_fodder/burgers/res/rt_is.%d" % last_step) as f:
+            with open(os.path.join(res_path, f"rt_is.{last_step}")) as f:
                 lines = f.readlines()
                 # print(last_step,lines[0])
                 # print(lines)
@@ -87,28 +105,36 @@ class TestTracker(unittest.TestCase):
     def test_full_forward(self):
         """Automatic full forward tracking run."""
         # os.mkdir('testing_fodder/burgers/res')
-        if os.path.exists("tests/testing_fodder/burgers/res/"):
-            shutil.rmtree("tests/testing_fodder/burgers/res/")
-        if os.path.exists("tests/testing_fodder/burgers/img/"):
-            shutil.rmtree("tests/testing_fodder/burgers/img/")
-        shutil.copytree(
-           "tests/testing_fodder/burgers/res_orig/", "tests/testing_fodder/burgers/res/")
-        shutil.copytree(
-           "tests/testing_fodder/burgers/img_orig/", "tests/testing_fodder/burgers/img/")
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        res_path = os.path.join(current_dir, "testing_fodder/burgers/res/")
+        img_path = os.path.join(current_dir, "testing_fodder/burgers/img/")
+        res_orig_path = os.path.join(current_dir, "testing_fodder/burgers/res_orig/")
+        img_orig_path = os.path.join(current_dir, "testing_fodder/burgers/img_orig/")
+
+        if os.path.exists(res_path):
+            shutil.rmtree(res_path)
+        if os.path.exists(img_path):
+            shutil.rmtree(img_path)
+        shutil.copytree(res_orig_path, res_path)
+        shutil.copytree(img_orig_path, img_path)
         self.tracker.full_forward()
         # if it passes without error, we assume it's ok. The actual test is in
         # the C code.
 
     def test_full_backward(self):
         """Automatic full backward correction phase."""
-        if os.path.exists("tests/testing_fodder/burgers/res/"):
-            shutil.rmtree("tests/testing_fodder/burgers/res/")
-        if os.path.exists("tests/testing_fodder/burgers/img/"):
-            shutil.rmtree("tests/testing_fodder/burgers/img/")
-        shutil.copytree(
-            "tests/testing_fodder/burgers/res_orig/", "tests/testing_fodder/burgers/res/")
-        shutil.copytree(
-           "tests/testing_fodder/burgers/img_orig/", "tests/testing_fodder/burgers/img/")
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        res_path = os.path.join(current_dir, "testing_fodder/burgers/res/")
+        img_path = os.path.join(current_dir, "testing_fodder/burgers/img/")
+        res_orig_path = os.path.join(current_dir, "testing_fodder/burgers/res_orig/")
+        img_orig_path = os.path.join(current_dir, "testing_fodder/burgers/img_orig/")
+
+        if os.path.exists(res_path):
+            shutil.rmtree(res_path)
+        if os.path.exists(img_path):
+            shutil.rmtree(img_path)
+        shutil.copytree(res_orig_path, res_path)
+        shutil.copytree(img_orig_path, img_path)
         self.tracker.full_forward()
         self.tracker.full_backward()
         # if it passes without error, we assume it's ok. The actual test is in
@@ -116,10 +142,14 @@ class TestTracker(unittest.TestCase):
 
     def tearDown(self):
         # Clean up file system resources
-        if os.path.exists("tests/testing_fodder/burgers/res/"):
-            shutil.rmtree("tests/testing_fodder/burgers/res/")
-        if os.path.exists("tests/testing_fodder/burgers/img/"):
-            shutil.rmtree("tests/testing_fodder/burgers/img/")
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        res_path = os.path.join(current_dir, "testing_fodder/burgers/res/")
+        img_path = os.path.join(current_dir, "testing_fodder/burgers/img/")
+
+        if os.path.exists(res_path):
+            shutil.rmtree(res_path)
+        if os.path.exists(img_path):
+            shutil.rmtree(img_path)
 
         # Clean up object references
         self.cals = None
