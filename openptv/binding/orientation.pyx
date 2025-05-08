@@ -24,6 +24,38 @@ def full_calibration(Calibration cal,
     ControlParams cparam, list flags=[]):
     """
     Performs a full calibration, affecting all calibration structs.
+    
+    Arguments:
+    Calibration cal - current position and other parameters of the camera. Will
+        be overwritten with new calibration if iteration succeeded, otherwise
+        remains untouched.
+    np.ndarray[ndim=2, dtype=DTYPE_t] ref_pts - an (n,3) array, the 3D known
+        positions of the select 2D points found on the image.
+    TargetArray img_pts - detected points to match to known 3D positions.
+        Must be sorted by matching ref point (as done by function
+        ``match_detection_to_ref()``.
+    ControlParams cparam - an object holding general control parameters.
+    flags - a list whose members are the names of possible distortion
+        parameters. Only parameter names present in the list will be used.
+        Passing an empty list should be functionally equivalent to a raw
+        calibration, though the code paths taken in C are different.
+
+        The recognized flags are:
+            'cc', 'xh', 'yh' - sensor position.
+            'k1', 'k2', 'k3' - radial distortion.
+            'p1', 'p2' - decentering
+            'scale', 'shear' - affine transforms.
+
+        This is what the underlying library uses a struct for, but come on.
+
+    Returns:
+    ret - (r,2) array, the residuals in the x and y direction for r points used
+        in orientation.
+    used - r-length array, indices into target array of targets used.
+    err_est - error estimation per calibration DOF. We
+
+    Raises:
+    ValueError if iteration did not converge.
     """
     cdef:
         vec3d *ref_coord
