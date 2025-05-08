@@ -67,15 +67,23 @@ def create_extension(name, sources):
     )
 
 
-# Create extensions directly from .pyx files
-cython_files = glob.glob('./openptv/binding/*.pyx')
-extensions = []
-
-for pyx_file in cython_files:
-    # Get the module name from the .pyx file path
-    module = os.path.splitext(pyx_file)[0].replace(os.path.sep, '.')
-    # Create an extension for this module
-    extensions.append(create_extension(module, [pyx_file]))
+# Create extensions with explicit module names
+extensions = [
+    create_extension('openptv.binding.calibration', ['./openptv/binding/calibration.pyx']),
+    create_extension('openptv.binding.correspondences', ['./openptv/binding/correspondences.pyx']),
+    create_extension('openptv.binding.epipolar', ['./openptv/binding/epipolar.pyx']),
+    create_extension('openptv.binding.image_processing', ['./openptv/binding/image_processing.pyx']),
+    create_extension('openptv.binding.imgcoord', ['./openptv/binding/imgcoord.pyx']),
+    create_extension('openptv.binding.orientation', ['./openptv/binding/orientation.pyx']),
+    create_extension('openptv.binding.param_bridge', ['./openptv/binding/param_bridge.pyx']),
+    create_extension('openptv.binding.parameters', ['./openptv/binding/parameters.pyx']),
+    create_extension('openptv.binding.segmentation', ['./openptv/binding/segmentation.pyx']),
+    create_extension('openptv.binding.tracker', ['./openptv/binding/tracker.pyx']),
+    create_extension('openptv.binding.tracker_bridge', ['./openptv/binding/tracker_bridge.pyx']),
+    create_extension('openptv.binding.tracking_framebuf', ['./openptv/binding/tracking_framebuf.pyx']),
+    create_extension('openptv.binding.transforms', ['./openptv/binding/transforms.pyx']),
+    create_extension('openptv.binding.vec_utils', ['./openptv/binding/vec_utils.pyx']),
+]
 
 # Use cythonize on the extensions
 ext_modules = cythonize(
