@@ -13,19 +13,22 @@ from libc.string cimport strncpy
 
 from openptv.binding.parameters cimport track_par, sequence_par, volume_par, control_par, target_par
 from openptv.binding.parameters cimport orient_par, mm_np, calibration, Glass, Exterior, Interior, ap_52
-from openptv.binding.parameters cimport SEQ_FNAME_MAX_LEN
 
-from openptv.parameters.tracking import TrackingParams
-from openptv.parameters.sequence import SequenceParams
-from openptv.parameters.volume import VolumeParams
-from openptv.parameters.control import ControlParams
-from openptv.parameters.target import TargetParams
-from openptv.parameters.orient import OrientParams
-from openptv.parameters.calibration import CalOriParams
-from openptv.parameters.utils import encode_if_needed, decode_if_needed
+# Define SEQ_FNAME_MAX_LEN
+cdef int SEQ_FNAME_MAX_LEN = 128
+
+# Import Python modules
+import openptv.parameters.tracking
+import openptv.parameters.sequence
+import openptv.parameters.volume
+import openptv.parameters.control
+import openptv.parameters.target
+import openptv.parameters.orient
+import openptv.parameters.calibration
+import openptv.parameters.utils
 
 
-cdef track_par* tracking_params_to_c(TrackingParams params):
+cdef track_par* tracking_params_to_c(object params):
     """
     Convert a Python TrackingParams object to a C track_par struct.
 
@@ -87,10 +90,10 @@ def tracking_params_from_c(track_par* c_params, path=None):
     }
 
     # Create a TrackingParams object from the dictionary
-    return TrackingParams.from_c_struct(param_dict, path)
+    return openptv.parameters.tracking.TrackingParams.from_c_struct(param_dict, path)
 
 
-cdef sequence_par* sequence_params_to_c(SequenceParams params):
+cdef sequence_par* sequence_params_to_c(object params):
     """
     Convert a Python SequenceParams object to a C sequence_par struct.
 
@@ -113,7 +116,7 @@ cdef sequence_par* sequence_params_to_c(SequenceParams params):
     # Copy base names
     for i in range(param_dict['num_cams']):
         if i < len(param_dict['img_base_name']):
-            base_name = encode_if_needed(param_dict['img_base_name'][i])
+            base_name = openptv.parameters.utils.encode_if_needed(param_dict['img_base_name'][i])
             strncpy(c_params.img_base_name[i], base_name, SEQ_FNAME_MAX_LEN - 1)
             c_params.img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
 
@@ -134,7 +137,7 @@ def sequence_params_from_c(sequence_par* c_params, path=None):
     # Create a list of base names
     base_names = []
     for i in range(c_params.num_cams):
-        base_names.append(decode_if_needed(c_params.img_base_name[i]))
+        base_names.append(openptv.parameters.utils.decode_if_needed(c_params.img_base_name[i]))
 
     # Create a dictionary of parameter values
     param_dict = {
@@ -145,10 +148,10 @@ def sequence_params_from_c(sequence_par* c_params, path=None):
     }
 
     # Create a SequenceParams object from the dictionary
-    return SequenceParams.from_c_struct(param_dict, path)
+    return openptv.parameters.sequence.SequenceParams.from_c_struct(param_dict, path)
 
 
-cdef volume_par* volume_params_to_c(VolumeParams params):
+cdef volume_par* volume_params_to_c(object params):
     """
     Convert a Python VolumeParams object to a C volume_par struct.
 
@@ -209,10 +212,10 @@ def volume_params_from_c(volume_par* c_params, path=None):
     }
 
     # Create a VolumeParams object from the dictionary
-    return VolumeParams.from_c_struct(param_dict, path)
+    return openptv.parameters.volume.VolumeParams.from_c_struct(param_dict, path)
 
 
-cdef control_par* control_params_to_c(ControlParams params):
+cdef control_par* control_params_to_c(object params):
     """
     Convert a Python ControlParams object to a C control_par struct.
 
@@ -233,12 +236,12 @@ cdef control_par* control_params_to_c(ControlParams params):
     # Copy base names
     for i in range(param_dict['num_cams']):
         if i < len(param_dict['img_base_name']):
-            img_name = encode_if_needed(param_dict['img_base_name'][i])
+            img_name = openptv.parameters.utils.encode_if_needed(param_dict['img_base_name'][i])
             strncpy(c_params.img_base_name[i], img_name, SEQ_FNAME_MAX_LEN - 1)
             c_params.img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
 
         if i < len(param_dict['cal_img_base_name']):
-            cal_name = encode_if_needed(param_dict['cal_img_base_name'][i])
+            cal_name = openptv.parameters.utils.encode_if_needed(param_dict['cal_img_base_name'][i])
             strncpy(c_params.cal_img_base_name[i], cal_name, SEQ_FNAME_MAX_LEN - 1)
             c_params.cal_img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
 
@@ -281,8 +284,8 @@ def control_params_from_c(control_par* c_params, path=None):
     cal_img_base_name = []
 
     for i in range(c_params.num_cams):
-        img_base_name.append(decode_if_needed(c_params.img_base_name[i]))
-        cal_img_base_name.append(decode_if_needed(c_params.cal_img_base_name[i]))
+        img_base_name.append(openptv.parameters.utils.decode_if_needed(c_params.img_base_name[i]))
+        cal_img_base_name.append(openptv.parameters.utils.decode_if_needed(c_params.cal_img_base_name[i]))
 
     # Create multimedia parameters
     mm_np = {
@@ -310,10 +313,10 @@ def control_params_from_c(control_par* c_params, path=None):
     }
 
     # Create a ControlParams object from the dictionary
-    return ControlParams.from_c_struct(param_dict, path)
+    return openptv.parameters.control.ControlParams.from_c_struct(param_dict, path)
 
 
-cdef target_par* target_params_to_c(TargetParams params):
+cdef target_par* target_params_to_c(object params):
     """
     Convert a Python TargetParams object to a C target_par struct.
 
@@ -375,10 +378,10 @@ def target_params_from_c(target_par* c_params, path=None):
     }
 
     # Create a TargetParams object from the dictionary
-    return TargetParams.from_c_struct(param_dict, path)
+    return openptv.parameters.target.TargetParams.from_c_struct(param_dict, path)
 
 
-cdef orient_par* orient_params_to_c(OrientParams params):
+cdef orient_par* orient_params_to_c(object params):
     """
     Convert a Python OrientParams object to a C orient_par struct.
 
@@ -438,10 +441,10 @@ def orient_params_from_c(orient_par* c_params, path=None):
     }
 
     # Create an OrientParams object from the dictionary
-    return OrientParams.from_c_struct(param_dict, path)
+    return openptv.parameters.orient.OrientParams.from_c_struct(param_dict, path)
 
 
-cdef calibration* cal_ori_params_to_c(CalOriParams params):
+cdef calibration* cal_ori_params_to_c(object params):
     """
     Convert a Python CalOriParams object to a C calibration struct.
 
@@ -560,4 +563,4 @@ def cal_ori_params_from_c(calibration* c_params, path=None):
     }
 
     # Create a CalOriParams object from the dictionary
-    return CalOriParams.from_c_struct(param_dict, path)
+    return openptv.parameters.calibration.CalOriParams.from_c_struct(param_dict, path)
