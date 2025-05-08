@@ -20,10 +20,9 @@ class TrackingParams(Parameters):
     """
 
     def __init__(self, dvxmin=0.0, dvxmax=0.0, dvymin=0.0, dvymax=0.0,
-                 dvzmin=0.0, dvzmax=0.0, angle=0.0, dacc=0.0,
+                 dvzmin=0.0, dvzmax=0.0, dangle=0.0, dacc=0.0,
                  flagNewParticles=False, path=None,
-                 velocity_lims=None, angle_lim=None, accel_lim=None, add_particle=None,
-                 dangle=None, **kwargs):
+                 velocity_lims=None, angle_lim=None, accel_lim=None, add_particle=None, **kwargs):
         """
         Initialize tracking parameters.
 
@@ -34,15 +33,14 @@ class TrackingParams(Parameters):
             dvymax (float): Maximum velocity in y direction.
             dvzmin (float): Minimum velocity in z direction.
             dvzmax (float): Maximum velocity in z direction.
-            angle (float): Angle criterion for tracking.
+            dangle (float): Angle criterion for tracking.
             dacc (float): Acceleration criterion for tracking.
             flagNewParticles (bool): Whether to add new particles.
             path (str or Path): Path to the parameter directory.
             velocity_lims (list): List of [min, max] velocity limits for x, y, z.
-            angle_lim (float): Angle criterion for tracking (alternative to angle).
+            angle_lim (float): Angle criterion for tracking (alternative to dangle).
             accel_lim (float): Acceleration criterion for tracking (alternative to dacc).
             add_particle (int): Whether to add new particles (alternative to flagNewParticles).
-            dangle (float): Angle criterion for tracking (alternative to angle).
         """
         super().__init__(path)
 
@@ -57,19 +55,17 @@ class TrackingParams(Parameters):
 
         # Handle alternative parameter names
         if angle_lim is not None:
-            angle = angle_lim
-        if dangle is not None:
-            angle = dangle
+            dangle = angle_lim
         if accel_lim is not None:
             dacc = accel_lim
         if add_particle is not None:
             flagNewParticles = bool(add_particle)
 
         self.set(dvxmin, dvxmax, dvymin, dvymax, dvzmin, dvzmax,
-                 angle, dacc, flagNewParticles)
+                 dangle, dacc, flagNewParticles)
 
     def set(self, dvxmin=0.0, dvxmax=0.0, dvymin=0.0, dvymax=0.0,
-            dvzmin=0.0, dvzmax=0.0, angle=0.0, dacc=0.0,
+            dvzmin=0.0, dvzmax=0.0, dangle=0.0, dacc=0.0,
             flagNewParticles=False):
         """
         Set tracking parameters.
@@ -81,7 +77,7 @@ class TrackingParams(Parameters):
             dvymax (float): Maximum velocity in y direction.
             dvzmin (float): Minimum velocity in z direction.
             dvzmax (float): Maximum velocity in z direction.
-            angle (float): Angle criterion for tracking.
+            dangle (float): Angle criterion for tracking.
             dacc (float): Acceleration criterion for tracking.
             flagNewParticles (bool): Whether to add new particles.
         """
@@ -91,7 +87,7 @@ class TrackingParams(Parameters):
         self.dvymax = dvymax
         self.dvzmin = dvzmin
         self.dvzmax = dvzmax
-        self.angle = angle
+        self.angle = dangle  # Store as angle internally for backward compatibility
         self.dacc = dacc
         self.flagNewParticles = flagNewParticles
 
@@ -189,7 +185,7 @@ class TrackingParams(Parameters):
             dvymax=c_struct['dvymax'],
             dvzmin=c_struct['dvzmin'],
             dvzmax=c_struct['dvzmax'],
-            angle=c_struct['dangle'],
+            dangle=c_struct['dangle'],
             dacc=c_struct['dacc'],
             flagNewParticles=int_to_bool(c_struct['add']),
             path=path,
