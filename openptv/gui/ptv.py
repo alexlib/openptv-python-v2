@@ -139,12 +139,13 @@ def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeP
             - epar: Examine parameters
     """
     # Get parameter file paths
-    ptv_par_path = Path("parameters/ptv.par")
-    sequence_par_path = Path("parameters/sequence.par")
-    criteria_par_path = Path("parameters/criteria.par")
-    track_par_path = Path("parameters/track.par")
-    targ_rec_par_path = Path("parameters/targ_rec.par")
-    examine_par_path = Path("parameters/examine.par")
+    parameters_dir = Path("parameters")
+    ptv_par_path = parameters_dir / "ptv.par"
+    sequence_par_path = parameters_dir / "sequence.par"
+    criteria_par_path = parameters_dir / "criteria.par"
+    track_par_path = parameters_dir / "track.par"
+    targ_rec_par_path = parameters_dir / "targ_rec.par"
+    examine_par_path = parameters_dir
 
     try:
         # Control parameters
@@ -169,7 +170,7 @@ def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeP
 
         # Examine parameters (multiplane vs single plane calibration)
         # Use the high-level API's ExamineParams
-        epar = ExamineParams.read(examine_par_path)
+        epar = ExamineParams.from_file(examine_par_path)
 
         # Read calibration files
         cals = _read_calibrations(cpar, n_cams)

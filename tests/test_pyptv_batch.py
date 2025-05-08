@@ -5,7 +5,7 @@ from pathlib import Path
 def test_pyptv_batch(test_data_dir):
     """Test batch processing with test cavity data"""
     # Skip this test while we're transitioning to the new parameter module
-    pytest.skip("Skipping while transitioning to the new parameter module")
+    # pytest.skip("Skipping while transitioning to the new parameter module")
 
     test_dir = test_data_dir
     assert test_dir.exists(), f"Test directory {test_dir} not found"

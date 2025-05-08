@@ -84,7 +84,7 @@ def test_pyptv_batch_test_cavity(test_data_dir, setup_and_cleanup_res_dir):
     4. Verifies tracking statistics
     """
     # Skip this test while we're transitioning to the new parameter module
-    pytest.skip("Skipping while transitioning to the new parameter module")
+    # pytest.skip("Skipping while transitioning to the new parameter module")
 
     test_dir = test_data_dir
     assert test_dir.exists(), f"Test directory {test_dir} not found"
