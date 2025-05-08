@@ -1,6 +1,8 @@
 # cython: language_level=3
 # distutils: language = c
 
+from openptv.binding.vec_utils cimport vec3d
+
 # Cython definitions for parameters.h
 cdef extern from "../liboptv/include/parameters.h":
     ctypedef struct mm_np:
