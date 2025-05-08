@@ -73,20 +73,21 @@ def tracking_params_from_c(object c_params, path=None):
         A TrackingParams object.
     """
     # Create a dictionary of parameter values
+    cdef track_par* c_track_params = <track_par*>c_params
     param_dict = {
-        'dvxmin': c_params.dvxmin,
-        'dvxmax': c_params.dvxmax,
-        'dvymin': c_params.dvymin,
-        'dvymax': c_params.dvymax,
-        'dvzmin': c_params.dvzmin,
-        'dvzmax': c_params.dvzmax,
-        'dangle': c_params.dangle,
-        'dacc': c_params.dacc,
-        'add': c_params.add,
-        'dsumg': c_params.dsumg,
-        'dn': c_params.dn,
-        'dnx': c_params.dnx,
-        'dny': c_params.dny,
+        'dvxmin': c_track_params.dvxmin,
+        'dvxmax': c_track_params.dvxmax,
+        'dvymin': c_track_params.dvymin,
+        'dvymax': c_track_params.dvymax,
+        'dvzmin': c_track_params.dvzmin,
+        'dvzmax': c_track_params.dvzmax,
+        'dangle': c_track_params.dangle,
+        'dacc': c_track_params.dacc,
+        'add': c_track_params.add,
+        'dsumg': c_track_params.dsumg,
+        'dn': c_track_params.dn,
+        'dnx': c_track_params.dnx,
+        'dny': c_track_params.dny,
     }
 
     # Create a TrackingParams object from the dictionary
@@ -134,10 +135,11 @@ def sequence_params_from_c(object c_params, path=None):
     """
     # Create a list of base names
     base_names = []
-    # Count the number of non-NULL pointers in img_base_name
+    # Get the number of cameras from the length of the img_base_name array
+    cdef sequence_par* c_seq_params = <sequence_par*>c_params
     cdef int num_cams = 0
-    while c_params.img_base_name[num_cams] != NULL:
-        base_names.append(openptv.parameters.utils.decode_if_needed(c_params.img_base_name[num_cams]))
+    while c_seq_params.img_base_name[num_cams] != NULL:
+        base_names.append(openptv.parameters.utils.decode_if_needed(c_seq_params.img_base_name[num_cams]))
         num_cams += 1
 
     # Create a dictionary of parameter values
@@ -194,21 +196,22 @@ def volume_params_from_c(object c_params, path=None):
         A VolumeParams object.
     """
     # Create lists for X_lay, Zmin_lay, and Zmax_lay
-    X_lay = [c_params.X_lay[0], c_params.X_lay[1]]
-    Zmin_lay = [c_params.Zmin_lay[0], c_params.Zmin_lay[1]]
-    Zmax_lay = [c_params.Zmax_lay[0], c_params.Zmax_lay[1]]
+    cdef volume_par* c_vol_params = <volume_par*>c_params
+    X_lay = [c_vol_params.X_lay[0], c_vol_params.X_lay[1]]
+    Zmin_lay = [c_vol_params.Zmin_lay[0], c_vol_params.Zmin_lay[1]]
+    Zmax_lay = [c_vol_params.Zmax_lay[0], c_vol_params.Zmax_lay[1]]
 
     # Create a dictionary of parameter values
     param_dict = {
         'X_lay': X_lay,
         'Zmin_lay': Zmin_lay,
         'Zmax_lay': Zmax_lay,
-        'cnx': c_params.cnx,
-        'cny': c_params.cny,
-        'cn': c_params.cn,
-        'csumg': c_params.csumg,
-        'corrmin': c_params.corrmin,
-        'eps0': c_params.eps0,
+        'cnx': c_vol_params.cnx,
+        'cny': c_vol_params.cny,
+        'cn': c_vol_params.cn,
+        'csumg': c_vol_params.csumg,
+        'corrmin': c_vol_params.corrmin,
+        'eps0': c_vol_params.eps0,
     }
 
     # Create a VolumeParams object from the dictionary
@@ -282,34 +285,35 @@ def control_params_from_c(object c_params, path=None):
     img_base_name = []
     cal_img_base_name = []
 
-    for i in range(c_params.num_cams):
-        if c_params.img_base_name[i] != NULL:
-            img_base_name.append(openptv.parameters.utils.decode_if_needed(c_params.img_base_name[i]))
-        if c_params.cal_img_base_name[i] != NULL:
-            cal_img_base_name.append(openptv.parameters.utils.decode_if_needed(c_params.cal_img_base_name[i]))
+    cdef control_par* c_ctrl_params = <control_par*>c_params
+    for i in range(c_ctrl_params.num_cams):
+        if c_ctrl_params.img_base_name[i] != NULL:
+            img_base_name.append(openptv.parameters.utils.decode_if_needed(c_ctrl_params.img_base_name[i]))
+        if c_ctrl_params.cal_img_base_name[i] != NULL:
+            cal_img_base_name.append(openptv.parameters.utils.decode_if_needed(c_ctrl_params.cal_img_base_name[i]))
 
     # Create multimedia parameters
     mm_np = {
-        'nlay': c_params.mm.nlay,
-        'n1': c_params.mm.n1,
-        'n2': [c_params.mm.n2[0], c_params.mm.n2[1], c_params.mm.n2[2]],
-        'n3': c_params.mm.n3,
-        'd': [c_params.mm.d[0], c_params.mm.d[1], c_params.mm.d[2]],
+        'nlay': c_ctrl_params.mm.nlay,
+        'n1': c_ctrl_params.mm.n1,
+        'n2': [c_ctrl_params.mm.n2[0], c_ctrl_params.mm.n2[1], c_ctrl_params.mm.n2[2]],
+        'n3': c_ctrl_params.mm.n3,
+        'd': [c_ctrl_params.mm.d[0], c_ctrl_params.mm.d[1], c_ctrl_params.mm.d[2]],
     }
 
     # Create a dictionary of parameter values
     param_dict = {
-        'num_cams': c_params.num_cams,
+        'num_cams': c_ctrl_params.num_cams,
         'img_base_name': img_base_name,
         'cal_img_base_name': cal_img_base_name,
-        'hp_flag': c_params.hp_flag,
-        'allCam_flag': c_params.allCam_flag,
-        'tiff_flag': c_params.tiff_flag,
-        'imx': c_params.imx,
-        'imy': c_params.imy,
-        'pix_x': c_params.pix_x,
-        'pix_y': c_params.pix_y,
-        'chfield': c_params.chfield,
+        'hp_flag': c_ctrl_params.hp_flag,
+        'allCam_flag': c_ctrl_params.allCam_flag,
+        'tiff_flag': c_ctrl_params.tiff_flag,
+        'imx': c_ctrl_params.imx,
+        'imy': c_ctrl_params.imy,
+        'pix_x': c_ctrl_params.pix_x,
+        'pix_y': c_ctrl_params.pix_y,
+        'chfield': c_ctrl_params.chfield,
         'mm': mm_np,
     }
 
@@ -362,20 +366,21 @@ def target_params_from_c(object c_params, path=None):
         A TargetParams object.
     """
     # Create a list for gvthres
-    gvthres = [c_params.gvthres[0], c_params.gvthres[1], c_params.gvthres[2], c_params.gvthres[3]]
+    cdef target_par* c_targ_params = <target_par*>c_params
+    gvthres = [c_targ_params.gvthres[0], c_targ_params.gvthres[1], c_targ_params.gvthres[2], c_targ_params.gvthres[3]]
 
     # Create a dictionary of parameter values
     param_dict = {
         'gvthres': gvthres,
-        'discont': c_params.discont,
-        'nnmin': c_params.nnmin,
-        'nnmax': c_params.nnmax,
-        'nxmin': c_params.nxmin,
-        'nxmax': c_params.nxmax,
-        'nymin': c_params.nymin,
-        'nymax': c_params.nymax,
-        'sumg_min': c_params.sumg_min,
-        'cr_sz': c_params.cr_sz,
+        'discont': c_targ_params.discont,
+        'nnmin': c_targ_params.nnmin,
+        'nnmax': c_targ_params.nnmax,
+        'nxmin': c_targ_params.nxmin,
+        'nxmax': c_targ_params.nxmax,
+        'nymin': c_targ_params.nymin,
+        'nymax': c_targ_params.nymax,
+        'sumg_min': c_targ_params.sumg_min,
+        'cr_sz': c_targ_params.cr_sz,
     }
 
     # Create a TargetParams object from the dictionary
@@ -426,19 +431,20 @@ def orient_params_from_c(object c_params, path=None):
         An OrientParams object.
     """
     # Create a dictionary of parameter values
+    cdef orient_par* c_orient_params = <orient_par*>c_params
     param_dict = {
-        'useflag': c_params.useflag,
-        'ccflag': c_params.ccflag,
-        'xhflag': c_params.xhflag,
-        'yhflag': c_params.yhflag,
-        'k1flag': c_params.k1flag,
-        'k2flag': c_params.k2flag,
-        'k3flag': c_params.k3flag,
-        'p1flag': c_params.p1flag,
-        'p2flag': c_params.p2flag,
-        'scxflag': c_params.scxflag,
-        'sheflag': c_params.sheflag,
-        'interfflag': c_params.interfflag,
+        'useflag': c_orient_params.useflag,
+        'ccflag': c_orient_params.ccflag,
+        'xhflag': c_orient_params.xhflag,
+        'yhflag': c_orient_params.yhflag,
+        'k1flag': c_orient_params.k1flag,
+        'k2flag': c_orient_params.k2flag,
+        'k3flag': c_orient_params.k3flag,
+        'p1flag': c_orient_params.p1flag,
+        'p2flag': c_orient_params.p2flag,
+        'scxflag': c_orient_params.scxflag,
+        'sheflag': c_orient_params.sheflag,
+        'interfflag': c_orient_params.interfflag,
     }
 
     # Create an OrientParams object from the dictionary
@@ -515,44 +521,45 @@ def cal_ori_params_from_c(object c_params, path=None):
         A CalOriParams object.
     """
     # Create a dictionary for exterior parameters
+    cdef calibration* c_cal_params = <calibration*>c_params
     ext_par = {
-        'x0': c_params.ext_par.x0,
-        'y0': c_params.ext_par.y0,
-        'z0': c_params.ext_par.z0,
-        'omega': c_params.ext_par.omega,
-        'phi': c_params.ext_par.phi,
-        'kappa': c_params.ext_par.kappa,
-        'dm': [[c_params.ext_par.dm[i][j] for j in range(3)] for i in range(3)],
+        'x0': c_cal_params.ext_par.x0,
+        'y0': c_cal_params.ext_par.y0,
+        'z0': c_cal_params.ext_par.z0,
+        'omega': c_cal_params.ext_par.omega,
+        'phi': c_cal_params.ext_par.phi,
+        'kappa': c_cal_params.ext_par.kappa,
+        'dm': [[c_cal_params.ext_par.dm[i][j] for j in range(3)] for i in range(3)],
     }
 
     # Create a dictionary for interior parameters
     int_par = {
-        'xh': c_params.int_par.xh,
-        'yh': c_params.int_par.yh,
-        'cc': c_params.int_par.cc,
+        'xh': c_cal_params.int_par.xh,
+        'yh': c_cal_params.int_par.yh,
+        'cc': c_cal_params.int_par.cc,
     }
 
     # Create a dictionary for glass parameters
     glass_par = {
-        'vec_x': c_params.glass_par.vec_x,
-        'vec_y': c_params.glass_par.vec_y,
-        'vec_z': c_params.glass_par.vec_z,
-        'n1': c_params.glass_par.n1,
-        'n2': c_params.glass_par.n2,
-        'n3': c_params.glass_par.n3,
-        'd': c_params.glass_par.d,
+        'vec_x': c_cal_params.glass_par.vec_x,
+        'vec_y': c_cal_params.glass_par.vec_y,
+        'vec_z': c_cal_params.glass_par.vec_z,
+        'n1': c_cal_params.glass_par.n1,
+        'n2': c_cal_params.glass_par.n2,
+        'n3': c_cal_params.glass_par.n3,
+        'd': c_cal_params.glass_par.d,
     }
 
     # Create a dictionary for added parameters
     added_par = {
-        'k1': c_params.added_par.k1,
-        'k2': c_params.added_par.k2,
-        'k3': c_params.added_par.k3,
-        'p1': c_params.added_par.p1,
-        'p2': c_params.added_par.p2,
-        'scx': c_params.added_par.scx,
-        'she': c_params.added_par.she,
-        'field': c_params.added_par.field,
+        'k1': c_cal_params.added_par.k1,
+        'k2': c_cal_params.added_par.k2,
+        'k3': c_cal_params.added_par.k3,
+        'p1': c_cal_params.added_par.p1,
+        'p2': c_cal_params.added_par.p2,
+        'scx': c_cal_params.added_par.scx,
+        'she': c_cal_params.added_par.she,
+        'field': c_cal_params.added_par.field,
     }
 
     # Create a dictionary of parameter values
