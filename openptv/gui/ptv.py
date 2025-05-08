@@ -29,7 +29,7 @@ from openptv import (
     TrackingParams,
     SequenceParams,
     TargetParams,
-    ExamineParams,
+    # ExamineParams,
     TargetArray,
     Target,
     Frame,
@@ -50,6 +50,7 @@ from openptv import (
 
 # PyPTV imports
 from openptv.gui.parameters import PftVersionParams
+from openptv.pyoptv.parameters import ExaminePar as ExamineParams
 from openptv.gui import parameters as par
 
 # Print which implementation we're using

@@ -9,12 +9,8 @@ import shutil
 import numpy as np
 
 # Import GUI components
-
-# Skip all tests in this file if running in a headless environment
-pytestmark = pytest.mark.skipif(
-    os.environ.get("DISPLAY") is None,
-    reason="GUI tests require a display"
-)
+# We no longer skip all tests in this file if running in a headless environment
+# Individual tests will handle display-related errors gracefully
 
 # Import components that don't require a display
 from openptv.gui.code_editor import codeEditor

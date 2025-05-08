@@ -20,15 +20,21 @@ def pytest_collection_modifyitems(items):
     # If a module is not in the test_order list, it will be run after all modules in the list
     items.sort(key=lambda item: module_order.get(os.path.basename(item.module.__file__), float('inf')))
 
-# Set GUI backend before any imports
-os.environ['ETS_TOOLKIT'] = 'qt4'
+# Set GUI backend for headless operation
+os.environ['ETS_TOOLKIT'] = 'null'
 os.environ['QT_API'] = 'pyside6'
 
-# Skip GUI tests when running headless
+# Configure matplotlib for non-interactive backend
+import matplotlib
+matplotlib.use('Agg')
+
+# This fixture used to skip tests when no display was available
+# Now it's modified to allow tests to run in headless environments
 @pytest.fixture(scope="session", autouse=True)
-def check_display():
-    if "DISPLAY" not in os.environ and "WAYLAND_DISPLAY" not in os.environ:
-        pytest.skip("GUI tests require a display")
+def configure_headless():
+    """Configure the environment for headless testing."""
+    # No longer skip tests when no display is available
+    pass
 
 
 @pytest.fixture(scope="session")
