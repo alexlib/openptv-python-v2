@@ -67,22 +67,29 @@ def create_extension(name, sources):
     )
 
 
-# Create extensions with explicit module names
+# Create extensions with explicit module names and in a specific order
 extensions = [
+    # Build vec_utils first as it's needed by other modules
+    create_extension('openptv.binding.vec_utils', ['./openptv/binding/vec_utils.pyx']),
+
+    # Build parameters next as it's needed by many modules
+    create_extension('openptv.binding.parameters', ['./openptv/binding/parameters.pyx']),
+
+    # Build the rest of the modules
     create_extension('openptv.binding.calibration', ['./openptv/binding/calibration.pyx']),
+    create_extension('openptv.binding.transforms', ['./openptv/binding/transforms.pyx']),
+    create_extension('openptv.binding.tracking_framebuf', ['./openptv/binding/tracking_framebuf.pyx']),
+    create_extension('openptv.binding.imgcoord', ['./openptv/binding/imgcoord.pyx']),
+    create_extension('openptv.binding.orientation', ['./openptv/binding/orientation.pyx']),
+    create_extension('openptv.binding.segmentation', ['./openptv/binding/segmentation.pyx']),
+    create_extension('openptv.binding.tracker', ['./openptv/binding/tracker.pyx']),
     create_extension('openptv.binding.correspondences', ['./openptv/binding/correspondences.pyx']),
     create_extension('openptv.binding.epipolar', ['./openptv/binding/epipolar.pyx']),
     create_extension('openptv.binding.image_processing', ['./openptv/binding/image_processing.pyx']),
-    create_extension('openptv.binding.imgcoord', ['./openptv/binding/imgcoord.pyx']),
-    create_extension('openptv.binding.orientation', ['./openptv/binding/orientation.pyx']),
+
+    # Build the bridge modules last
     create_extension('openptv.binding.param_bridge', ['./openptv/binding/param_bridge.pyx']),
-    create_extension('openptv.binding.parameters', ['./openptv/binding/parameters.pyx']),
-    create_extension('openptv.binding.segmentation', ['./openptv/binding/segmentation.pyx']),
-    create_extension('openptv.binding.tracker', ['./openptv/binding/tracker.pyx']),
     create_extension('openptv.binding.tracker_bridge', ['./openptv/binding/tracker_bridge.pyx']),
-    create_extension('openptv.binding.tracking_framebuf', ['./openptv/binding/tracking_framebuf.pyx']),
-    create_extension('openptv.binding.transforms', ['./openptv/binding/transforms.pyx']),
-    create_extension('openptv.binding.vec_utils', ['./openptv/binding/vec_utils.pyx']),
 ]
 
 # Use cythonize on the extensions
