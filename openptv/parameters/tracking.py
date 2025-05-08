@@ -87,7 +87,7 @@ class TrackingParams(Parameters):
         self.dvymax = dvymax
         self.dvzmin = dvzmin
         self.dvzmax = dvzmax
-        self.angle = dangle  # Store as angle internally for backward compatibility
+        self.dangle = dangle  # Store as angle internally for backward compatibility
         self.dacc = dacc
         self.flagNewParticles = flagNewParticles
 
@@ -115,7 +115,7 @@ class TrackingParams(Parameters):
                 self.dvymax = float(g(f))
                 self.dvzmin = float(g(f))
                 self.dvzmax = float(g(f))
-                self.angle = float(g(f))
+                self.dangle = float(g(f))
                 self.dacc = float(g(f))
                 self.flagNewParticles = int_to_bool(int(g(f)))
         except Exception as e:
@@ -136,7 +136,7 @@ class TrackingParams(Parameters):
                 f.write(f"{self.dvymax}\n")
                 f.write(f"{self.dvzmin}\n")
                 f.write(f"{self.dvzmax}\n")
-                f.write(f"{self.angle}\n")
+                f.write(f"{self.dangle}\n")
                 f.write(f"{self.dacc}\n")
                 f.write(f"{bool_to_int(self.flagNewParticles)}\n")
         except Exception as e:
@@ -156,7 +156,7 @@ class TrackingParams(Parameters):
             'dvymax': self.dvymax,
             'dvzmin': self.dvzmin,
             'dvzmax': self.dvzmax,
-            'dangle': self.angle,
+            'dangle': self.dangle,
             'dacc': self.dacc,
             'add': bool_to_int(self.flagNewParticles),
             # Additional fields that are not used in the GUI but are in the C struct

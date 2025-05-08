@@ -40,7 +40,7 @@ class TestTrackingParams:
             dvymax=10.0,
             dvzmin=-10.0,
             dvzmax=10.0,
-            angle=0.5,
+            dangle=0.5,
             dacc=0.5,
             flagNewParticles=True,
         )
@@ -51,7 +51,7 @@ class TestTrackingParams:
         assert params.dvymax == 10.0
         assert params.dvzmin == -10.0
         assert params.dvzmax == 10.0
-        assert params.angle == 0.5
+        assert params.dangle == 0.5
         assert params.dacc == 0.5
         assert params.flagNewParticles is True
     
@@ -64,7 +64,7 @@ class TestTrackingParams:
             dvymax=10.0,
             dvzmin=-10.0,
             dvzmax=10.0,
-            angle=0.5,
+            dangle=0.5,
             dacc=0.5,
             flagNewParticles=True,
         )
@@ -103,7 +103,7 @@ class TestTrackingParams:
         assert params.dvymax == 10.0
         assert params.dvzmin == -10.0
         assert params.dvzmax == 10.0
-        assert params.angle == 0.5
+        assert params.dangle == 0.5
         assert params.dacc == 0.5
         assert params.flagNewParticles is True
     
@@ -140,7 +140,7 @@ class TestTrackingParams:
             assert params2.dvymax == params.dvymax
             assert params2.dvzmin == params.dvzmin
             assert params2.dvzmax == params.dvzmax
-            assert params2.angle == params.angle
+            assert params2.dangle == params.dangle
             assert params2.dacc == params.dacc
             assert params2.flagNewParticles == params.flagNewParticles
 
