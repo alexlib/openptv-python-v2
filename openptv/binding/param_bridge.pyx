@@ -109,16 +109,14 @@ cdef sequence_par* sequence_params_to_c(object params):
     param_dict = params.to_c_struct()
 
     # Fill in the C struct
-    c_params.num_cams = param_dict['num_cams']
     c_params.first = param_dict['first']
     c_params.last = param_dict['last']
 
     # Copy base names
-    for i in range(param_dict['num_cams']):
-        if i < len(param_dict['img_base_name']):
-            base_name = openptv.parameters.utils.encode_if_needed(param_dict['img_base_name'][i])
-            strncpy(c_params.img_base_name[i], base_name, SEQ_FNAME_MAX_LEN - 1)
-            c_params.img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
+    for i in range(len(param_dict['img_base_name'])):
+        base_name = openptv.parameters.utils.encode_if_needed(param_dict['img_base_name'][i])
+        strncpy(c_params.img_base_name[i], base_name, SEQ_FNAME_MAX_LEN - 1)
+        c_params.img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
 
     return c_params
 
@@ -136,12 +134,14 @@ def sequence_params_from_c(sequence_par* c_params, path=None):
     """
     # Create a list of base names
     base_names = []
-    for i in range(c_params.num_cams):
-        base_names.append(openptv.parameters.utils.decode_if_needed(c_params.img_base_name[i]))
+    # Count the number of non-NULL pointers in img_base_name
+    cdef int num_cams = 0
+    while c_params.img_base_name[num_cams] != NULL:
+        base_names.append(openptv.parameters.utils.decode_if_needed(c_params.img_base_name[num_cams]))
+        num_cams += 1
 
     # Create a dictionary of parameter values
     param_dict = {
-        'num_cams': c_params.num_cams,
         'img_base_name': base_names,
         'first': c_params.first,
         'last': c_params.last,
@@ -234,16 +234,15 @@ cdef control_par* control_params_to_c(object params):
     c_params.num_cams = param_dict['num_cams']
 
     # Copy base names
-    for i in range(param_dict['num_cams']):
-        if i < len(param_dict['img_base_name']):
-            img_name = openptv.parameters.utils.encode_if_needed(param_dict['img_base_name'][i])
-            strncpy(c_params.img_base_name[i], img_name, SEQ_FNAME_MAX_LEN - 1)
-            c_params.img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
+    for i in range(len(param_dict['img_base_name'])):
+        img_name = openptv.parameters.utils.encode_if_needed(param_dict['img_base_name'][i])
+        strncpy(c_params.img_base_name[i], img_name, SEQ_FNAME_MAX_LEN - 1)
+        c_params.img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
 
-        if i < len(param_dict['cal_img_base_name']):
-            cal_name = openptv.parameters.utils.encode_if_needed(param_dict['cal_img_base_name'][i])
-            strncpy(c_params.cal_img_base_name[i], cal_name, SEQ_FNAME_MAX_LEN - 1)
-            c_params.cal_img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
+    for i in range(len(param_dict['cal_img_base_name'])):
+        cal_name = openptv.parameters.utils.encode_if_needed(param_dict['cal_img_base_name'][i])
+        strncpy(c_params.cal_img_base_name[i], cal_name, SEQ_FNAME_MAX_LEN - 1)
+        c_params.cal_img_base_name[i][SEQ_FNAME_MAX_LEN - 1] = b'\0'
 
     c_params.hp_flag = param_dict['hp_flag']
     c_params.allCam_flag = param_dict['allCam_flag']
@@ -284,8 +283,10 @@ def control_params_from_c(control_par* c_params, path=None):
     cal_img_base_name = []
 
     for i in range(c_params.num_cams):
-        img_base_name.append(openptv.parameters.utils.decode_if_needed(c_params.img_base_name[i]))
-        cal_img_base_name.append(openptv.parameters.utils.decode_if_needed(c_params.cal_img_base_name[i]))
+        if c_params.img_base_name[i] != NULL:
+            img_base_name.append(openptv.parameters.utils.decode_if_needed(c_params.img_base_name[i]))
+        if c_params.cal_img_base_name[i] != NULL:
+            cal_img_base_name.append(openptv.parameters.utils.decode_if_needed(c_params.cal_img_base_name[i]))
 
     # Create multimedia parameters
     mm_np = {
