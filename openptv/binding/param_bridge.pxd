@@ -11,9 +11,9 @@ from openptv.binding.parameters cimport track_par, sequence_par, volume_par, con
 from openptv.binding.vec_utils cimport vec3d
 
 
-cdef track_par* tracking_params_to_c(object params)
-cdef sequence_par* sequence_params_to_c(object params)
-cdef volume_par* volume_params_to_c(object params)
-cdef control_par* control_params_to_c(object params)
-cdef target_par* target_params_to_c(object params)
-cdef orient_par* orient_params_to_c(object params)
+cdef track_par* _tracking_params_to_c(object params)
+cdef sequence_par* _sequence_params_to_c(object params)
+cdef volume_par* _volume_params_to_c(object params)
+cdef control_par* _control_params_to_c(object params)
+cdef target_par* _target_params_to_c(object params)
+cdef orient_par* _orient_params_to_c(object params)

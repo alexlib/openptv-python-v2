@@ -10,6 +10,8 @@ and C parameter structs.
 
 from libc.stdlib cimport malloc, free
 from libc.string cimport strncpy
+from cpython.pycapsule cimport PyCapsule_New
+from libc.stdint cimport uintptr_t
 
 from openptv.binding.parameters cimport track_par, sequence_par, volume_par, control_par, target_par
 from openptv.binding.parameters cimport orient_par, mm_np, calibration, Glass, Exterior, Interior, ap_52
@@ -28,7 +30,11 @@ import openptv.parameters.calibration
 import openptv.parameters.utils
 
 
-cdef track_par* tracking_params_to_c(object params):
+def tracking_params_to_c_capsule(params):
+    """Return a PyCapsule wrapping a C track_par pointer from TrackingParams."""
+    cdef track_par* ptr = _tracking_params_to_c(params)
+    return PyCapsule_New(<void*>ptr, b"track_par", NULL)
+cdef track_par* _tracking_params_to_c(object params):
     """
     Convert a Python TrackingParams object to a C track_par struct.
 
@@ -94,7 +100,11 @@ def tracking_params_from_c(object c_params, path=None):
     return openptv.parameters.tracking.TrackingParams.from_c_struct(param_dict, path)
 
 
-cdef sequence_par* sequence_params_to_c(object params):
+def sequence_params_to_c_capsule(params):
+    """Return a PyCapsule wrapping a C sequence_par pointer from SequenceParams."""
+    cdef sequence_par* ptr = _sequence_params_to_c(params)
+    return PyCapsule_New(<void*>ptr, b"sequence_par", NULL)
+cdef sequence_par* _sequence_params_to_c(object params):
     """
     Convert a Python SequenceParams object to a C sequence_par struct.
 
@@ -153,7 +163,11 @@ def sequence_params_from_c(object c_params, path=None):
     return openptv.parameters.sequence.SequenceParams.from_c_struct(param_dict, path)
 
 
-cdef volume_par* volume_params_to_c(object params):
+def volume_params_to_c_capsule(params):
+    """Return a PyCapsule wrapping a C volume_par pointer from VolumeParams."""
+    cdef volume_par* ptr = _volume_params_to_c(params)
+    return PyCapsule_New(<void*>ptr, b"volume_par", NULL)
+cdef volume_par* _volume_params_to_c(object params):
     """
     Convert a Python VolumeParams object to a C volume_par struct.
 
@@ -218,7 +232,11 @@ def volume_params_from_c(object c_params, path=None):
     return openptv.parameters.volume.VolumeParams.from_c_struct(param_dict, path)
 
 
-cdef control_par* control_params_to_c(object params):
+def control_params_to_c_capsule(params):
+    """Return a PyCapsule wrapping a C control_par pointer from ControlParams."""
+    cdef control_par* ptr = _control_params_to_c(params)
+    return PyCapsule_New(<void*>ptr, b"control_par", NULL)
+cdef control_par* _control_params_to_c(object params):
     """
     Convert a Python ControlParams object to a C control_par struct.
 
@@ -321,7 +339,11 @@ def control_params_from_c(object c_params, path=None):
     return openptv.parameters.control.ControlParams.from_c_struct(param_dict, path)
 
 
-cdef target_par* target_params_to_c(object params):
+def target_params_to_c_capsule(params):
+    """Return a PyCapsule wrapping a C target_par pointer from TargetParams."""
+    cdef target_par* ptr = _target_params_to_c(params)
+    return PyCapsule_New(<void*>ptr, b"target_par", NULL)
+cdef target_par* _target_params_to_c(object params):
     """
     Convert a Python TargetParams object to a C target_par struct.
 
@@ -387,7 +409,11 @@ def target_params_from_c(object c_params, path=None):
     return openptv.parameters.target.TargetParams.from_c_struct(param_dict, path)
 
 
-cdef orient_par* orient_params_to_c(object params):
+def orient_params_to_c_capsule(params):
+    """Return a PyCapsule wrapping a C orient_par pointer from OrientParams."""
+    cdef orient_par* ptr = _orient_params_to_c(params)
+    return PyCapsule_New(<void*>ptr, b"orient_par", NULL)
+cdef orient_par* _orient_params_to_c(object params):
     """
     Convert a Python OrientParams object to a C orient_par struct.
 

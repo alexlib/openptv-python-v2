@@ -10,7 +10,8 @@ This module provides functions for calling C tracking functions with Python para
 from libc.stdlib cimport malloc, free
 
 from openptv.binding.parameters cimport track_par, volume_par
-from openptv.binding.param_bridge cimport tracking_params_to_c, volume_params_to_c
+from openptv.binding.param_bridge cimport _tracking_params_to_c, _volume_params_to_c
+# ...existing code...
 
 # Import Python modules
 import numpy as np
