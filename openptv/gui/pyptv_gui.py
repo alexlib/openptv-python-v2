@@ -1756,7 +1756,7 @@ def main():
         # Try to find test_cavity in common locations
         test_cavity_candidates = [
             original_dir / "tests" / "test_cavity",  # In the tests directory of original dir
-            original_dir / "test_cavity",  # Directly in original dir
+            original_dir.parent / "test_cavity",  # Directly in original dir
             software_path / "tests" / "test_cavity",  # In the tests directory of software path
             software_path.parent / "tests" / "test_cavity",  # In tests directory of parent
             Path("tests/test_cavity"),  # Relative to current directory

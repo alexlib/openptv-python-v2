@@ -36,12 +36,10 @@ class ShakingParams(Parameters):
         """
         super().__init__(path)
         self.set(shaking_first_frame, shaking_last_frame, 
-                 shaking_max_num_points, shaking_max_num_frames, 
-                 shaking_start_points, shaking_end_points)
+                 shaking_max_num_points, shaking_max_num_frames)
     
     def set(self, shaking_first_frame=0, shaking_last_frame=0, 
-            shaking_max_num_points=0, shaking_max_num_frames=0, 
-            shaking_start_points=None, shaking_end_points=None):
+            shaking_max_num_points=0, shaking_max_num_frames=0):
         """
         Set shaking parameters.
         
@@ -50,15 +48,11 @@ class ShakingParams(Parameters):
             shaking_last_frame (int): Last frame for shaking.
             shaking_max_num_points (int): Maximum number of points for shaking.
             shaking_max_num_frames (int): Maximum number of frames for shaking.
-            shaking_start_points (list): List of start points for shaking.
-            shaking_end_points (list): List of end points for shaking.
         """
         self.shaking_first_frame = shaking_first_frame
         self.shaking_last_frame = shaking_last_frame
         self.shaking_max_num_points = shaking_max_num_points
         self.shaking_max_num_frames = shaking_max_num_frames
-        self.shaking_start_points = shaking_start_points or []
-        self.shaking_end_points = shaking_end_points or []
     
     def filename(self):
         """
@@ -81,14 +75,7 @@ class ShakingParams(Parameters):
                 self.shaking_first_frame = int(g(f))
                 self.shaking_last_frame = int(g(f))
                 self.shaking_max_num_points = int(g(f))
-                self.shaking_max_num_frames = int(g(f))
-                
-                self.shaking_start_points = []
-                self.shaking_end_points = []
-                
-                for i in range(self.shaking_max_num_points):
-                    self.shaking_start_points.append(int(g(f)))
-                    self.shaking_end_points.append(int(g(f)))
+                self.shaking_max_num_frames = int(g(f))                
         except Exception as e:
             raise IOError(f"Error reading shaking parameters: {e}")
     
@@ -106,16 +93,6 @@ class ShakingParams(Parameters):
                 f.write(f"{self.shaking_max_num_points}\n")
                 f.write(f"{self.shaking_max_num_frames}\n")
                 
-                for i in range(self.shaking_max_num_points):
-                    if i < len(self.shaking_start_points):
-                        f.write(f"{self.shaking_start_points[i]}\n")
-                    else:
-                        f.write("0\n")
-                    
-                    if i < len(self.shaking_end_points):
-                        f.write(f"{self.shaking_end_points[i]}\n")
-                    else:
-                        f.write("0\n")
         except Exception as e:
             raise IOError(f"Error writing shaking parameters: {e}")
     
@@ -131,8 +108,6 @@ class ShakingParams(Parameters):
             'shaking_last_frame': self.shaking_last_frame,
             'shaking_max_num_points': self.shaking_max_num_points,
             'shaking_max_num_frames': self.shaking_max_num_frames,
-            'shaking_start_points': self.shaking_start_points,
-            'shaking_end_points': self.shaking_end_points,
         }
     
     @classmethod
@@ -152,7 +127,5 @@ class ShakingParams(Parameters):
             shaking_last_frame=c_struct['shaking_last_frame'],
             shaking_max_num_points=c_struct['shaking_max_num_points'],
             shaking_max_num_frames=c_struct['shaking_max_num_frames'],
-            shaking_start_points=c_struct['shaking_start_points'],
-            shaking_end_points=c_struct['shaking_end_points'],
             path=path,
         )

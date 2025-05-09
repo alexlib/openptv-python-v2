@@ -347,7 +347,7 @@ class Tracking_Params(HasTraits):
         self.dvymax = track_params.dvymax
         self.dvzmin = track_params.dvzmin
         self.dvzmax = track_params.dvzmax
-        self.angle = track_params.angle
+        self.angle = track_params.dangle
         self.dacc = track_params.dacc
         self.flagNewParticles = np.bool_(track_params.flagNewParticles)
 
@@ -1170,22 +1170,22 @@ class Calib_Params(HasTraits):
         detectPlateParams.read()
 
         # Map the attributes from the new parameter class to the expected names
-        gv_th1 = detectPlateParams.gvthres  # Use the attribute name from the new class
-        gv_th2 = detectPlateParams.gvthres  # These might need to be adjusted based on the actual structure
-        gv_th3 = detectPlateParams.gvthres
-        gv_th4 = detectPlateParams.gvthres
-        tolerable_discontinuity = detectPlateParams.tolerable_discontinuity
+        gvth_1 = detectPlateParams.gvth_1  # Use the attribute name from the new class
+        gvth_2 = detectPlateParams.gvth_2  # These might need to be adjusted based on the actual structure
+        gvth_3 = detectPlateParams.gvth_3
+        gvth_4 = detectPlateParams.gvth_4
+        tolerable_discontinuity = detectPlateParams.tol_dis
         min_npix = detectPlateParams.min_npix
         max_npix = detectPlateParams.max_npix
         min_npix_x = detectPlateParams.min_npix_x
         max_npix_x = detectPlateParams.max_npix_x
         min_npix_y = detectPlateParams.min_npix_y
         max_npix_y = detectPlateParams.max_npix_y
-        sum_of_grey = detectPlateParams.sum_of_grey
-        size_of_crosses = detectPlateParams.size_of_crosses
+        sum_of_grey = detectPlateParams.sum_grey
+        size_of_crosses = detectPlateParams.size_cross
 
         for i in range(self.n_img):
-            exec(f"self.grey_value_treshold_{i+1} = gv_th{i+1}")
+            setattr(self, f"grey_value_treshold_{i+1}", locals()[f"gvth_{i+1}"])
 
         self.tolerable_discontinuity = tolerable_discontinuity
         self.min_npix = min_npix
@@ -1260,19 +1260,21 @@ class Calib_Params(HasTraits):
         dumbbellParams = DumbbellParams(path=self.par_path)
         dumbbellParams.read()
         (
+            self.dumbbell_acc,
             self.dumbbell_eps,
             self.dumbbell_scale,
-            self.dumbbell_gradient_descent,
-            self.dumbbell_penalty_weight,
-            self.dumbbell_step,
-            self.dumbbell_niter,
+            # self.dumbbell_gradient_descent,
+            # self.dumbbell_penalty_weight,
+            # self.dumbbell_step,
+            # self.dumbbell_niter,
         ) = (
-            dumbbellParams.dumbbell_eps,
+            dumbbellParams.acc,
+            dumbbellParams.eps0,
             dumbbellParams.dumbbell_scale,
-            dumbbellParams.dumbbell_gradient_descent,
-            dumbbellParams.dumbbell_penalty_weight,
-            dumbbellParams.dumbbell_step,
-            dumbbellParams.dumbbell_niter,
+            # dumbbellParams.gradient_descent,
+            # dumbbellParams.dumbbell_penalty_weight,
+            # dumbbellParams.dumbbell_step,
+            # dumbbellParams.dumbbell_niter,
         )
 
         shakingParams = ShakingParams(path=self.par_path)
@@ -1347,9 +1349,12 @@ class Experiment(HasTraits):
         self.syncActiveDir()
 
     def syncActiveDir(self):
-        default_parameters_path = Path(par_dir_prefix).resolve()
+        default_parameters_path = Path(par_dir_prefix()).resolve()
         print(f" Syncing parameters between two folders: \n")
         print(f"{self.active_params.par_path}, {default_parameters_path}")
+        if Path(self.active_params.par_path).resolve() == default_parameters_path:
+            print("Source and destination parameter directories are the same. Skipping copy.")
+            return
         copy_params_dir(self.active_params.par_path, default_parameters_path)
 
     def populate_runs(self, exp_path: Path):
