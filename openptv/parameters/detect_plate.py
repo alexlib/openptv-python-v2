@@ -18,58 +18,69 @@ class DetectPlateParams(Parameters):
     This class handles reading and writing detect plate parameters to/from files.
     """
     
-    def __init__(self, gvthres=0, tolerable_discontinuity=0, min_npix=0, max_npix=0,
+    def __init__(self, gvth_1=0, gvth_2=0, gvth_3=0, gvth_4=0,
+                 tol_dis=0, min_npix=0, max_npix=0,
                  min_npix_x=0, max_npix_x=0, min_npix_y=0, max_npix_y=0,
-                 sum_of_grey=0, size_of_crosses=0, path=None):
+                 sum_grey=0, size_cross=0, path=None):
         """
         Initialize detect plate parameters.
         
         Args:
-            gvthres (int): Gray value threshold.
-            tolerable_discontinuity (int): Tolerable discontinuity.
+            gvth_1 (int): Gray value threshold for camera 1.
+            gvth_2 (int): Gray value threshold for camera 2.
+            gvth_3 (int): Gray value threshold for camera 3.
+            gvth_4 (int): Gray value threshold for camera 4.
+            tol_dis (int): Tolerable discontinuity.
             min_npix (int): Minimum number of pixels.
             max_npix (int): Maximum number of pixels.
             min_npix_x (int): Minimum number of pixels in x direction.
             max_npix_x (int): Maximum number of pixels in x direction.
             min_npix_y (int): Minimum number of pixels in y direction.
             max_npix_y (int): Maximum number of pixels in y direction.
-            sum_of_grey (int): Sum of gray values.
-            size_of_crosses (int): Size of crosses.
+            sum_grey (int): Sum of gray values.
+            size_cross (int): Size of crosses.
             path (str or Path): Path to the parameter directory.
         """
         super().__init__(path)
-        self.set(gvthres, tolerable_discontinuity, min_npix, max_npix,
+        self.set(gvth_1, gvth_2, gvth_3, gvth_4, tol_dis, min_npix, max_npix,
                  min_npix_x, max_npix_x, min_npix_y, max_npix_y,
-                 sum_of_grey, size_of_crosses)
+                 sum_grey, size_cross)
     
-    def set(self, gvthres=0, tolerable_discontinuity=0, min_npix=0, max_npix=0,
+    def set(self, gvth_1=0, gvth_2=0, gvth_3=0, gvth_4=0,
+            tol_dis=0, min_npix=0, max_npix=0,
             min_npix_x=0, max_npix_x=0, min_npix_y=0, max_npix_y=0,
-            sum_of_grey=0, size_of_crosses=0):
+            sum_grey=0, size_cross=0):
         """
         Set detect plate parameters.
         
         Args:
-            gvthres (int): Gray value threshold.
-            tolerable_discontinuity (int): Tolerable discontinuity.
+            gvth_1 (int): Gray value threshold for camera 1.
+            gvth_2 (int): Gray value threshold for camera 2.
+            gvth_3 (int): Gray value threshold for camera 3.
+            gvth_4 (int): Gray value threshold for camera 4.
+            tol_dis (int): Tolerable discontinuity.
             min_npix (int): Minimum number of pixels.
             max_npix (int): Maximum number of pixels.
             min_npix_x (int): Minimum number of pixels in x direction.
             max_npix_x (int): Maximum number of pixels in x direction.
             min_npix_y (int): Minimum number of pixels in y direction.
             max_npix_y (int): Maximum number of pixels in y direction.
-            sum_of_grey (int): Sum of gray values.
-            size_of_crosses (int): Size of crosses.
+            sum_grey (int): Sum of gray values.
+            size_cross (int): Size of crosses.
         """
-        self.gvthres = gvthres
-        self.tolerable_discontinuity = tolerable_discontinuity
+        self.gvth_1 = gvth_1
+        self.gvth_2 = gvth_2
+        self.gvth_3 = gvth_3
+        self.gvth_4 = gvth_4
+        self.tol_dis = tol_dis
         self.min_npix = min_npix
         self.max_npix = max_npix
         self.min_npix_x = min_npix_x
         self.max_npix_x = max_npix_x
         self.min_npix_y = min_npix_y
         self.max_npix_y = max_npix_y
-        self.sum_of_grey = sum_of_grey
-        self.size_of_crosses = size_of_crosses
+        self.sum_grey = sum_grey
+        self.size_cross = size_cross
     
     def filename(self):
         """
@@ -89,16 +100,19 @@ class DetectPlateParams(Parameters):
         """
         try:
             with open(self.filepath(), "r") as f:
-                self.gvthres = int(g(f))
-                self.tolerable_discontinuity = int(g(f))
+                self.gvth_1 = int(g(f))
+                self.gvth_2 = int(g(f))
+                self.gvth_3 = int(g(f))
+                self.gvth_4 = int(g(f))
+                self.tol_dis = int(g(f))
                 self.min_npix = int(g(f))
                 self.max_npix = int(g(f))
                 self.min_npix_x = int(g(f))
                 self.max_npix_x = int(g(f))
                 self.min_npix_y = int(g(f))
                 self.max_npix_y = int(g(f))
-                self.sum_of_grey = int(g(f))
-                self.size_of_crosses = int(g(f))
+                self.sum_grey = int(g(f))
+                self.size_cross = int(g(f))
         except Exception as e:
             raise IOError(f"Error reading detect plate parameters: {e}")
     
@@ -111,16 +125,19 @@ class DetectPlateParams(Parameters):
         """
         try:
             with open(self.filepath(), "w") as f:
-                f.write(f"{self.gvthres}\n")
-                f.write(f"{self.tolerable_discontinuity}\n")
+                f.write(f"{self.gvth_1}\n")
+                f.write(f"{self.gvth_2}\n")
+                f.write(f"{self.gvth_3}\n")
+                f.write(f"{self.gvth_4}\n")
+                f.write(f"{self.tol_dis}\n")
                 f.write(f"{self.min_npix}\n")
                 f.write(f"{self.max_npix}\n")
                 f.write(f"{self.min_npix_x}\n")
                 f.write(f"{self.max_npix_x}\n")
                 f.write(f"{self.min_npix_y}\n")
                 f.write(f"{self.max_npix_y}\n")
-                f.write(f"{self.sum_of_grey}\n")
-                f.write(f"{self.size_of_crosses}\n")
+                f.write(f"{self.sum_grey}\n")
+                f.write(f"{self.size_cross}\n")
         except Exception as e:
             raise IOError(f"Error writing detect plate parameters: {e}")
     
@@ -132,16 +149,19 @@ class DetectPlateParams(Parameters):
             dict: A dictionary of detect plate parameter values.
         """
         return {
-            'gvthres': self.gvthres,
-            'tolerable_discontinuity': self.tolerable_discontinuity,
+            'gvth_1': self.gvth_1,
+            'gvth_2': self.gvth_2,
+            'gvth_3': self.gvth_3,
+            'gvth_4': self.gvth_4,
+            'tol_dis': self.tol_dis,
             'min_npix': self.min_npix,
             'max_npix': self.max_npix,
             'min_npix_x': self.min_npix_x,
             'max_npix_x': self.max_npix_x,
             'min_npix_y': self.min_npix_y,
             'max_npix_y': self.max_npix_y,
-            'sum_of_grey': self.sum_of_grey,
-            'size_of_crosses': self.size_of_crosses,
+            'sum_grey': self.sum_grey,
+            'size_cross': self.size_cross,
         }
     
     @classmethod
@@ -157,15 +177,18 @@ class DetectPlateParams(Parameters):
             DetectPlateParams: A new DetectPlateParams object.
         """
         return cls(
-            gvthres=c_struct['gvthres'],
-            tolerable_discontinuity=c_struct['tolerable_discontinuity'],
+            gvth_1=c_struct['gvth_1'],
+            gvth_2=c_struct['gvth_2'],
+            gvth_3=c_struct['gvth_3'],
+            gvth_4=c_struct['gvth_4'],
+            tol_dis=c_struct['tol_dis'],
             min_npix=c_struct['min_npix'],
             max_npix=c_struct['max_npix'],
             min_npix_x=c_struct['min_npix_x'],
             max_npix_x=c_struct['max_npix_x'],
             min_npix_y=c_struct['min_npix_y'],
             max_npix_y=c_struct['max_npix_y'],
-            sum_of_grey=c_struct['sum_of_grey'],
-            size_of_crosses=c_struct['size_of_crosses'],
+            sum_grey=c_struct['sum_grey'],
+            size_cross=c_struct['size_cross'],
             path=path,
         )

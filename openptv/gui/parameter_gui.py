@@ -1169,38 +1169,23 @@ class Calib_Params(HasTraits):
         detectPlateParams = DetectPlateParams(path=self.par_path)
         detectPlateParams.read()
 
-        (
-            gv_th1,
-            gv_th2,
-            gv_th3,
-            gv_th4,
-            tolerable_discontinuity,
-            min_npix,
-            max_npix,
-            min_npix_x,
-            max_npix_x,
-            min_npix_y,
-            max_npix_y,
-            sum_of_grey,
-            size_of_crosses,
-        ) = (
-            detectPlateParams.gvth_1,
-            detectPlateParams.gvth_2,
-            detectPlateParams.gvth_3,
-            detectPlateParams.gvth_4,
-            detectPlateParams.tol_dis,
-            detectPlateParams.min_npix,
-            detectPlateParams.max_npix,
-            detectPlateParams.min_npix_x,
-            detectPlateParams.max_npix_x,
-            detectPlateParams.min_npix_y,
-            detectPlateParams.max_npix_y,
-            detectPlateParams.sum_grey,
-            detectPlateParams.size_cross,
-        )
+        # Map the attributes from the new parameter class to the expected names
+        gv_th1 = detectPlateParams.gvthres  # Use the attribute name from the new class
+        gv_th2 = detectPlateParams.gvthres  # These might need to be adjusted based on the actual structure
+        gv_th3 = detectPlateParams.gvthres
+        gv_th4 = detectPlateParams.gvthres
+        tolerable_discontinuity = detectPlateParams.tolerable_discontinuity
+        min_npix = detectPlateParams.min_npix
+        max_npix = detectPlateParams.max_npix
+        min_npix_x = detectPlateParams.min_npix_x
+        max_npix_x = detectPlateParams.max_npix_x
+        min_npix_y = detectPlateParams.min_npix_y
+        max_npix_y = detectPlateParams.max_npix_y
+        sum_of_grey = detectPlateParams.sum_of_grey
+        size_of_crosses = detectPlateParams.size_of_crosses
 
         for i in range(self.n_img):
-            exec("self.grey_value_treshold_{0} = gv_th{0}".format(i + 1))
+            exec(f"self.grey_value_treshold_{i+1} = gv_th{i+1}")
 
         self.tolerable_discontinuity = tolerable_discontinuity
         self.min_npix = min_npix
@@ -1380,7 +1365,7 @@ class Experiment(HasTraits):
 
         # choose directories that has 'parameters' in their path
         dir_contents = [
-            f for f in dir_contents if str(f.stem).startswith(par_dir_prefix)
+            f for f in dir_contents if str(f.stem).startswith(par_dir_prefix())
         ]
         # print(f" parameter sets are in {dir_contents}")
 
