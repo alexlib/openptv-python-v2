@@ -8,7 +8,9 @@ and the bridge functions in openptv.binding.param_bridge.
 import os
 import pytest
 import tempfile
+import shutil
 from pathlib import Path
+import yaml
 
 import numpy as np
 
@@ -26,6 +28,7 @@ from openptv.parameters.detect_plate import DetectPlateParams
 from openptv.parameters.dumbbell import DumbbellParams
 from openptv.parameters.shaking import ShakingParams
 from openptv.parameters.pft_version import PftVersionParams
+from openptv.parameters import UnifiedParameters
 
 
 class TestTrackingParams:
@@ -223,6 +226,44 @@ class TestSequenceParams:
 
 
 # Add similar test classes for other parameter types
+
+def make_legacy_dir(tmpdir):
+    d = Path(tmpdir) / "legacy_params"
+    d.mkdir()
+    # Write track.par (not tracking.par)
+    t = TrackingParams(dvxmin=-1, dvxmax=1, dvymin=-2, dvymax=2, dvzmin=-3, dvzmax=3, angle=0.5, dacc=0.1, flagNewParticles=True)
+    t.path = d
+    t.write()
+    # Write sequence.par
+    s = SequenceParams(n_img=2, base_name=["img", "img"], first=0, last=0)
+    s.path = d
+    s.write()
+    # Write gui.yaml
+    with open(d / 'gui.yaml', 'w') as f:
+        yaml.safe_dump({'window_size': [800, 600]}, f)
+    return d
+
+def test_unified_read_write(tmp_path):
+    legacy_dir = make_legacy_dir(tmp_path)
+    unified_path = tmp_path / 'parameters.yaml'
+    # Convert legacy dir to unified YAML
+    up = UnifiedParameters(unified_path)
+    up.from_legacy_dir(legacy_dir)
+    up.write()
+    # Read back unified YAML
+    up2 = UnifiedParameters(unified_path)
+    up2.read()
+    assert up2.get_section('tracking').dvxmin == -1
+    assert up2.get_section('sequence').n_img == 2
+    assert up2.get_gui_param('window_size') == [800, 600]
+    # Convert back to legacy dir
+    out_dir = tmp_path / 'legacy_out'
+    up2.to_legacy_dir(out_dir)
+    assert (out_dir / 'track.yaml').exists()
+    assert (out_dir / 'sequence.yaml').exists()
+    with open(out_dir / 'gui.yaml') as f:
+        gui = yaml.safe_load(f)
+    assert gui['window_size'] == [800, 600]
 
 
 if __name__ == "__main__":
