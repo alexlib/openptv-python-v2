@@ -321,54 +321,59 @@ class PtvParams(Parameters):
     
     def read(self):
         """
-        Read PTV parameters from file.
-        
+        Read PTV parameters from file. Tries .par first, then .yaml if .par is missing.
         Raises:
             IOError: If the file cannot be read.
         """
+        par_path = self.filepath()
+        yaml_path = par_path.with_suffix('.yaml')
         try:
-            with open(self.filepath(), "r", encoding="utf8") as f:
-                self.n_img = int(g(f))
-                
-                self.img_name = []
-                self.img_cal = []
-                for i in range(self.n_img):
-                    self.img_name.append(g(f))
-                    self.img_cal.append(g(f))
-                
-                self.hp_flag = int_to_bool(int(g(f)))
-                self.allcam_flag = int_to_bool(int(g(f)))
-                self.tiff_flag = int_to_bool(int(g(f)))
-                self.imx = int(g(f))
-                self.imy = int(g(f))
-                self.pix_x = float(g(f))
-                self.pix_y = float(g(f))
-                self.chfield = int(g(f))
-                self.mmp_n1 = float(g(f))
-                self.mmp_n2 = float(g(f))
-                self.mmp_n3 = float(g(f))
-                self.mmp_d = float(g(f))
+            if par_path.exists():
+                with open(par_path, "r", encoding="utf8") as f:
+                    self.n_img = int(g(f))
+                    self.img_name = []
+                    self.img_cal = []
+                    for i in range(self.n_img):
+                        self.img_name.append(g(f))
+                        self.img_cal.append(g(f))
+                    self.hp_flag = int_to_bool(int(g(f)))
+                    self.allcam_flag = int_to_bool(int(g(f)))
+                    self.tiff_flag = int_to_bool(int(g(f)))
+                    self.imx = int(g(f))
+                    self.imy = int(g(f))
+                    self.pix_x = float(g(f))
+                    self.pix_y = float(g(f))
+                    self.chfield = int(g(f))
+                    self.mmp_n1 = float(g(f))
+                    self.mmp_n2 = float(g(f))
+                    self.mmp_n3 = float(g(f))
+                    self.mmp_d = float(g(f))
+            elif yaml_path.exists():
+                import yaml
+                with open(yaml_path, "r") as f:
+                    data = yaml.safe_load(f)
+                for k, v in data.items():
+                    setattr(self, k, v)
+            else:
+                raise FileNotFoundError(f"Neither {par_path} nor {yaml_path} exists.")
         except Exception as e:
             raise IOError(f"Error reading PTV parameters: {e}")
     
     def write(self):
         """
-        Write PTV parameters to file.
-        
+        Write PTV parameters to file and update YAML as well.
         Raises:
             IOError: If the file cannot be written.
         """
         try:
-            with open(self.filepath(), "w") as f:
+            with open(self.filepath(), "w", encoding="utf8") as f:
                 f.write(f"{self.n_img}\n")
-                
                 for i in range(self.n_img):
                     f.write(f"{self.img_name[i]}\n")
                     f.write(f"{self.img_cal[i]}\n")
-                
-                f.write(f"{bool_to_int(self.hp_flag)}\n")
-                f.write(f"{bool_to_int(self.allcam_flag)}\n")
-                f.write(f"{bool_to_int(self.tiff_flag)}\n")
+                f.write(f"{int(self.hp_flag)}\n")
+                f.write(f"{int(self.allcam_flag)}\n")
+                f.write(f"{int(self.tiff_flag)}\n")
                 f.write(f"{self.imx}\n")
                 f.write(f"{self.imy}\n")
                 f.write(f"{self.pix_x}\n")
@@ -378,6 +383,7 @@ class PtvParams(Parameters):
                 f.write(f"{self.mmp_n2}\n")
                 f.write(f"{self.mmp_n3}\n")
                 f.write(f"{self.mmp_d}\n")
+            self.to_yaml()  # Always update YAML after writing
         except Exception as e:
             raise IOError(f"Error writing PTV parameters: {e}")
     

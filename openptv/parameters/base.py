@@ -6,6 +6,7 @@ This module provides the base Parameter class that all parameter classes inherit
 
 from pathlib import Path
 import os
+import yaml
 
 # Import from our own utils module
 from openptv.parameters.utils import par_dir_prefix
@@ -136,3 +137,23 @@ class Parameters:
         # Check if the file exists relative to the experiment path
         filepath = self.exp_path / filename
         return filepath.exists()
+
+    def to_yaml(self):
+        """
+        Write the parameter values to a YAML file with the same base name as the parameter file.
+        Converts Path objects to str to ensure YAML is safe-loadable.
+        """
+        import yaml
+        yaml_file = self.filepath().with_suffix('.yaml')
+        def _to_primitive(val):
+            if isinstance(val, Path):
+                return str(val)
+            elif isinstance(val, (list, tuple)):
+                return [_to_primitive(v) for v in val]
+            elif isinstance(val, dict):
+                return {k: _to_primitive(v) for k, v in val.items()}
+            else:
+                return val
+        data = {k: _to_primitive(v) for k, v in self.__dict__.items() if not k.startswith('_') and not callable(v)}
+        with open(yaml_file, "w") as outfile:
+            yaml.safe_dump(data, outfile, default_flow_style=False)

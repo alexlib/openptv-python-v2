@@ -44,9 +44,7 @@ def test_parameters_base_class():
 
 def test_ptv_params(temp_params_dir):
     """Test the PtvParams class"""
-    # Create parameters directory
-    params_dir = temp_params_dir / "parameters"
-    params_dir.mkdir(exist_ok=True)
+    params_dir = temp_params_dir  # Use only one 'parameters' directory
 
     # Create a test ptv.par file
     ptv_par_path = params_dir / "ptv.par"
@@ -96,22 +94,18 @@ def test_ptv_params(temp_params_dir):
         yaml.dump(ptv_yaml_data, f)
 
     # Test reading from .par file
-    # Change to the temp directory to match how the Parameters class works
     original_dir = Path.cwd()
-    os.chdir(temp_params_dir)
+    os.chdir(params_dir)
 
     try:
-        # Initialize with the correct path
-        cparams = PtvParams()
+        cparams = PtvParams(path=params_dir)
         cparams.read()
-
-        # Verify the parameters were read correctly
         assert cparams.n_img == 4
         assert cparams.img_name[0] == "img/cam1.%d"
         assert cparams.img_cal[0] == "cal/cam1.tif"
-        assert cparams.hp_flag == 1
-        assert cparams.allcam_flag == 1
-        assert cparams.tiff_flag == 1
+        assert cparams.hp_flag is True
+        assert cparams.allcam_flag is True
+        assert cparams.tiff_flag is True
         assert cparams.imx == 1280
         assert cparams.imy == 1024
         assert cparams.pix_x == 0.012
@@ -127,18 +121,50 @@ def test_ptv_params(temp_params_dir):
         cparams.write()
 
         # Read back and verify
-        cparams2 = PtvParams()
+        cparams2 = PtvParams(path=params_dir)
         cparams2.read()
         assert cparams2.n_img == 3
+
+        # Remove the .par file and test that YAML is used
+        ptv_par_path.unlink()
+        cparams3 = PtvParams(path=params_dir)
+        cparams3.read()
+        assert cparams3.n_img == 3
+        # Remove the .yaml file and test fallback to .par
+        ptv_yaml_path.unlink()
+        with open(ptv_par_path, "w") as f:
+            f.write("4\n")
+            f.write("img/cam1.%d\n")
+            f.write("cal/cam1.tif\n")
+            f.write("img/cam2.%d\n")
+            f.write("cal/cam2.tif\n")
+            f.write("img/cam3.%d\n")
+            f.write("cal/cam3.tif\n")
+            f.write("img/cam4.%d\n")
+            f.write("cal/cam4.tif\n")
+            f.write("1\n")
+            f.write("1\n")
+            f.write("1\n")
+            f.write("1280\n")
+            f.write("1024\n")
+            f.write("0.012\n")
+            f.write("0.012\n")
+            f.write("0\n")
+            f.write("1.0\n")
+            f.write("1.33\n")
+            f.write("1.46\n")
+            f.write("5.0\n")
+        cparams4 = PtvParams(path=params_dir)
+        cparams4.read()
+        assert cparams4.n_img == 4
+        ptv_par_path.unlink(missing_ok=True)
+        ptv_yaml_path.unlink(missing_ok=True)
     finally:
-        # Change back to the original directory
         os.chdir(original_dir)
 
 def test_sequence_params(temp_params_dir):
     """Test the SequenceParams class"""
-    # Create parameters directory
-    params_dir = temp_params_dir / "parameters"
-    params_dir.mkdir(exist_ok=True)
+    params_dir = temp_params_dir
 
     # Create a test sequence.par file
     seq_par_path = params_dir / "sequence.par"
@@ -150,34 +176,44 @@ def test_sequence_params(temp_params_dir):
         f.write("10000\n")  # first
         f.write("10010\n")  # last
 
-    # Test reading from file
-    # Change to the temp directory to match how the Parameters class works
     original_dir = Path.cwd()
-    os.chdir(temp_params_dir)
+    os.chdir(params_dir)
 
     try:
-        # Initialize with the correct path and parameters
-        sparams = SequenceParams(n_img=4, base_name=[], first=0, last=0)
+        sparams = SequenceParams(n_img=4, base_name=[], first=0, last=0, path=params_dir)
         sparams.read()
-
-        # Verify the parameters were read correctly
         assert sparams.first == 10000
         assert sparams.last == 10010
         assert len(sparams.base_name) == 4
         assert sparams.base_name[0] == "img/cam1.%d"
 
-        # Test setting values
         sparams.first = 10001
         sparams.last = 10009
         sparams.write()
 
-        # Read back and verify
-        sparams2 = SequenceParams(n_img=4, base_name=[], first=0, last=0)
+        sparams2 = SequenceParams(n_img=4, base_name=[], first=0, last=0, path=params_dir)
         sparams2.read()
         assert sparams2.first == 10001
         assert sparams2.last == 10009
     finally:
-        # Change back to the original directory
         os.chdir(original_dir)
 
-# Add more tests for other parameter classes as needed
+def test_convert_par_to_yaml_script(tmp_path):
+    """Test the migration script for converting .par to .yaml"""
+    import subprocess
+    import os
+    param_dir = tmp_path / "parameters"
+    param_dir.mkdir()
+    ptv_par = param_dir / "ptv.par"
+    with open(ptv_par, "w") as f:
+        f.write("4\nimg/cam1.%d\ncal/cam1.tif\nimg/cam2.%d\ncal/cam2.tif\nimg/cam3.%d\ncal/cam3.tif\nimg/cam4.%d\ncal/cam4.tif\n1\n1\n1\n1280\n1024\n0.012\n0.012\n0\n1.0\n1.33\n1.46\n5.0\n")
+    # Run from project root so script path is correct
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    subprocess.run([
+        "python", "examples/convert_par_to_yaml.py", str(param_dir)
+    ], check=True, cwd=project_root)
+    ptv_yaml = param_dir / "ptv.yaml"
+    assert ptv_yaml.exists()
+    with open(ptv_yaml) as f:
+        data = yaml.safe_load(f)
+    assert data["n_img"] == 4

@@ -180,3 +180,25 @@ vol_params.read()
 targets = []  # Load targets
 results = track_forward_with_params(targets, track_params, vol_params)
 ```
+
+## YAML Parameter Files (May 2025 Update)
+
+OpenPTV now uses YAML as the default format for all parameter files. The legacy `.par` files are still supported for backward compatibility, but all new files will be written as `.yaml`.
+
+### What Changed?
+- All parameter classes now read and write `.yaml` files by default.
+- If a `.yaml` file is not found, the code will attempt to read the corresponding `.par` file and automatically convert it to YAML.
+- You can migrate all your `.par` files to YAML using the provided script:
+
+```bash
+python examples/convert_par_to_yaml.py <parameters_directory>
+```
+
+### Why YAML?
+- Human-readable and editable
+- Supports comments and complex data structures
+- Easier to maintain and version control
+
+### Backward Compatibility
+- If you have existing `.par` files, you do not need to convert them immediately. The software will read them and create `.yaml` files automatically.
+- It is recommended to migrate to YAML for consistency and future compatibility.

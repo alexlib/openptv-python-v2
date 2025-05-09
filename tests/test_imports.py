@@ -20,8 +20,8 @@ def get_binding_modules():
 def test_import_binding(module_name):
     """Test that each binding module can be imported."""
     # Skip param_bridge and tracker_bridge tests since they're not compiled yet
-    if module_name in ['param_bridge', 'tracker_bridge']:
-        pytest.skip(f"Skipping {module_name} test since it's not compiled yet")
+    # if module_name in ['param_bridge', 'tracker_bridge']:
+        # pytest.skip(f"Skipping {module_name} test since it's not compiled yet")
 
     try:
         module = importlib.import_module(f"openptv.binding.{module_name}")

@@ -154,25 +154,14 @@ def test_directory_editor_creation(tmp_path):
 
 # @pytest.mark.skipif(os.environ.get("DISPLAY") is None,
 #                    reason="GUI tests require a display")
-def test_calibration_gui_creation(mock_experiment_dir, test_data_dir):
-    """Test that CalibrationGUI can be created"""
-    # Skip if CalibrationGUI is not available
-    if CalibrationGUI is None:
-        pytest.skip("CalibrationGUI not available")
-
-    # Skip this test for now as it requires more complex setup
-    pytest.skip("CalibrationGUI test requires more complex setup")
-
-# @pytest.mark.skipif(os.environ.get("DISPLAY") is None,
-#                    reason="GUI tests require a display")
 def test_parameters_gui_creation(mock_experiment_dir, test_data_dir):
     """Test that Main_Params can be created"""
     # Skip this test while we're transitioning to the new parameter module
-    pytest.skip("Skipping while transitioning to the new parameter module")
+    # pytest.skip("Skipping while transitioning to the new parameter module")
 
     # Skip if Main_Params is not available
-    if Main_Params is None:
-        pytest.skip("Main_Params not available")
+    # if Main_Params is None:
+        # pytest.skip("Main_Params not available")
 
     # Create a parameters directory in the mock experiment directory
     params_dir = mock_experiment_dir / "parameters"
