@@ -77,7 +77,7 @@ class TargetParams(Parameters):
         Returns:
             str: The filename for target parameters.
         """
-        return "target.par"
+        return self.path
     
     def read(self):
         """

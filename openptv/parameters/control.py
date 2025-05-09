@@ -103,7 +103,7 @@ class ControlParams(Parameters):
         Returns:
             str: The filename for control parameters.
         """
-        return "control.par"
+        return "ptv.par"
     
     def read(self):
         """

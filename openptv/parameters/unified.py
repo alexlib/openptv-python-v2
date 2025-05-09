@@ -15,11 +15,10 @@ from . import (
 
 # List of all parameter types and their classes
 PARAMETER_CLASSES = {
-    'tracking': tracking.TrackingParams,
+    'track': tracking.TrackingParams,
     'sequence': sequence.SequenceParams,
     'volume': volume.VolumeParams,
     'control': control.ControlParams,
-    'target': target.TargetParams,
     'orient': orient.OrientParams,
     'cal_ori': calibration.CalOriParams,
     'criteria': criteria.CriteriaParams,
@@ -72,9 +71,16 @@ class UnifiedParameters:
         """Load parameters from a directory of legacy .par files (not YAML) for this test."""
         param_dir = Path(param_dir)
         for key, cls in PARAMETER_CLASSES.items():
+            print(f"Loading {key} using class {cls} from {param_dir}")
             # Use correct filename for tracking
             if key == "tracking":
                 par_path = param_dir / "track.par"
+            elif key == "detect_plate":
+                par_path = param_dir / "detect_plate.par"
+            elif key == "targ_rec":
+                par_path = param_dir / "targ_rec.par"
+            elif key == "control":
+                par_path = param_dir / "ptv.par"
             elif key == "cal_ori":
                 par_path = param_dir / "cal_ori.par"
             else:
@@ -82,22 +88,10 @@ class UnifiedParameters:
             yaml_path = param_dir / f"{key}.yaml"
             obj = None
             if par_path.exists():
-                obj = cls(path=param_dir)
-                # Special handling for sequence: set n_img by counting lines
-                if key == 'sequence':
-                    with open(par_path) as f:
-                        lines = f.readlines()
-                    n_img = len(lines) - 2  # last two lines are first/last
-                    obj.n_img = n_img
-                # Special handling for cal_ori: set n_img by counting lines
-                if key == 'cal_ori':
-                    with open(par_path) as f:
-                        lines = f.readlines()
-                    n_img = (len(lines) - 1 - 3) // 2
-                    obj.n_img = n_img
+                obj = cls(path=par_path)
                 obj.read()
             elif yaml_path.exists():
-                obj = cls(path=param_dir)
+                obj = cls(path=par_path)
                 obj.read()
             self.sections[key] = obj
         # Optionally load GUI params
@@ -122,10 +116,14 @@ class UnifiedParameters:
                 yaml.safe_dump(self.gui, f, sort_keys=False)
 
     def set_section(self, key, params):
+        if key == "tracking":
+            key = "track"
         assert key in PARAMETER_CLASSES
         self.sections[key] = params
 
     def get_section(self, key):
+        if key == "tracking":
+            key = "track"
         assert key in PARAMETER_CLASSES
         return self.sections[key]
 

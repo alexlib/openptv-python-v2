@@ -98,7 +98,7 @@ class TrackingParams(Parameters):
         Returns:
             str: The filename for tracking parameters.
         """
-        return "track.par"
+        return self.path
 
     def read(self):
         """

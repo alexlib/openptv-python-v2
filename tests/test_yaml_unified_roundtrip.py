@@ -74,3 +74,7 @@ def test_legacy_and_unified_yaml(tmp_path):
     print("Legacy .par:", (d / "track.par").read_text())
     print("Legacy .yaml:", (d / "track.yaml").read_text())
     print("Unified parameters.yaml:", (d / "parameters.yaml").read_text())
+
+if __name__ == "__main__":
+    import pytest
+    pytest.main([__file__])
