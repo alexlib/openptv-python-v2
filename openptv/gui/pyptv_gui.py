@@ -55,7 +55,7 @@ from openptv.parameters import (
     TrackingParams,
     SequenceParams,
     CalOriParams,
-    CriteriaParams,
+    VolumeParams,
     TargRecParams,
     ManOriParams,
     DetectPlateParams,

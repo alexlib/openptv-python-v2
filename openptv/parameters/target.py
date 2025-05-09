@@ -20,14 +20,14 @@ class TargetParams(Parameters):
     and converting between Python and C representations.
     """
 
-    def __init__(self, gvthres: Union[List, None]=None, discont: int=0, nnmin: int=0, nnmax: int=0,
+    def __init__(self, gvthresh: Union[List, None]=None, discont: int=0, nnmin: int=0, nnmax: int=0,
                  nxmin: int=0, nxmax: int=0, nymin: int=0, nymax: int=0, sumg_min: int=0, cr_sz: int=0,
                  path: Union[str, None]=None):
         """
         Initialize target parameters.
         
         Args:
-            gvthres (list): List of gray value thresholds for each camera.
+            gvthresh (list): List of gray value thresholds for each camera.
             discont (int): Discontinuity threshold.
             nnmin (int): Minimum number of pixels.
             nnmax (int): Maximum number of pixels.
@@ -40,15 +40,15 @@ class TargetParams(Parameters):
             path (str or Path): Path to the parameter directory.
         """
         super().__init__(path)
-        self.set(gvthres, discont, nnmin, nnmax, nxmin, nxmax, nymin, nymax, sumg_min, cr_sz)
+        self.set(gvthresh, discont, nnmin, nnmax, nxmin, nxmax, nymin, nymax, sumg_min, cr_sz)
     
-    def set(self, gvthres=None, discont=0, nnmin=0, nnmax=0,
+    def set(self, gvthresh=None, discont=0, nnmin=0, nnmax=0,
             nxmin=0, nxmax=0, nymin=0, nymax=0, sumg_min=0, cr_sz=0):
         """
         Set target parameters.
         
         Args:
-            gvthres (list): List of gray value thresholds for each camera.
+            gvthresh (list): List of gray value thresholds for each camera.
             discont (int): Discontinuity threshold.
             nnmin (int): Minimum number of pixels.
             nnmax (int): Maximum number of pixels.
@@ -59,7 +59,7 @@ class TargetParams(Parameters):
             sumg_min (int): Minimum sum of gray values.
             cr_sz (int): Cross size.
         """
-        self.gvthres = gvthres or [0, 0, 0, 0]
+        self.gvthresh = gvthresh or [0, 0, 0, 0]
         self.discont = discont
         self.nnmin = nnmin
         self.nnmax = nnmax
@@ -88,7 +88,7 @@ class TargetParams(Parameters):
         """
         try:
             with open(self.filepath(), "r") as f:
-                self.gvthres = [int(g(f)) for _ in range(4)]
+                self.gvthresh = [int(g(f)) for _ in range(4)]
                 self.discont = int(g(f))
                 self.nnmin = int(g(f))
                 self.nnmax = int(g(f))
@@ -111,7 +111,7 @@ class TargetParams(Parameters):
         try:
             with open(self.filepath(), "w") as f:
                 for i in range(4):
-                    f.write(f"{self.gvthres[i]}\n")
+                    f.write(f"{self.gvthresh[i]}\n")
                 f.write(f"{self.discont}\n")
                 f.write(f"{self.nnmin}\n")
                 f.write(f"{self.nnmax}\n")
@@ -132,7 +132,7 @@ class TargetParams(Parameters):
             dict: A dictionary of target parameter values.
         """
         return {
-            'gvthres': self.gvthres,
+            'gvthresh': self.gvthresh,
             'discont': self.discont,
             'nnmin': self.nnmin,
             'nnmax': self.nnmax,
@@ -157,7 +157,7 @@ class TargetParams(Parameters):
             TargetParams: A new TargetParams object.
         """
         return cls(
-            gvthres=c_struct['gvthres'],
+            gvthresh=c_struct['gvthresh'],
             discont=c_struct['discont'],
             nnmin=c_struct['nnmin'],
             nnmax=c_struct['nnmax'],

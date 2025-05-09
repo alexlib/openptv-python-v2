@@ -18,7 +18,7 @@ class PftVersionParams(Parameters):
     This class handles reading and writing PFT version parameters to/from files.
     """
 
-    def __init__(self, version=0, existing_target=False, path=None):
+    def __init__(self, sexisting_target=False, path=None):
         """
         Initialize PFT version parameters.
 
@@ -28,7 +28,7 @@ class PftVersionParams(Parameters):
             path (str or Path): Path to the parameter directory.
         """
         super().__init__(path)
-        self.set(version, existing_target)
+        self.set(existing_target)
 
     def set(self, version=0, existing_target=False):
         """
@@ -38,7 +38,6 @@ class PftVersionParams(Parameters):
             version (int): PFT version.
             existing_target (bool): Whether to use existing targets.
         """
-        self.version = version
         self.Existing_Target = existing_target
 
     def filename(self):
@@ -59,7 +58,7 @@ class PftVersionParams(Parameters):
         """
         try:
             with open(self.filepath(), "r") as f:
-                self.version = int(g(f))
+                # self.version = int(g(f))
                 try:
                     self.Existing_Target = bool(int(g(f)))
                 except:
@@ -77,7 +76,7 @@ class PftVersionParams(Parameters):
         """
         try:
             with open(self.filepath(), "w") as f:
-                f.write(f"{self.version}\n")
+                # f.write(f"{self.version}\n")
                 f.write(f"{int(self.Existing_Target)}\n")
         except Exception as e:
             raise IOError(f"Error writing PFT version parameters: {e}")
@@ -90,7 +89,7 @@ class PftVersionParams(Parameters):
             dict: A dictionary of PFT version parameter values.
         """
         return {
-            'version': self.version,
+            # 'version': self.version,
             'existing_target': self.Existing_Target,
         }
 
@@ -107,7 +106,7 @@ class PftVersionParams(Parameters):
             PftVersionParams: A new PftVersionParams object.
         """
         return cls(
-            version=c_struct['version'],
+            # version=c_struct['version'],
             existing_target=c_struct.get('existing_target', False),
             path=path,
         )

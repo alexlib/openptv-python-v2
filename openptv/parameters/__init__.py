@@ -14,7 +14,7 @@ from openptv.parameters.volume import VolumeParams
 from openptv.parameters.control import ControlParams
 from openptv.parameters.target import TargetParams
 from openptv.parameters.calibration import CalOriParams
-from openptv.parameters.criteria import CriteriaParams
+from openptv.parameters.volume import VolumeParams
 from openptv.parameters.examine import ExamineParams
 from openptv.parameters.orient import OrientParams
 from openptv.parameters.dumbbell import DumbbellParams
@@ -37,7 +37,7 @@ __all__ = [
     'TargetParams',
     'TargRecParams',
     'CalOriParams',
-    'CriteriaParams',
+    'VolumeParams',
     'ExamineParams',
     'OrientParams',
     'DetectPlateParams',

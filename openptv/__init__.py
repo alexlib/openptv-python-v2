@@ -90,7 +90,7 @@ from .parameters.tracking import TrackingParams
 from .parameters.sequence import SequenceParams
 from .parameters.target import TargetParams
 from .parameters.examine import ExamineParams
-from .parameters.criteria import CriteriaParams
+from .parameters.volume import VolumeParams
 from .parameters.dumbbell import DumbbellParams
 from .parameters.man_ori import ManOriParams
 from .parameters.multi_plane import MultiPlaneParams

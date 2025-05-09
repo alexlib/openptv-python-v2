@@ -60,7 +60,7 @@ results = track_forward_with_params(targets, track_params, vol_params)
 - `PtvParams`: PTV parameters
 - `TargetParams`: Target parameters
 - `CalOriParams`: Calibration and orientation parameters
-- `CriteriaParams`: Criteria parameters
+- `VolumeParams`: Criteria parameters
 - `ExamineParams`: Examine parameters
 - `OrientParams`: Orientation parameters
 - `DetectPlateParams`: Detect plate parameters

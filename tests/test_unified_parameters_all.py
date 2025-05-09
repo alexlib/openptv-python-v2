@@ -6,7 +6,6 @@ from openptv.parameters.sequence import SequenceParams
 from openptv.parameters.volume import VolumeParams
 from openptv.parameters.tracking import TrackingParams
 from openptv.parameters.target import TargetParams
-from openptv.parameters.criteria import CriteriaParams
 from openptv.parameters.examine import ExamineParams
 
 def test_unified_parameters_all(tmp_path):
@@ -33,11 +32,15 @@ def test_unified_parameters_all(tmp_path):
             'n_img': 2,
         },
         'volume': {  # volume.par → VolumeParams
-            'nlay': 1,
-            'n1': 1.0,
-            'n2': [1.0, 1.0, 1.0],
-            'd': [1.0, 1.0, 1.0],
-            'n3': 1.0,
+            'X_lay': [-40, 40],
+            'Zmin_lay': [-20, -20],
+            'Zmax_lay': [25, 25],
+            'cnx': 0.02,
+            'cny': 0.02,
+            'cn': 0.02,
+            'csumg': 0.02,
+            'corrmin': 33.0,
+            'eps0': 0.2,
         },
         'tracking': {  # track.par → TrackingParams
             'dvxmin': -1,
@@ -50,46 +53,29 @@ def test_unified_parameters_all(tmp_path):
             'dacc': 0.1,
             'flagNewParticles': True,
         },
-        'target': {  # target.par → TargetParams (example fields)
-            'cn': 11,
-            'cnx': 7,
-            'cny': 7,
-            'sumg_min': 30,
-            'size_min': 3,
-            'size_max': 100,
-            'nx': 15,
-            'ny': 15,
-            'sumg_max': 255,
-        },
         'detect_plate': {
-            'gvth_1': 40,
-            'gvth_2': 40,
-            'gvth_3': 40,
-            'gvth_4': 40,
-            'max_npix': 400,
-            'max_npix_x': 50,
-            'max_npix_y': 50,
-            'min_npix': 25,
-            'min_npix_x': 5,
-            'min_npix_y': 5,
-            'size_cross': 3,
-            'sum_grey': 100,
-            'tol_dis': 500,
+            'gvthresh': [40, 40, 40, 40],
+            'nnmax': 400,
+            'nxmax': 50,
+            'nymax': 50,
+            'nnmin': 25,
+            'nxmin': 5,
+            'nymin': 5,
+            'cr_sz': 3,
+            'sumg_min': 100,
+            'discont': 500,
         },
         'targ_rec': {  # targ_rec.par → TargetParams (example fields)
-            'gvth_1': 40,
-            'gvth_2': 40,
-            'gvth_3': 40,
-            'gvth_4': 40,
-            'max_npix': 400,
-            'max_npix_x': 50,
-            'max_npix_y': 50,
-            'min_npix': 25,
-            'min_npix_x': 5,
-            'min_npix_y': 5,
-            'size_cross': 3,
-            'sum_grey': 100,
-            'tol_dis': 500,
+            'gvthresh': [40, 40, 40, 40],
+            'nnmax': 400,
+            'nxmax': 50,
+            'nymax': 50,
+            'nnmin': 25,
+            'nxmin': 5,
+            'nymin': 5,
+            'cr_sz': 3,
+            'sumg_min': 100,
+            'discont': 500,
         },
         'criteria': {
             'X_lay': [-40, 40],
@@ -102,13 +88,9 @@ def test_unified_parameters_all(tmp_path):
             'csumg': 0.02,
             'eps0': 0.2,
         }, 
-        'examine': {  # examine.par → ExamineParams (example fields)
-            'min_npix': 5,
-            'max_npix': 100,
-            'sumg_min': 30,
-            'sumg_max': 255,
-            'size_min': 3,
-            'size_max': 100,
+        'examine': {
+            'Combine_Flag': False,
+            'Examine_Flag': False,
         },
         'cal_ori': {
             'chfield': 0,
@@ -148,8 +130,8 @@ def test_unified_parameters_all(tmp_path):
             'max_num_points': 10,
 
         },
-        'pft_version': {  # pft_version.par → PftVersionParams (example fields)
-            'existing_targets': False,
+        'pft_version': {
+            'Existing_Target': False,
         },
     }
     yml_path = tmp_path / 'parameters.yml'
@@ -173,7 +155,7 @@ def test_unified_parameters_all(tmp_path):
     assert isinstance(target, TargetParams)
     assert isinstance(detect_plate, TargetParams)
     assert isinstance(targ_rec, TargetParams)
-    assert isinstance(criteria, CriteriaParams)
+    assert isinstance(criteria, VolumeParams)
     assert isinstance(examine, ExamineParams)
 
     # Now test writing and reading back

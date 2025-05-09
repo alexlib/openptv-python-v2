@@ -14,7 +14,7 @@ from openptv.parameters import (
     PtvParams as OldPtvParams,
     CalOriParams as OldCalOriParams,
     SequenceParams as OldSequenceParams,
-    CriteriaParams as OldCriteriaParams,
+    VolumeParams as OldVolumeParams,
     TargRecParams as OldTargRecParams,
     ManOriParams as OldManOriParams,
     DetectPlateParams as OldDetectPlateParams,
@@ -34,7 +34,7 @@ from openptv.parameters import (
     PtvParams as NewPtvParams,
     CalOriParams as NewCalOriParams,
     SequenceParams as NewSequenceParams,
-    CriteriaParams as NewCriteriaParams,
+    VolumeParams as NewVolumeParams,
     TargRecParams as NewTargRecParams,
     ManOriParams as NewManOriParams,
     DetectPlateParams as NewDetectPlateParams,
@@ -120,17 +120,17 @@ def convert_old_to_new_sequence_params(old_params: OldSequenceParams) -> NewSequ
     )
 
 
-def convert_old_to_new_criteria_params(old_params: OldCriteriaParams) -> NewCriteriaParams:
+def convert_old_to_new_criteria_params(old_params: OldVolumeParams) -> NewVolumeParams:
     """
-    Convert old CriteriaParams to new CriteriaParams.
+    Convert old VolumeParams to new VolumeParams.
 
     Args:
-        old_params: Old CriteriaParams object.
+        old_params: Old VolumeParams object.
 
     Returns:
-        New CriteriaParams object.
+        New VolumeParams object.
     """
-    return NewCriteriaParams(
+    return NewVolumeParams(
         X_lay=old_params.X_lay,
         Zmin_lay=old_params.Zmin_lay,
         Zmax_lay=old_params.Zmax_lay,
@@ -285,7 +285,7 @@ def read_params_dir(par_path: Path) -> dict:
     ret = {
         NewCalOriParams: NewCalOriParams(n_img, path=par_path),
         NewSequenceParams: NewSequenceParams(n_img, path=par_path),
-        NewCriteriaParams: NewCriteriaParams(path=par_path),
+        NewVolumeParams: NewVolumeParams(path=par_path),
         NewTargRecParams: NewTargRecParams(n_img, path=par_path),
         NewManOriParams: NewManOriParams(n_img, [], path=par_path),
         NewDetectPlateParams: NewDetectPlateParams(path=par_path),

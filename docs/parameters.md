@@ -52,7 +52,7 @@ The following parameter classes are available in the unified module:
 - `OrientParams`: Orientation parameters
 - `ManOriParams`: Manual orientation parameters
 - `ExamineParams`: Examine parameters
-- `CriteriaParams`: Criteria parameters
+- `VolumeParams`: Criteria parameters
 - `DetectPlateParams`: Detect plate parameters
 - `DumbbellParams`: Dumbbell parameters
 - `ShakingParams`: Shaking parameters

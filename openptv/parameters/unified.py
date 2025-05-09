@@ -12,7 +12,7 @@ from openptv.parameters.volume import VolumeParams
 from openptv.parameters.tracking import TrackingParams
 from openptv.parameters.target import TargetParams
 from openptv.parameters.examine import ExamineParams
-from openptv.parameters.criteria import CriteriaParams
+from openptv.parameters.volume import VolumeParams
 from openptv.parameters.calibration import CalOriParams
 from openptv.parameters.man_ori import ManOriParams
 from openptv.parameters.multi_plane import MultiPlaneParams
@@ -46,7 +46,6 @@ class UnifiedParameters:
         target = TargetParams(**self.data.get('target', {}))
         detect_plate = TargetParams(**self.data.get('detect_plate', {}))
         targ_rec = TargetParams(**self.data.get('targ_rec', {}))
-        criteria = CriteriaParams(**self.data.get('criteria', {}))
         examine = ExamineParams(**self.data.get('examine', {}))
         # In to_classes:
         cal_ori = CalOriParams(**self.data.get('cal_ori', {}))

@@ -21,7 +21,7 @@ import numpy as np
 # Import from the new parameter module
 from openptv.parameters import (
     CalOriParams,
-    CriteriaParams,
+    VolumeParams,
     DetectPlateParams,
     DumbbellParams,
     ExamineParams,
@@ -138,7 +138,7 @@ class ParamHandler(Handler):
                 path=par_path,
             ).write()
             # write criteria_par
-            CriteriaParams(
+            VolumeParams(
                 X_lay,
                 Zmin_lay,
                 Zmax_lay,
@@ -735,20 +735,20 @@ class Main_Params(HasTraits):
         self.Seq_Last = sequenceParams.last
 
         # load criteria_par
-        criteriaParams = CriteriaParams(path=self.par_path)
-        criteriaParams.read()
-        self.Xmin = criteriaParams.X_lay[0]
-        self.Xmax = criteriaParams.X_lay[1]
-        self.Zmin1 = criteriaParams.Zmin_lay[0]
-        self.Zmin2 = criteriaParams.Zmin_lay[1]
-        self.Zmax1 = criteriaParams.Zmax_lay[0]
-        self.Zmax2 = criteriaParams.Zmax_lay[1]
-        self.Min_Corr_nx = criteriaParams.cnx
-        self.Min_Corr_ny = criteriaParams.cny
-        self.Min_Corr_npix = criteriaParams.cn
-        self.Sum_gv = criteriaParams.csumg
-        self.Min_Weight_corr = criteriaParams.corrmin
-        self.Tol_Band = criteriaParams.eps0
+        VolumeParams = VolumeParams(path=self.par_path)
+        VolumeParams.read()
+        self.Xmin = VolumeParams.X_lay[0]
+        self.Xmax = VolumeParams.X_lay[1]
+        self.Zmin1 = VolumeParams.Zmin_lay[0]
+        self.Zmin2 = VolumeParams.Zmin_lay[1]
+        self.Zmax1 = VolumeParams.Zmax_lay[0]
+        self.Zmax2 = VolumeParams.Zmax_lay[1]
+        self.Min_Corr_nx = VolumeParams.cnx
+        self.Min_Corr_ny = VolumeParams.cny
+        self.Min_Corr_npix = VolumeParams.cn
+        self.Sum_gv = VolumeParams.csumg
+        self.Min_Weight_corr = VolumeParams.corrmin
+        self.Tol_Band = VolumeParams.eps0
 
         # write masking parameters
         masking_filename = Path(self.par_path) / 'masking.json'
