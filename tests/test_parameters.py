@@ -8,7 +8,7 @@ from pathlib import Path
 import yaml
 import shutil
 
-from openptv.parameters import Parameters, PtvParams, SequenceParams
+from openptv.parameters import Parameters, ControlParams, SequenceParams
 
 @pytest.fixture
 def temp_params_dir():
@@ -43,7 +43,7 @@ def test_parameters_base_class():
         params.read()
 
 def test_ptv_params(temp_params_dir):
-    """Test the PtvParams class"""
+    """Test the ControlParams class"""
     params_dir = temp_params_dir  # Use only one 'parameters' directory
 
     # Create a test ptv.par file
@@ -98,7 +98,7 @@ def test_ptv_params(temp_params_dir):
     os.chdir(params_dir)
 
     try:
-        cparams = PtvParams(path=params_dir)
+        cparams = ControlParams(path=params_dir)
         cparams.read()
         assert cparams.n_img == 4
         assert cparams.img_name[0] == "img/cam1.%d"
@@ -121,13 +121,13 @@ def test_ptv_params(temp_params_dir):
         cparams.write()
 
         # Read back and verify
-        cparams2 = PtvParams(path=params_dir)
+        cparams2 = ControlParams(path=params_dir)
         cparams2.read()
         assert cparams2.n_img == 3
 
         # Remove the .par file and test that YAML is used
         ptv_par_path.unlink()
-        cparams3 = PtvParams(path=params_dir)
+        cparams3 = ControlParams(path=params_dir)
         cparams3.read()
         assert cparams3.n_img == 3
         # Remove the .yaml file and test fallback to .par
@@ -154,7 +154,7 @@ def test_ptv_params(temp_params_dir):
             f.write("1.33\n")
             f.write("1.46\n")
             f.write("5.0\n")
-        cparams4 = PtvParams(path=params_dir)
+        cparams4 = ControlParams(path=params_dir)
         cparams4.read()
         assert cparams4.n_img == 4
         ptv_par_path.unlink(missing_ok=True)

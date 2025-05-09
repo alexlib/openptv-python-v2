@@ -91,14 +91,14 @@ from .parameters.sequence import SequenceParams
 from .parameters.target import TargetParams
 from .parameters.examine import ExamineParams
 from .parameters.criteria import CriteriaParams
-from .parameters.detect_plate import DetectPlateParams
 from .parameters.dumbbell import DumbbellParams
 from .parameters.man_ori import ManOriParams
 from .parameters.multi_plane import MultiPlaneParams
 from .parameters.pft_version import PftVersionParams
-from .parameters.control import PtvParams
 from .parameters.shaking import ShakingParams
-from .parameters.target import TargRecParams
+from .parameters.orient import OrientParams
+from .parameters.calibration import CalOriParams
+from .parameters import UnifiedParameters
 
 # # Import constants from binding modules
 # if _using_cython:

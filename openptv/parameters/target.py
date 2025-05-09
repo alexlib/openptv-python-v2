@@ -9,6 +9,7 @@ import numpy as np
 
 from openptv.parameters.base import Parameters
 from openptv.parameters.utils import g
+from typing import List, Union 
 
 
 class TargetParams(Parameters):
@@ -18,10 +19,10 @@ class TargetParams(Parameters):
     This class handles reading and writing target parameters to/from files,
     and converting between Python and C representations.
     """
-    
-    def __init__(self, gvthres=None, discont=0, nnmin=0, nnmax=0,
-                 nxmin=0, nxmax=0, nymin=0, nymax=0, sumg_min=0, cr_sz=0,
-                 path=None):
+
+    def __init__(self, gvthres: Union[List, None]=None, discont: int=0, nnmin: int=0, nnmax: int=0,
+                 nxmin: int=0, nxmax: int=0, nymin: int=0, nymax: int=0, sumg_min: int=0, cr_sz: int=0,
+                 path: Union[str, None]=None):
         """
         Initialize target parameters.
         

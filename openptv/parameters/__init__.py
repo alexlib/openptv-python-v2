@@ -12,12 +12,11 @@ from openptv.parameters.tracking import TrackingParams
 from openptv.parameters.sequence import SequenceParams
 from openptv.parameters.volume import VolumeParams
 from openptv.parameters.control import ControlParams
-from openptv.parameters.target import TargetParams, TargRecParams
+from openptv.parameters.target import TargetParams
 from openptv.parameters.calibration import CalOriParams
 from openptv.parameters.criteria import CriteriaParams
 from openptv.parameters.examine import ExamineParams
 from openptv.parameters.orient import OrientParams
-from openptv.parameters.detect_plate import DetectPlateParams
 from openptv.parameters.dumbbell import DumbbellParams
 from openptv.parameters.shaking import ShakingParams
 from openptv.parameters.pft_version import PftVersionParams

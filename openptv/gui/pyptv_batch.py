@@ -37,26 +37,7 @@ def run_batch(new_seq_first: int, new_seq_last: int):
         /cal
         /res
     """
-    parameters_dir = Path("parameters")
-    unified_path = parameters_dir / "parameters.yml"
-    if unified_path.exists():
-        up = UnifiedParameters(unified_path)
-        up.read()
-        cpar = up.get_section('control')
-        if cpar is not None:
-            # Use get_num_cams() if available, else fallback to attribute
-            n_cams = cpar.n_img if hasattr(cpar, 'n_img') else getattr(cpar, 'num_cams', None)
-        else:
-            raise ValueError("UnifiedParameters: 'control' section missing or invalid in parameters.yml")
-    else:
-        # Use ControlParams to read ptv.par for n_cams
-        from openptv.parameters.control import ControlParams
-        cpar = ControlParams()
-        cpar.path = parameters_dir
-        cpar.read()
-        n_cams = cpar.n_img
-
-    cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c(n_cams=n_cams)
+    cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c()
 
     # Use the function parameters instead of undefined globals
     spar.set_first(new_seq_first)
