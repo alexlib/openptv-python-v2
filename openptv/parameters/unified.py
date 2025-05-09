@@ -7,8 +7,11 @@ as well as conversion to/from the legacy multi-file format for backward compatib
 import yaml
 from pathlib import Path
 from . import (
-    tracking, sequence, volume, control, target, orient, calibration
+    tracking, sequence, volume, control, target, orient, calibration,
+    criteria, dumbbell, examine, man_ori, multi_plane,
+    pft_version, shaking
 )
+
 
 # List of all parameter types and their classes
 PARAMETER_CLASSES = {
@@ -18,7 +21,16 @@ PARAMETER_CLASSES = {
     'control': control.ControlParams,
     'target': target.TargetParams,
     'orient': orient.OrientParams,
-    # 'calibration': calibration.CalOriParams,  # Uncomment if implemented
+    'cal_ori': calibration.CalOriParams,
+    'criteria': criteria.CriteriaParams,
+    'detect_plate': target.TargetParams,
+    'dumbbell': dumbbell.DumbbellParams,
+    'examine': examine.ExamineParams,
+    'man_ori': man_ori.ManOriParams,
+    'multi_planes': multi_plane.MultiPlaneParams,
+    'pft_version': pft_version.PftVersionParams,
+    'shaking': shaking.ShakingParams,
+    'targ_rec': target.TargetParams,
 }
 
 class UnifiedParameters:
@@ -30,6 +42,10 @@ class UnifiedParameters:
         self.path = Path(path) if path else Path('parameters.yaml')
         self.sections = {key: None for key in PARAMETER_CLASSES}
         self.gui = {}  # For GUI-only parameters
+
+    def set_path(self, path: Path):
+        """Set the path for the unified YAML file."""
+        self.path = path
 
     def read(self):
         """Read all parameters from the unified YAML file."""
@@ -59,14 +75,26 @@ class UnifiedParameters:
             # Use correct filename for tracking
             if key == "tracking":
                 par_path = param_dir / "track.par"
+            elif key == "cal_ori":
+                par_path = param_dir / "cal_ori.par"
             else:
                 par_path = param_dir / f"{key}.par"
             yaml_path = param_dir / f"{key}.yaml"
             obj = None
             if par_path.exists():
                 obj = cls(path=param_dir)
+                # Special handling for sequence: set n_img by counting lines
                 if key == 'sequence':
-                    obj.n_img = 2
+                    with open(par_path) as f:
+                        lines = f.readlines()
+                    n_img = len(lines) - 2  # last two lines are first/last
+                    obj.n_img = n_img
+                # Special handling for cal_ori: set n_img by counting lines
+                if key == 'cal_ori':
+                    with open(par_path) as f:
+                        lines = f.readlines()
+                    n_img = (len(lines) - 1 - 3) // 2
+                    obj.n_img = n_img
                 obj.read()
             elif yaml_path.exists():
                 obj = cls(path=param_dir)
@@ -106,3 +134,27 @@ class UnifiedParameters:
 
     def get_gui_param(self, name, default=None):
         return self.gui.get(name, default)
+
+    def pprint(self):
+        """Print all parameter sections and GUI params in a human-readable format."""
+        print(f"UnifiedParameters: {self.path}")
+        for key, section in self.sections.items():
+            print(f"\n[{key}]")
+            if section is not None:
+                for k, v in section.to_dict().items():
+                    if k not in ("path", "exp_path"):
+                        print(f"  {k}: {v}")
+            else:
+                print("  (not set)")
+        if self.gui:
+            print("\n[gui]")
+            for k, v in self.gui.items():
+                print(f"  {k}: {v}")
+
+    def get_num_cams(self):
+        """Get the number of cameras from the sequence parameters."""
+        cpar = self.get_section("control")
+        if cpar is not None:
+            num_cams = cpar.n_cams
+
+        return num_cams

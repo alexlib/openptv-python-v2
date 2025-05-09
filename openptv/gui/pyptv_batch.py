@@ -18,6 +18,7 @@ import sys
 import time
 
 from openptv.gui.ptv import py_start_proc_c, py_trackcorr_init, py_sequence_loop
+from openptv.parameters.unified import UnifiedParameters
 
 
 # project specific inputs
@@ -36,9 +37,24 @@ def run_batch(new_seq_first: int, new_seq_last: int):
         /cal
         /res
     """
-    # read the number of cameras
-    with open("parameters/ptv.par", "r") as f:
-        n_cams = int(f.readline())
+    parameters_dir = Path("parameters")
+    unified_path = parameters_dir / "parameters.yml"
+    if unified_path.exists():
+        up = UnifiedParameters(unified_path)
+        up.read()
+        cpar = up.get_section('control')
+        if cpar is not None:
+            # Use get_num_cams() if available, else fallback to attribute
+            n_cams = cpar.n_img if hasattr(cpar, 'n_img') else getattr(cpar, 'num_cams', None)
+        else:
+            raise ValueError("UnifiedParameters: 'control' section missing or invalid in parameters.yml")
+    else:
+        # Use ControlParams to read ptv.par for n_cams
+        from openptv.parameters.control import ControlParams
+        cpar = ControlParams()
+        cpar.path = parameters_dir
+        cpar.read()
+        n_cams = cpar.n_img
 
     cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c(n_cams=n_cams)
 
@@ -47,15 +63,15 @@ def run_batch(new_seq_first: int, new_seq_last: int):
     spar.set_last(new_seq_last)
 
     exp = {
-    'cpar':cpar,
-    'spar':spar,
-    'vpar':vpar,
-    'track_par':track_par,
-    'tpar':tpar,
-    'cals':cals,
-    'epar':epar,
-    'n_cams':n_cams,
-        }
+        'cpar': cpar,
+        'spar': spar,
+        'vpar': vpar,
+        'track_par': track_par,
+        'tpar': tpar,
+        'cals': cals,
+        'epar': epar,
+        'n_cams': n_cams,
+    }
 
     # use dataclass to convert dictionary keys to attributes
     exp = AttrDict(exp)

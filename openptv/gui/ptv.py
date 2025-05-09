@@ -50,6 +50,7 @@ from openptv import (
 
 # PyPTV imports
 from openptv.parameters import PftVersionParams
+from openptv.parameters.unified import UnifiedParameters
 
 # Print which implementation we're using
 print(f"Using Cython implementation: {using_cython()}")
@@ -88,11 +89,11 @@ def simple_highpass(img: np.ndarray, cpar: ControlParams) -> np.ndarray:
     return preprocess_image(img, 0, cpar, DEFAULT_HIGHPASS_FILTER_SIZE)
 
 
-def _read_calibrations(cpar: ControlParams, n_cams: int) -> List[Calibration]:
+def _read_calibrations(cpar, n_cams: int) -> List[Calibration]:
     """Read calibration files for all cameras.
 
     Args:
-        cpar: Control parameters
+        cpar: Control parameters (must have cal_img_base_name attribute)
         n_cams: Number of cameras
 
     Returns:
@@ -102,84 +103,60 @@ def _read_calibrations(cpar: ControlParams, n_cams: int) -> List[Calibration]:
         IOError: If calibration files cannot be read
     """
     cals = []
+    # Try both possible attribute names for calibration base names
+    if hasattr(cpar, 'cal_img_base_name'):
+        cal_base_names = cpar.cal_img_base_name
+    elif hasattr(cpar, 'img_cal'):
+        cal_base_names = cpar.img_cal
+    else:
+        raise AttributeError("ControlParams object has no calibration base name attribute (expected 'cal_img_base_name' or 'img_cal')")
     for i_cam in range(n_cams):
         cal = Calibration()
-        base_name = cpar.get_cal_img_base_name(i_cam)
+        base_name = cal_base_names[i_cam]
         ori_file = base_name + ".ori"
         addpar_file = base_name + ".addpar"
-
         try:
             cal.from_file(ori_file, addpar_file)
             cals.append(cal)
         except IOError as e:
             raise IOError(f"Failed to read calibration files for camera {i_cam}: {e}")
-
     return cals
 
 
-def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeParams,
+def py_start_proc_c() -> Tuple[ControlParams, SequenceParams, VolumeParams,
                                     TrackingParams, TargetParams, List[Calibration],
                                     ExamineParams]:
     """Read all parameters needed for processing.
 
     This function reads all parameter files from the parameters directory and initializes
-    the necessary objects for processing.
-
-    Args:
-        n_cams: Number of cameras
-
-    Returns:
-        Tuple containing:
-            - cpar: Control parameters
-            - spar: Sequence parameters
-            - vpar: Volume parameters
-            - track_par: Tracking parameters
-            - tpar: Target parameters
-            - cals: List of calibration objects
-            - epar: Examine parameters
+    the necessary objects for processing. Supports both unified parameters.yml and legacy .par files.
     """
-    # Get parameter file paths
     parameters_dir = Path("parameters")
-    ptv_par_path = parameters_dir / "ptv.par"
-    sequence_par_path = parameters_dir / "sequence.par"
-    criteria_par_path = parameters_dir / "criteria.par"
-    track_par_path = parameters_dir / "track.par"
-    targ_rec_par_path = parameters_dir / "targ_rec.par"
-    examine_par_path = parameters_dir
 
+    unified_path = parameters_dir / "parameters.yml"
+    up = UnifiedParameters()
+
+    if unified_path.exists():
+        up = UnifiedParameters(unified_path)
+        up.read()
+    else:
+        up.from_legacy_dir(parameters_dir)
+        up.set_path(unified_path)
+    
     try:
-        # Control parameters
-        cpar = ControlParams(n_cams)
-        cpar.read_control_par(str(ptv_par_path))
-
-        # Sequence parameters
-        spar = SequenceParams(num_cams=n_cams)
-        spar.read_sequence_par(str(sequence_par_path), n_cams)
-
-        # Volume parameters
-        vpar = VolumeParams()
-        vpar.read_volume_par(str(criteria_par_path))
-
-        # Tracking parameters
-        track_par = TrackingParams()
-        track_par.read_track_par(str(track_par_path))
-
-        # Target parameters
-        tpar = TargetParams(n_cams)
-        tpar.read(str(targ_rec_par_path))
-
-        # Examine parameters (multiplane vs single plane calibration)
-        # Use the high-level API's ExamineParams
-        epar = ExamineParams.from_file(examine_par_path)
-
-        # Read calibration files
+        n_cams = up.get_num_cams()
+        # The 'control' section in parameters.yml is equivalent to ptv.par (not control.par)
+        cpar = up.get_section('control')  # This is the content of ptv.par
+        spar = up.get_section('sequence')
+        vpar = up.get_section('volume')
+        track_par = up.get_section('tracking')
+        tpar = up.get_section('target')
+        epar = up.get_section('examine')
         cals = _read_calibrations(cpar, n_cams)
-
         return cpar, spar, vpar, track_par, tpar, cals, epar
     except Exception as e:
-        print(f"Error reading parameters: {e}")
-        raise
-
+        raise ValueError(f"Failed to read parameters: {e}")
+    
 
 def py_pre_processing_c(list_of_images: List[np.ndarray], cpar: ControlParams) -> List[np.ndarray]:
     """Apply pre-processing to a list of images.

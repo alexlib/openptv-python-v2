@@ -11,7 +11,7 @@ from openptv.parameters.base import Parameters
 from openptv.parameters.tracking import TrackingParams
 from openptv.parameters.sequence import SequenceParams
 from openptv.parameters.volume import VolumeParams
-from openptv.parameters.control import ControlParams, PtvParams
+from openptv.parameters.control import ControlParams
 from openptv.parameters.target import TargetParams, TargRecParams
 from openptv.parameters.calibration import CalOriParams
 from openptv.parameters.criteria import CriteriaParams
@@ -35,7 +35,6 @@ __all__ = [
     'SequenceParams',
     'VolumeParams',
     'ControlParams',
-    'PtvParams',
     'TargetParams',
     'TargRecParams',
     'CalOriParams',

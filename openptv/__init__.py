@@ -72,10 +72,6 @@ if '_module' in locals():
 # Direct imports of commonly used classes and functions
 try:
     from openptv.binding.calibration import Calibration
-    from openptv.binding.parameters import (
-        MultimediaParams, TrackingParams, SequenceParams,
-        VolumeParams, ControlParams, TargetParams
-    )
     from openptv.binding.tracking_framebuf import TargetArray, Target, Frame
     from openptv.binding.correspondences import correspondences, MatchedCoords
     from openptv.binding.image_processing import preprocess_image
@@ -84,10 +80,25 @@ try:
     from openptv.binding.tracker import Tracker, default_naming
     from openptv.binding.epipolar import epipolar_curve
     from openptv.binding.vec_utils import py_vec_copy, py_vec_cmp
-    from openptv.parameters import ExamineParams
 except ImportError as e:
     # If any of the direct imports fail, log a warning but don't crash
     warnings.warn(f"Some Cython bindings could not be imported: {e}")
+
+from .parameters.control import ControlParams
+from .parameters.volume import VolumeParams
+from .parameters.tracking import TrackingParams
+from .parameters.sequence import SequenceParams
+from .parameters.target import TargetParams
+from .parameters.examine import ExamineParams
+from .parameters.criteria import CriteriaParams
+from .parameters.detect_plate import DetectPlateParams
+from .parameters.dumbbell import DumbbellParams
+from .parameters.man_ori import ManOriParams
+from .parameters.multi_plane import MultiPlaneParams
+from .parameters.pft_version import PftVersionParams
+from .parameters.control import PtvParams
+from .parameters.shaking import ShakingParams
+from .parameters.target import TargRecParams
 
 # # Import constants from binding modules
 # if _using_cython:
