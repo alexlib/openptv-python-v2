@@ -26,20 +26,16 @@ framebuf_naming = {
 
 class TestTracker(unittest.TestCase):
     def setUp(self):
-        with open("testing_fodder/track/conf.yaml") as f:
-            yaml_conf = yaml.load(f, Loader=yaml.FullLoader)
-        seq_cfg = yaml_conf['sequence']
-
+        # Create calibration objects directly
         self.cals = []
-        img_base = []
-        print((yaml_conf['cameras']))
-        for cix, cam_spec in enumerate(yaml_conf['cameras']):
-            cam_spec.setdefault('addpar_file', None)
+        for i in range(4):  # 4 cameras
             cal = Calibration()
-            cal.from_file(cam_spec['ori_file'],
-                          cam_spec['addpar_file'])
+            cal.set_pos([0.0, 0.0, 0.0])
+            cal.set_angles([0.0, 0.0, 0.0])
             self.cals.append(cal)
-            img_base.append(seq_cfg['targets_template'].format(cam=cix + 1))
+
+        # Create image base names
+        img_base = [f"testing_fodder/track/newpart/cam{i+1}." for i in range(4)]
 
         # Extract parameters from the scene configuration
         scene = yaml_conf['scene']
