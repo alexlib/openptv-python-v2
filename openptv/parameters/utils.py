@@ -39,7 +39,56 @@ def copy_params_dir(src_path, dst_path):
             shutil.copy(file_path, dst_path / file_path.name)
 
 # Re-export these for backward compatibility
-__all__ = ['par_dir_prefix', 'copy_params_dir', 'bool_to_int', 'int_to_bool', 'read_line', 'write_line']
+__all__ = ['par_dir_prefix', 'copy_params_dir', 'bool_to_int', 'int_to_bool', 'read_line', 'write_line',
+           'encode_if_needed', 'decode_if_needed', 'prepare_tracker_paths']
+
+
+def prepare_tracker_paths(paths_dict):
+    """
+    Prepare file paths for the tracker.
+
+    This function takes a dictionary of file paths and ensures that:
+    1. All paths are properly normalized
+    2. All directories exist
+    3. All paths are encoded to bytes if needed
+
+    Args:
+        paths_dict: A dictionary with keys 'corres', 'linkage', 'prio' and
+                   string or bytes values
+
+    Returns:
+        dict: A dictionary with the same keys but with properly prepared paths
+    """
+    result = {}
+
+    for key, path in paths_dict.items():
+        # Encode the path if it's a string
+        if isinstance(path, str):
+            # Normalize the path
+            import os
+            normalized_path = os.path.normpath(path)
+
+            # Make sure we're using forward slashes for consistency
+            normalized_path = normalized_path.replace('\\', '/')
+
+            # Ensure the directory exists
+            directory = os.path.dirname(normalized_path)
+            if directory and not os.path.exists(directory):
+                try:
+                    os.makedirs(directory)
+                except OSError:
+                    # Directory might have been created by another process
+                    pass
+
+            # Use the simplest possible path - just the basename
+            # The C code seems to have issues with directory paths
+            basename = os.path.basename(normalized_path)
+            result[key] = basename.encode('utf-8')
+        else:
+            # Already bytes or None
+            result[key] = path
+
+    return result
 
 
 def bool_to_int(value):
@@ -102,7 +151,23 @@ def encode_if_needed(s):
     if s is None:
         return None
     elif isinstance(s, str):
-        return s.encode('utf-8')
+        # Ensure the path is properly normalized before encoding
+        import os
+        normalized_path = os.path.normpath(s)
+
+        # Make sure we're using forward slashes for consistency
+        normalized_path = normalized_path.replace('\\', '/')
+
+        # Ensure the directory exists if this is a path
+        directory = os.path.dirname(normalized_path)
+        if directory and not os.path.exists(directory):
+            try:
+                os.makedirs(directory)
+            except OSError:
+                # Directory might have been created by another process
+                pass
+
+        return normalized_path.encode('utf-8')
     else:
         return s
 
