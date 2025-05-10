@@ -78,6 +78,9 @@ class ControlParams(Parameters):
             mmp_n3 (float): Refractive index of water.
             mmp_d (float): Thickness of glass.
         """
+        if n_img == 0:
+            raise ValueError("Number of cameras must be greater than 0")
+
         self.n_img = n_img
         self.img_base_name = img_base_name or []
         self.cal_img_base_name = cal_img_base_name or []
@@ -89,8 +92,8 @@ class ControlParams(Parameters):
             self.cal_img_base_name.extend([''] * (self.n_img - len(self.cal_img_base_name)))
 
         # Add aliases for backward compatibility with GUI code
-        self.img_name = self.img_base_name
-        self.img_cal = self.cal_img_base_name
+        # self.img_name = self.img_base_name
+        # self.img_cal = self.cal_img_base_name
 
         # Store multimedia parameters
         self.mmp_n1 = mmp_n1
@@ -146,8 +149,8 @@ class ControlParams(Parameters):
                     self.cal_img_base_name.append(g(f))
 
                 # Set aliases for backward compatibility
-                self.img_name = self.img_base_name
-                self.img_cal = self.cal_img_base_name
+                # self.img_name = self.img_base_name
+                # self.img_cal = self.cal_img_base_name
 
                 self.hp_flag = int_to_bool(int(g(f)))
                 self.allcam_flag = int_to_bool(int(g(f)))

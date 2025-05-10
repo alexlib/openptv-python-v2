@@ -97,64 +97,60 @@ class UnifiedParameters:
             return out
 
         # Parameter name mapping for storing in YAML (reverse of get_section mapping)
-        param_name_mapping = {
-            'control': {
-                'img_base_name': 'img_name',
-                'cal_img_base_name': 'img_cal',
-                'allcam_flag': 'allCam_flag',
-            },
-            'sequence': {
-                'base_name': 'img_base_name',
-            },
-            'target': {
-                'discont': 'disco',
-                'nnmin': 'min_npix',
-                'nnmax': 'max_npix',
-                'nxmin': 'min_npix_x',
-                'nxmax': 'max_npix_x',
-                'nymin': 'min_npix_y',
-                'nymax': 'max_npix_y',
-                'sumg_min': 'sum_grey',
-                'cr_sz': 'size_cross',
-            },
-            'detect_plate': {
-                'discont': 'disco',
-                'nnmin': 'min_npix',
-                'nnmax': 'max_npix',
-                'nxmin': 'min_npix_x',
-                'nxmax': 'max_npix_x',
-                'nymin': 'min_npix_y',
-                'nymax': 'max_npix_y',
-                'sumg_min': 'sum_grey',
-                'cr_sz': 'size_cross',
-            },
-            'targ_rec': {
-                'discont': 'disco',
-                'nnmin': 'min_npix',
-                'nnmax': 'max_npix',
-                'nxmin': 'min_npix_x',
-                'nxmax': 'max_npix_x',
-                'nymin': 'min_npix_y',
-                'nymax': 'max_npix_y',
-                'sumg_min': 'sum_grey',
-                'cr_sz': 'size_cross',
-            }
-        }
+        # param_name_mapping = {
+        #     'control': {
+        #         'img_base_name': 'img_name',
+        #         'cal_img_base_name': 'img_cal',
+        #         'allcam_flag': 'allCam_flag',
+        #     },
+        #     'sequence': {
+        #         'base_name': 'img_base_name',
+        #     },
+        #     'target': {
+        #         'discont': 'disco',
+        #         'nnmin': 'min_npix',
+        #         'nnmax': 'max_npix',
+        #         'nxmin': 'min_npix_x',
+        #         'nxmax': 'max_npix_x',
+        #         'nymin': 'min_npix_y',
+        #         'nymax': 'max_npix_y',
+        #         'sumg_min': 'sum_grey',
+        #         'cr_sz': 'size_cross',
+        #     },
+        #     'detect_plate': {
+        #         'discont': 'disco',
+        #         'nnmin': 'min_npix',
+        #         'nnmax': 'max_npix',
+        #         'nxmin': 'min_npix_x',
+        #         'nxmax': 'max_npix_x',
+        #         'nymin': 'min_npix_y',
+        #         'nymax': 'max_npix_y',
+        #         'sumg_min': 'sum_grey',
+        #         'cr_sz': 'size_cross',
+        #     },
+        #     'targ_rec': {
+        #         'discont': 'disco',
+        #         'nnmin': 'min_npix',
+        #         'nnmax': 'max_npix',
+        #         'nxmin': 'min_npix_x',
+        #         'nxmax': 'max_npix_x',
+        #         'nymin': 'min_npix_y',
+        #         'nymax': 'max_npix_y',
+        #         'sumg_min': 'sum_grey',
+        #         'cr_sz': 'size_cross',
+        #     }
+        # }
 
         # Process control parameters
         control_dict = clean_dict(cpar.__dict__)
-        if 'control' in param_name_mapping:
-            for new_name, old_name in param_name_mapping['control'].items():
-                if new_name in control_dict:
-                    control_dict[old_name] = control_dict.pop(new_name)
+        # if 'control' in param_name_mapping:
+        #     for new_name, old_name in param_name_mapping['control'].items():
+        #         if new_name in control_dict:
+        #             control_dict[old_name] = control_dict.pop(new_name)
         self.data['control'] = control_dict
 
         # Process sequence parameters
         sequence_dict = clean_dict(sequence.__dict__)
-        if 'sequence' in param_name_mapping:
-            for new_name, old_name in param_name_mapping['sequence'].items():
-                if new_name in sequence_dict:
-                    sequence_dict[old_name] = sequence_dict.pop(new_name)
         self.data['sequence'] = sequence_dict
 
         # Process other parameters
@@ -183,7 +179,7 @@ class UnifiedParameters:
 
         # Create parameter objects with the legacy directory path
         cpar = ControlParams(path=legacy_dir)
-        sequence = SequenceParams(path=legacy_dir)
+        sequence = SequenceParams(n_img = cpar.n_img, path=legacy_dir)
         volume = VolumeParams(path=legacy_dir)
         tracking = TrackingParams(path=legacy_dir)
         target = TargetParams(path=legacy_dir)
@@ -352,63 +348,63 @@ class UnifiedParameters:
             A parameter object for the specified section.
         """
         # Parameter name mapping to handle different naming conventions
-        param_name_mapping = {
-            'control': {
-                'img_name': 'img_base_name',
-                'img_cal': 'cal_img_base_name',
-                'allCam_flag': 'allcam_flag',
-            },
-            'sequence': {
-                'img_base_name': 'base_name',
-            },
-            'target': {
-                'tol_dis': 'discont',
-                'disco': 'discont',
-                'min_npix': 'nnmin',
-                'max_npix': 'nnmax',
-                'min_npix_x': 'nxmin',
-                'max_npix_x': 'nxmax',
-                'min_npix_y': 'nymin',
-                'max_npix_y': 'nymax',
-                'sum_grey': 'sumg_min',
-                'size_cross': 'cr_sz',
-            },
-            'detect_plate': {
-                'tol_dis': 'discont',
-                'disco': 'discont',
-                'min_npix': 'nnmin',
-                'max_npix': 'nnmax',
-                'min_npix_x': 'nxmin',
-                'max_npix_x': 'nxmax',
-                'min_npix_y': 'nymin',
-                'max_npix_y': 'nymax',
-                'sum_grey': 'sumg_min',
-                'size_cross': 'cr_sz',
-            },
-            'targ_rec': {
-                'tol_dis': 'discont',
-                'disco': 'discont',
-                'min_npix': 'nnmin',
-                'max_npix': 'nnmax',
-                'min_npix_x': 'nxmin',
-                'max_npix_x': 'nxmax',
-                'min_npix_y': 'nymin',
-                'max_npix_y': 'nymax',
-                'sum_grey': 'sumg_min',
-                'size_cross': 'cr_sz',
-            }
-        }
+        # param_name_mapping = {
+        #     'control': {
+        #         'img_name': 'img_base_name',
+        #         'img_cal': 'cal_img_base_name',
+        #         'allCam_flag': 'allcam_flag',
+        #     },
+        #     'sequence': {
+        #         'img_base_name': 'base_name',
+        #     },
+        #     'target': {
+        #         'tol_dis': 'discont',
+        #         'disco': 'discont',
+        #         'min_npix': 'nnmin',
+        #         'max_npix': 'nnmax',
+        #         'min_npix_x': 'nxmin',
+        #         'max_npix_x': 'nxmax',
+        #         'min_npix_y': 'nymin',
+        #         'max_npix_y': 'nymax',
+        #         'sum_grey': 'sumg_min',
+        #         'size_cross': 'cr_sz',
+        #     },
+        #     'detect_plate': {
+        #         'tol_dis': 'discont',
+        #         'disco': 'discont',
+        #         'min_npix': 'nnmin',
+        #         'max_npix': 'nnmax',
+        #         'min_npix_x': 'nxmin',
+        #         'max_npix_x': 'nxmax',
+        #         'min_npix_y': 'nymin',
+        #         'max_npix_y': 'nymax',
+        #         'sum_grey': 'sumg_min',
+        #         'size_cross': 'cr_sz',
+        #     },
+        #     'targ_rec': {
+        #         'tol_dis': 'discont',
+        #         'disco': 'discont',
+        #         'min_npix': 'nnmin',
+        #         'max_npix': 'nnmax',
+        #         'min_npix_x': 'nxmin',
+        #         'max_npix_x': 'nxmax',
+        #         'min_npix_y': 'nymin',
+        #         'max_npix_y': 'nymax',
+        #         'sum_grey': 'sumg_min',
+        #         'size_cross': 'cr_sz',
+        #     }
+        # }
 
         if section_name in self.data:
             # Get the section data
             section_data = self.data.get(section_name, {}).copy()
 
             # Apply parameter name mapping if available
-            if section_name in param_name_mapping:
-                mapping = param_name_mapping[section_name]
-                for old_name, new_name in mapping.items():
-                    if old_name in section_data:
-                        section_data[new_name] = section_data.pop(old_name)
+            # if section_name in param_name_mapping:
+            #     mapping = param_name_mapping[section_name]
+            #     for old_name, new_name in mapping.items():
+            #         if old_name in section_data:
+            #             section_data[new_name] = section_data.pop(old_name)
 
             # Create and return the appropriate parameter object
             if section_name == 'control':
@@ -506,7 +502,7 @@ class UnifiedParameters:
             # Otherwise, assume it's already a dictionary
             self.data[section_name] = section_data
 
-    def get_num_cams(self):
+    def get_num_cams(self) -> int:
         """
         Get the number of cameras from the control section.
 
@@ -514,5 +510,5 @@ class UnifiedParameters:
             The number of cameras, or 0 if not found.
         """
         if 'control' in self.data and 'n_img' in self.data['control']:
-            return self.data['control']['n_img']
+            return int(self.data['control']['n_img'])
         return 0

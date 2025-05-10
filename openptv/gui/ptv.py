@@ -162,16 +162,7 @@ def py_start_proc_c() -> Tuple[ControlParams, SequenceParams, VolumeParams,
     try:
         # Get the control parameters first
         cpar = up.get_section('control')  # This is the content of ptv.par
-
-        # Get the number of cameras from the control parameters
-        if hasattr(up, 'get_num_cams'):
-            n_cams = up.get_num_cams()
-        elif hasattr(cpar, 'n_img'):
-            n_cams = cpar.n_img
-        else:
-            # Default to 4 cameras if we can't determine the number
-            n_cams = 4
-            print(f"Warning: Could not determine number of cameras, defaulting to {n_cams}")
+        n_cams = up.get_num_cams()
 
         # Get the rest of the parameters
         spar = up.get_section('sequence')

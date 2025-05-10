@@ -43,6 +43,9 @@ class SequenceParams(Parameters):
             first (int): First frame number.
             last (int): Last frame number.
         """
+        if n_img == 0:
+            raise ValueError("Number of cameras must be greater than 0")
+        
         self.n_img = n_img
         self.base_name = base_name or []
         # Ensure base_name has n_img elements

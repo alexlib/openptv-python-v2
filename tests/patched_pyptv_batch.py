@@ -36,11 +36,8 @@ def run_batch(new_seq_first: int, new_seq_last: int):
         /cal
         /res
     """
-    # read the number of cameras
-    with open("parameters/ptv.par", "r") as f:
-        n_cams = int(f.readline())
     
-    cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c(n_cams=n_cams)
+    cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c()
     
     # FIX: Use the function parameters instead of undefined globals
     spar.set_first(new_seq_first)
