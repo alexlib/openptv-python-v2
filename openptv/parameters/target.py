@@ -188,3 +188,25 @@ class TargetParams(Parameters):
             path=path,
             filename=filename,
         )
+    
+    def to_cython_object(self):
+        """
+        Convert the Python TargetParams instance to a Cython TargetParams object.
+        
+        Returns:
+            object: A Cython TargetParams object with the same parameter values.
+        """
+        from openptv.binding.parameters import TargetParams as CythonTargetParams
+        
+        # Create a new Cython TargetParams object with the same values
+        cython_params = CythonTargetParams(
+            discont=self.discont,
+            gvthresh=self.gvthres.copy() if hasattr(self.gvthres, 'copy') else self.gvthres[:],
+            pixel_count_bounds=(self.nnmin, self.nnmax),
+            xsize_bounds=(self.nxmin, self.nxmax),
+            ysize_bounds=(self.nymin, self.nymax),
+            min_sum_grey=self.sumg_min,
+            cross_size=self.cr_sz
+        )
+        
+        return cython_params

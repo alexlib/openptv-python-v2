@@ -76,7 +76,7 @@ def simple_highpass(img: np.ndarray, cpar: ControlParams) -> np.ndarray:
     Returns:
         Highpass filtered image
     """
-    return preprocess_image(img, 0, cpar.to_c_struct(), DEFAULT_HIGHPASS_FILTER_SIZE)
+    return preprocess_image(img, 0, cpar.to_cython_object(), DEFAULT_HIGHPASS_FILTER_SIZE)
 
 
 def _read_calibrations(cpar: ControlParams, num_cams: int) -> List[Calibration]:
@@ -233,14 +233,14 @@ def py_detection_proc_c(list_of_images: List[np.ndarray],
             raise NotImplementedError("Existing targets are not implemented")
         else:
             # Use the high-level API which will select the appropriate implementation
-            targs = target_recognition(img, tpar, i_cam, cpar)
+            targs = target_recognition(img, tpar.to_cython_object(), i_cam, cpar.to_cython_object())
 
         # Sort targets by y-coordinate
         targs.sort_y()
         detections.append(targs)
 
         # Create matched coordinates using the high-level API
-        mc = MatchedCoords(targs, cpar, cals[i_cam])
+        mc = MatchedCoords(targs, cpar.to_cython_object(), cals[i_cam])
         corrected.append(mc)
 
     return detections, corrected
@@ -402,8 +402,9 @@ def py_sequence_loop(exp) -> None:
     Existing_Target = np.bool_(pftVersionParams.Existing_Target)
 
     # sequence loop for all frames
-    first_frame = spar.get_first()
-    last_frame = spar.get_last()
+    first_frame = spar.get_first_frame()
+    last_frame = spar.get_last_frame()
+
     print(f" From {first_frame = } to {last_frame = }")
 
     for frame in range(first_frame, last_frame + 1):
@@ -450,11 +451,11 @@ def py_sequence_loop(exp) -> None:
                             print("failed to read the mask")
 
                 high_pass = simple_highpass(img, cpar)
-                targs = target_recognition(high_pass, tpar, i_cam, cpar)
+                targs = target_recognition(high_pass, tpar.to_cython_object(), i_cam, cpar.to_cython_object())
 
             targs.sort_y()
             detections.append(targs)
-            masked_coords = MatchedCoords(targs, cpar, cals[i_cam])
+            masked_coords = MatchedCoords(targs, cpar.to_cython_object(), cals[i_cam])  
             pos, _ = masked_coords.as_arrays()
             corrected.append(masked_coords)
 
@@ -463,7 +464,7 @@ def py_sequence_loop(exp) -> None:
 
         # Corresp. + positions.
         sorted_pos, sorted_corresp, _ = correspondences(
-            detections, corrected, cals, vpar, cpar)
+            detections, corrected, cals, vpar.to_cython_object(), cpar.to_cython_object())
 
         # Save targets only after they've been modified:
         # this is a workaround of the proper way to construct _targets name
@@ -482,7 +483,7 @@ def py_sequence_loop(exp) -> None:
             corrected[i].get_by_pnrs(sorted_corresp[i])
             for i in range(len(cals))
         ])
-        pos, _ = point_positions(flat.transpose(1, 0, 2), cpar, cals, vpar)
+        pos, _ = point_positions(flat.transpose(1, 0, 2), cpar.to_cython_object(), cals[i_cam], vpar.to_cython_object())
 
         # if len(cals) == 1: # single camera case
         #     sorted_corresp = np.tile(sorted_corresp,(4,1))

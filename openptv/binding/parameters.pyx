@@ -684,7 +684,7 @@ cdef class ControlParams:
     # Arguments:
     # filename - path to text file containing the parameters.
     def read_control_par(self, str filename):
-        """Read control parameters from a text file.
+        """Read control parameters from a text file
         
         Arguments:
             filename: path to the parameter file
@@ -700,6 +700,21 @@ cdef class ControlParams:
         self._control_par = read_control_par(c_filename)
         self._multimedia_params.set_mm_np(self._control_par[0].mm)
         
+    def write_control_par(self, str filename):
+        """Write control parameters to a text file.
+        
+        Arguments:
+            filename: path to the output parameter file
+        """
+        self._filename_bytes = filename.encode('utf-8')
+        cdef char* c_filename = <char*><char*>self._filename_bytes
+        
+        # Call the C function to write parameters to a file
+        cdef int ret = write_control_par(c_filename, self._control_par)
+        
+        if ret != 0:
+            raise IOError(f"Failed to write control parameters to {filename}")
+    
     # Get image base name of camera #cam
     def get_img_base_name(self, cam):
         """Get image base name of camera #cam"""

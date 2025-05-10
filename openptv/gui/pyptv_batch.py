@@ -43,8 +43,8 @@ def run_batch(new_seq_first: int, new_seq_last: int):
     cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c(num_cams=num_cams)
 
     # Use the function parameters instead of undefined globals
-    spar.set_first(new_seq_first)
-    spar.set_last(new_seq_last)
+    spar.first = new_seq_first
+    spar.last = new_seq_last
 
     exp = {
     'cpar':cpar,

@@ -225,16 +225,48 @@ class ControlParams(Parameters):
             mm_np=c_struct['mm'],
             path=path,
         )
-    
-    def to_cython(self):
+        
+    def to_cython_object(self):
         """
-        Convert control parameters to a Cython-compatible format.
+        Convert the Python ControlParams instance to a Cython ControlParams object.
         
         Returns:
-            object: A Cython-compatible object representing the control parameters.
+            object: A Cython ControlParams object with the same parameter values.
         """
-        from openptv.binding.param_bridge import control_params_to_c
-        return control_params_to_c(self)
+        from openptv.binding.parameters import ControlParams as CythonControlParams
+        
+        # Create flags list based on boolean properties
+        flags = []
+        if self.hp_flag:
+            flags.append('hp')
+        if self.allcam_flag:
+            flags.append('allcam')
+        if self.tiff_flag:
+            flags.append('headers')
+        
+        # Extract values from multimedia parameters
+        mm_params = self.mm_np
+        
+        # Create a new Cython ControlParams object
+        cython_params = CythonControlParams(
+            num_cams=self.num_cams,
+            flags=flags,
+            image_size=(self.imx, self.imy),
+            pixel_size=(self.pix_x, self.pix_y),
+            cam_side_n=mm_params['n1'],
+            wall_ns=[mm_params['n2'][0]] if mm_params['nlay'] > 0 else None,
+            wall_thicks=[mm_params['d'][0]] if mm_params['nlay'] > 0 else None,
+            object_side_n=mm_params['n3']
+        )
+        
+        # Set the calibration and image base names
+        for i in range(self.num_cams):
+            if i < len(self.img_base_name) and self.img_base_name[i]:
+                cython_params.set_img_base_name(i, self.img_base_name[i])
+            if i < len(self.cal_img_base_name) and self.cal_img_base_name[i]:
+                cython_params.set_cal_img_base_name(i, self.cal_img_base_name[i])
+        
+        return cython_params
 
 
 # Remove the PtvParams class and make it an alias to ControlParams

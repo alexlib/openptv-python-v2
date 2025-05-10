@@ -169,3 +169,29 @@ class VolumeParams(Parameters):
             eps0=c_struct['eps0'],
             path=path,
         )
+    
+    def to_cython_object(self):
+        """
+        Convert the Python VolumeParams instance to a Cython VolumeParams object.
+        
+        Returns:
+            object: A Cython VolumeParams object with the same parameter values.
+        """
+        from openptv.binding.parameters import VolumeParams as CythonVolumeParams
+        
+        # Create z_spans from Zmin_lay and Zmax_lay
+        z_spans = [(self.Zmin_lay[i], self.Zmax_lay[i]) for i in range(len(self.Zmin_lay))]
+        
+        # Create a new Cython VolumeParams object with the same values
+        cython_params = CythonVolumeParams(
+            x_span=self.X_lay,
+            z_spans=z_spans,
+            pixels_x=self.cnx,
+            pixels_y=self.cny,
+            pixels_tot=self.cn,
+            ref_gray=self.csumg,
+            min_correlation=self.corrmin,
+            epipolar_band=self.eps0
+        )
+        
+        return cython_params

@@ -130,3 +130,22 @@ class SequenceParams(Parameters):
     def to_cython(self):
         from openptv.binding.param_bridge import sequence_params_to_c
         return sequence_params_to_c(self)
+    
+
+    def get_first_frame(self):
+        return self.first
+    
+    def get_last_frame(self):
+        return self.last
+
+    def set_first(self, new_first: int):
+        self.first = new_first
+
+    def set_last(self, new_last: int):
+        self.last = new_last
+
+    def get_img_base_name(self, i_cam: int):
+        return self.base_name[i_cam]
+    
+    def set_img_base_name(self, new_name: str):
+        self.base_name = new_name

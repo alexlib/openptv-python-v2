@@ -2,7 +2,7 @@ import pytest
 from openptv.gui import pyptv_batch
 from pathlib import Path
 
-def test_pyptv_batch(test_data_dir):
+def test_pyptv_batch(test_data_dir: Path):
     """Test batch processing with test cavity data"""
     # Skip this test while we're transitioning to the new parameter module
     # pytest.skip("Skipping while transitioning to the new parameter module")
@@ -15,6 +15,9 @@ def test_pyptv_batch(test_data_dir):
     end_frame = 10004
 
     try:
-        pyptv_batch.main(str(test_dir), start_frame, end_frame)
+        pyptv_batch.main(test_dir, start_frame, end_frame)
     except Exception as e:
         pytest.fail(f"Batch processing failed: {str(e)}")
+
+
+test_pyptv_batch(Path(__file__).parent / 'test_cavity')
