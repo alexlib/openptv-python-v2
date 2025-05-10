@@ -1734,11 +1734,7 @@ def printException():
 
 # -------------------------------------------------------------
 def main():
-    """main ()
-
-    Raises:
-        OSError: if software or folder path are missing
-    """
+    """Main entry point. User must provide path to the working folder."""
     # Get the original working directory (where the script was launched from)
     original_dir = Path.cwd().resolve()
     print(f"Original working directory: {original_dir}")
@@ -1747,42 +1743,20 @@ def main():
     software_path = Path(__file__).parent.resolve()
     print(f"Software path is {software_path}")
 
-    # Path to the experiment
+    # Allow default experiment path for debugging
     if len(sys.argv) > 1:
-        # Get the experiment path from command line arguments
         exp_path = Path(sys.argv[1]).resolve()
         print(f"Experimental path from arguments: {exp_path}")
     else:
-        # Try to find test_cavity in common locations
-        test_cavity_candidates = [
-            original_dir / "tests" / "test_cavity",  # In the tests directory of original dir
-            original_dir.parent / "test_cavity",  # Directly in original dir
-            software_path / "tests" / "test_cavity",  # In the tests directory of software path
-            software_path.parent / "tests" / "test_cavity",  # In tests directory of parent
-            Path("tests/test_cavity"),  # Relative to current directory
-            Path("test_cavity"),  # Directly in current directory
-        ]
-
-        print("Searching for test_cavity in the following locations:")
-        for candidate in test_cavity_candidates:
-            print(f"  - {candidate} {'(exists)' if candidate.exists() and candidate.is_dir() else '(not found)'}")
-
-        # Find the first existing test_cavity directory
-        exp_path = None
-        for candidate in test_cavity_candidates:
-            if candidate.exists() and candidate.is_dir():
-                exp_path = candidate
-                break
-
-        # If no test_cavity found, use the current directory
-        if exp_path is None:
-            exp_path = original_dir
-
-        print(f"Without input, PyPTV fallbacks to a default {exp_path} \n")
+        # Provide a default path for debugging (change as needed)
+        default_debug_path = Path("tests/test_cavity").resolve()
+        print(f"No experiment path provided. Using default for debugging: {default_debug_path}")
+        exp_path = default_debug_path
 
     # Verify the experiment path exists
     if not exp_path.is_dir() or not exp_path.exists():
-        raise OSError(f"Wrong experimental directory {exp_path}")
+        print(f"Error: Wrong experimental directory {exp_path}")
+        sys.exit(1)
 
     # Change directory to the experiment path
     print(f"Changing directory to: {exp_path}")
@@ -1799,17 +1773,5 @@ def main():
         print(f"Changing back to original directory: {original_dir}")
         os.chdir(original_dir)
 
-def main_cli():
-    """Command-line entry point for PyPTV GUI."""
-    try:
-        # Call main with the original arguments
-        main()
-    except Exception as e:
-        print(f"Error running PyPTV: {str(e)}")
-        printException()
-        return 1
-
-    return 0
-
 if __name__ == "__main__":
-    main_cli()
+    main()

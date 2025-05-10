@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 from openptv.parameters.base import Parameters
-from openptv.parameters.utils import read_line, write_line
+from openptv.parameters.utils import g, write_line_to_file
 
 
 class MultiPlaneParams(Parameters):
@@ -72,10 +72,10 @@ class MultiPlaneParams(Parameters):
         """
         try:
             with open(self.filepath(), "r") as f:
-                self.n_planes = int(read_line(f))
+                self.n_planes = int(g(f))
                 self.plane_name = []
                 for _ in range(self.n_planes):
-                    self.plane_name.append(read_line(f))
+                    self.plane_name.append(g(f))
         except FileNotFoundError:
             raise FileNotFoundError(f"Parameter file {self.filepath()} not found")
         except ValueError as e:
@@ -90,9 +90,9 @@ class MultiPlaneParams(Parameters):
         """
         try:
             with open(self.filepath(), "w") as f:
-                write_line(f, str(self.n_planes))
+                write_line_to_file(f, str(self.n_planes))
                 for i in range(self.n_planes):
-                    write_line(f, self.plane_name[i])
+                    write_line_to_file(f, self.plane_name[i])
         except IOError:
             raise IOError(f"Error writing {self.filepath()}")
 

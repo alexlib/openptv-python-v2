@@ -10,11 +10,10 @@ import os
 import sys
 import re
 from pathlib import Path
-from typing import List, Tuple, Dict, Optional, Union, Any, Callable
+from typing import List, Tuple
 
 # Third-party imports
 import numpy as np
-from scipy.optimize import minimize
 from skimage.io import imread
 from skimage import img_as_ubyte
 from skimage.color import rgb2gray
@@ -24,32 +23,24 @@ import openptv
 from openptv import (
     using_cython,
     Calibration,
+    TargetArray,
+    correspondences,
+    MatchedCoords,
+    preprocess_image,
+    target_recognition,
+    point_positions,
+    Tracker
+)
+
+from openptv.parameters import (
     ControlParams,
     VolumeParams,
     TrackingParams,
     SequenceParams,
     TargetParams,
     ExamineParams,
-    TargetArray,
-    Target,
-    Frame,
-    correspondences,
-    MatchedCoords,
-    preprocess_image,
-    target_recognition,
-    point_positions,
-    external_calibration,
-    full_calibration,
-    Tracker,
-    default_naming,
-    # Constants
-    TR_BUFSPACE, TR_MAX_CAMS, MAX_TARGETS,
-    CORRES_NONE, PT_UNUSED,
-    NPAR, COORD_UNUSED
+    PftVersionParams,
 )
-
-# PyPTV imports
-from openptv.parameters import PftVersionParams
 
 # Print which implementation we're using
 print(f"Using Cython implementation: {using_cython()}")
@@ -267,7 +258,7 @@ def py_correspondences_proc_c(exp):
 
     # Save targets only after they've been modified:
     for i_cam in range(exp.n_cams):
-        base_name = exp.spar.get_img_base_name(i_cam)
+        base_name = get_short_img_base_name(i_cam, spar=exp.cpar)
         write_targets(exp.detections[i_cam], base_name, frame)
 
     return sorted_pos, sorted_corresp, num_targs
@@ -419,7 +410,9 @@ def py_sequence_loop(exp) -> None:
         for i_cam in range(n_cams):
             base_image_name = spar.get_img_base_name(i_cam)
             if Existing_Target:
-                targs = read_targets(base_image_name, frame)
+                # Use short base name for reading targets
+                short_base_name = get_short_img_base_name(i_cam, spar=spar)
+                targs = read_targets(short_base_name, frame)
             else:
                 # imname = spar.get_img_base_name(i_cam) + str(frame).encode()
 
@@ -446,14 +439,11 @@ def py_sequence_loop(exp) -> None:
                     if exp.exp1.active_params.m_params.Subtr_Mask:
                         # print("Subtracting mask")
                         try:
-                            # background_name = exp.exp1.active_params.m_params.Base_Name_Mask.replace('#',str(i_cam))
                             background_name = exp.exp1.active_params.m_params.Base_Name_Mask % (i_cam + 1)
                             background = imread(background_name)
                             img = np.clip(img - background, 0, 255).astype(np.uint8)
-
                         except ValueError:
                             print("failed to read the mask")
-
 
                 high_pass = simple_highpass(img, cpar)
                 targs = target_recognition(high_pass, tpar, i_cam, cpar)
@@ -474,8 +464,7 @@ def py_sequence_loop(exp) -> None:
         # Save targets only after they've been modified:
         # this is a workaround of the proper way to construct _targets name
         for i_cam in range(n_cams):
-            base_name = spar.get_img_base_name(i_cam)
-            # base_name = replace_format_specifiers(base_name) # %d to %04d
+            base_name = get_short_img_base_name(i_cam, spar=spar)
             write_targets(detections[i_cam], base_name, frame)
 
         print("Frame " + str(frame) + " had " +
@@ -526,43 +515,9 @@ def py_trackcorr_init(exp):
     from pathlib import Path
 
     for cam_id in range(exp.cpar.get_num_cams()):
-        img_base_name = exp.spar.get_img_base_name(cam_id)
-        print(f"Original image base name: {img_base_name}")
-
-        # Handle the format string more robustly
-        if '%' in img_base_name:
-            # Split the path into directory and filename parts
-            path_obj = Path(img_base_name)
-            dir_part = path_obj.parent
-            file_part = path_obj.name
-
-            # Split the filename at the format specifier
-            base_part = file_part.split('%')[0]
-
-            # Handle the underscore case
-            if base_part and base_part[-1] == '_':
-                base_part = base_part[:-1] + '.'
-            elif not base_part.endswith('.'):
-                base_part = base_part + '.'
-
-            # Reconstruct the path
-            if str(dir_part) == '.':
-                # No directory part
-                short_name = base_part
-            else:
-                # Include the directory part
-                short_name = os.path.join(str(dir_part), base_part)
-
-            print(f"Renaming {img_base_name} to {short_name} before C library tracker")
-            exp.spar.set_img_base_name(cam_id, short_name)
-        else:
-            # If there's no format specifier, ensure it ends with a period
-            if not img_base_name.endswith('.'):
-                short_name = img_base_name + '.'
-                print(f"Renaming {img_base_name} to {short_name} before C library tracker")
-                exp.spar.set_img_base_name(cam_id, short_name)
-            else:
-                print(f"Keeping {img_base_name} as is (already properly formatted)")
+        short_name = get_short_img_base_name(cam_id, spar=exp.spar)
+        print(f"Setting image base name for camera {cam_id}: {short_name}")
+        exp.spar.set_img_base_name(cam_id, short_name)
 
     # Use the new naming utilities
     from openptv.utils import get_default_naming_str, ensure_naming_directories
@@ -859,16 +814,8 @@ def read_targets(file_base: str, frame: int=123456789) -> TargetArray:
     # buffer = TargetArray()
     # buffer = []
 
-    # if file_base has an extension, remove it
+    # Always use only the part before the first dot (for legacy reasons)
     file_base = file_base.split(".")[0]
-
-    # We don't need this dictionary anymore as we use the path_config system
-    # This is kept as a comment for reference
-    # framebuf_naming = {
-    #     'corres': 'res/rt_is',
-    #     'linkage': 'res/ptv_is',
-    #     'prio': 'res/added'
-    # }
 
     filename = file_base_to_filename(file_base, frame)
 
@@ -891,7 +838,6 @@ def read_targets(file_base: str, frame: int=123456789) -> TargetArray:
                 targ.set_pixel_counts(int(line[3]), int(line[4]), int(line[5]))
                 targ.set_sum_grey_value(int(line[6]))
                 targ.set_tnr(int(line[7]))
-
 
     except IOError as err:
         print(f"Can't open targets file: {filename}")
@@ -1138,3 +1084,20 @@ def full_scipy_calibration(cal: Calibration,
     residuals /= 100
 
     return residuals
+
+def get_short_img_base_name(i_cam: int, spar=None) -> str:
+    """
+    Return a short image base name like 'cam1.' for the given camera number (zero-based),
+    but preserve the directory path from spar.img_base_name if provided.
+    """
+    if spar is not None:
+        # Get the full path for this camera
+        orig_path = spar.get_img_base_name(i_cam)
+        # If bytes, decode
+        if isinstance(orig_path, bytes):
+            orig_path = orig_path.decode()
+        dir_path = os.path.dirname(orig_path)
+        # Compose new base name with directory
+        return os.path.join(dir_path, f"cam{i_cam}.")
+    else:
+        return f"cam{i_cam}."

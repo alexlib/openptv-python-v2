@@ -1361,41 +1361,51 @@ class Experiment(HasTraits):
         # Read all parameters directories from an experiment directory
         self.paramsets = []
 
-        # list all directories
+        # List all directories starting with par_dir_prefix()
         dir_contents = [
             f
             for f in exp_path.iterdir()
-            if (exp_path / f).is_dir()
+            if f.is_dir() and f.stem.startswith(par_dir_prefix())
         ]
+        dir_contents = sorted(dir_contents, key=lambda x: str(x))
 
-        # choose directories that has 'parameters' in their path
-        dir_contents = [
-            f for f in dir_contents if str(f.stem).startswith(par_dir_prefix())
-        ]
-        # print(f" parameter sets are in {dir_contents}")
+        default_par_dir = exp_path / par_dir_prefix()
+        has_default = any(f.stem == par_dir_prefix() for f in dir_contents)
+        run_dirs = [f for f in dir_contents if f.stem != par_dir_prefix()]
 
-        # if only 'parameters' folder, create its copy 'parametersRun1'
-        if len(dir_contents) == 1 and str(dir_contents[0].stem) == par_dir_prefix:
-            # single parameters directory, backward compatibility
-            exp_name = "Run1"
-            new_name = str(dir_contents[0]) + exp_name
-            new_path = Path(new_name).resolve()
-            print(f" Copying to the new folder {new_path} \n")
-            print("------------------------------------------\n")
-            copy_params_dir(dir_contents[0], new_path)
-            dir_contents.append(new_path)
-
-        # take each path in the dir_contents and create a tree entity with the short name
-        for dir_item in dir_contents:
-            # par_path = exp_path / dir_item
-            if str(dir_item.stem) != par_dir_prefix:
-                # This should be a params dir, add a tree entry for it.
-                exp_name = str(dir_item.stem).rsplit('parameters',maxsplit=1)[-1]
-
-                print(f"Experiment name is: {exp_name}")
+        if not has_default and run_dirs:
+            # No default, but there are run dirs: add runs, copy first to default, but don't add default to paramsets
+            for idx, run_dir in enumerate(run_dirs):
+                run_name = run_dir.stem[len(par_dir_prefix()):] or f"Run{idx}"
+                print(f"Experiment name is: {run_name}")
                 print(f" adding Parameter set\n")
-                self.addParamset(exp_name, dir_item)
-
-        if not self.changed_active_params:
-            if self.nParamsets() > 0:
+                self.addParamset(run_name, run_dir)
+            # Copy first run dir to default parameters (behind the scenes)
+            print(f"Copying {run_dirs[0]} to default parameters directory {default_par_dir}")
+            copy_params_dir(run_dirs[0], default_par_dir)
+            # Set first run as active
+            if not self.changed_active_params and self.nParamsets() > 0:
                 self.setActive(0)
+            return
+
+        if has_default and not run_dirs:
+            # Only default exists: copy it to parametersRun0, add Run0 to paramsets
+            run0_dir = exp_path / f"{par_dir_prefix()}Run0"
+            print(f"Copying {default_par_dir} to {run0_dir}")
+            copy_params_dir(default_par_dir, run0_dir)
+            print("Experiment name is: Run0")
+            print(" adding Parameter set\n")
+            self.addParamset("Run0", run0_dir)
+            if not self.changed_active_params and self.nParamsets() > 0:
+                self.setActive(0)
+            return
+
+        # Both default and run dirs exist: add only run dirs to paramsets, don't add default
+        for idx, run_dir in enumerate(run_dirs):
+            run_name = run_dir.stem[len(par_dir_prefix()):] or f"Run{idx}"
+            print(f"Experiment name is: {run_name}")
+            print(f" adding Parameter set\n")
+            self.addParamset(run_name, run_dir)
+
+        if not self.changed_active_params and self.nParamsets() > 0:
+            self.setActive(0)
