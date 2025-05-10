@@ -4,11 +4,7 @@
 Test all parameter conversions between Python and Cython.
 """
 
-import sys
-import os
-
-# Add the parent directory to the path so we can import openptv
-sys.path.append(os.path.abspath('..'))
+import pytest
 
 from openptv.parameters import (
     TrackingParams, SequenceParams, VolumeParams, ControlParams, TargetParams
@@ -23,7 +19,6 @@ from openptv.binding.parameters import (
 
 def test_tracking_params():
     """Test converting a Python TrackingParams to a Cython TrackingParams."""
-    print("\nTesting TrackingParams conversion...")
     py_params = TrackingParams(
         dvxmin=-10.0, dvxmax=10.0,
         dvymin=-10.0, dvymax=10.0,
@@ -31,27 +26,38 @@ def test_tracking_params():
         dangle=30.0, dacc=0.5,
         flagNewParticles=True
     )
-    
+
     cy_params = py_params.to_cython_object()
     assert isinstance(cy_params, CythonTrackingParams)
-    print("✅ TrackingParams conversion passed")
+
+    # Check that the values were transferred correctly
+    assert cy_params.get_dvxmin() == py_params.dvxmin
+    assert cy_params.get_dvxmax() == py_params.dvxmax
+    assert cy_params.get_dvymin() == py_params.dvymin
+    assert cy_params.get_dvymax() == py_params.dvymax
+    assert cy_params.get_dvzmin() == py_params.dvzmin
+    assert cy_params.get_dvzmax() == py_params.dvzmax
+    assert cy_params.get_dangle() == py_params.dangle
+    assert cy_params.get_dacc() == py_params.dacc
+    assert cy_params.get_add() == 1  # True is converted to 1
 
 def test_sequence_params():
     """Test converting a Python SequenceParams to a Cython SequenceParams."""
-    print("\nTesting SequenceParams conversion...")
     py_params = SequenceParams(
         n_img=4,
         base_name=["cam1", "cam2", "cam3", "cam4"],
         first=1, last=100
     )
-    
+
     cy_params = py_params.to_cython_object()
     assert isinstance(cy_params, CythonSequenceParams)
-    print("✅ SequenceParams conversion passed")
+
+    # Check that the values were transferred correctly
+    assert cy_params.get_first() == py_params.first
+    assert cy_params.get_last() == py_params.last
 
 def test_volume_params():
     """Test converting a Python VolumeParams to a Cython VolumeParams."""
-    print("\nTesting VolumeParams conversion...")
     py_params = VolumeParams(
         X_lay=[-40, 40],
         Zmin_lay=[-10, -10],
@@ -59,14 +65,12 @@ def test_volume_params():
         cnx=0.02, cny=0.02, cn=0.01,
         csumg=0.5, corrmin=0.5, eps0=0.5
     )
-    
+
     cy_params = py_params.to_cython_object()
     assert isinstance(cy_params, CythonVolumeParams)
-    print("✅ VolumeParams conversion passed")
 
 def test_control_params():
     """Test converting a Python ControlParams to a Cython ControlParams."""
-    print("\nTesting ControlParams conversion...")
     py_params = ControlParams(
         n_img=4,
         img_base_name=["img1", "img2", "img3", "img4"],
@@ -77,14 +81,12 @@ def test_control_params():
         chfield=0,
         mmp_n1=1.0, mmp_n2=1.33, mmp_n3=1.0, mmp_d=10.0
     )
-    
+
     cy_params = py_params.to_cython_object()
     assert isinstance(cy_params, CythonControlParams)
-    print("✅ ControlParams conversion passed")
 
 def test_target_params():
     """Test converting a Python TargetParams to a Cython TargetParams."""
-    print("\nTesting TargetParams conversion...")
     py_params = TargetParams(
         gvthresh=[20, 20, 20, 20],
         discont=5,
@@ -94,16 +96,6 @@ def test_target_params():
         sumg_min=10,
         cr_sz=10
     )
-    
+
     cy_params = py_params.to_cython_object()
     assert isinstance(cy_params, CythonTargetParams)
-    print("✅ TargetParams conversion passed")
-
-if __name__ == "__main__":
-    print("Testing parameter conversions...")
-    test_tracking_params()
-    test_sequence_params()
-    test_volume_params()
-    test_control_params()
-    test_target_params()
-    print("\nAll parameter conversion tests passed!")

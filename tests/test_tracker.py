@@ -18,15 +18,15 @@ from openptv.parameters import ControlParams, VolumeParams, TrackingParams, \
     SequenceParams
 
 framebuf_naming = {
-    'corres': b'tests/testing_fodder/track/res/particles',
-    'linkage': b'tests/testing_fodder/track/res/linkage',
-    'prio': b'tests/testing_fodder/track/res/whatever'
+    'corres': b'testing_fodder/track/res/particles',
+    'linkage': b'testing_fodder/track/res/linkage',
+    'prio': b'testing_fodder/track/res/whatever'
 }
 
 
 class TestTracker(unittest.TestCase):
     def setUp(self):
-        with open("tests/testing_fodder/track/conf.yaml") as f:
+        with open("testing_fodder/track/conf.yaml") as f:
             yaml_conf = yaml.load(f, Loader=yaml.FullLoader)
         seq_cfg = yaml_conf['sequence']
 
@@ -106,8 +106,10 @@ class TestTracker(unittest.TestCase):
         )
         self.tpar = TrackingParams(**yaml_conf['tracking'])
         self.spar = SequenceParams(
-            image_base=img_base,
-            frame_range=(seq_cfg['first'], seq_cfg['last']))
+            n_img=len(yaml_conf['cameras']),
+            base_name=img_base,
+            first=seq_cfg['first'],
+            last=seq_cfg['last'])
 
         # Convert Python parameter objects to Cython objects
         c_cpar = self.cpar.to_cython_object()
@@ -121,12 +123,12 @@ class TestTracker(unittest.TestCase):
     def test_forward(self):
         """Manually running a full forward tracking run."""
         shutil.copytree(
-            "tests/testing_fodder/track/res_orig/", "tests/testing_fodder/track/res/")
+            "testing_fodder/track/res_orig/", "testing_fodder/track/res/")
 
         # Create initial linkage files that the test expects
-        os.makedirs("tests/testing_fodder/track/res/", exist_ok=True)
+        os.makedirs("testing_fodder/track/res/", exist_ok=True)
         for step in range(10001, 10005):
-            with open(f"tests/testing_fodder/track/res/linkage.{step}", "w") as f:
+            with open(f"testing_fodder/track/res/linkage.{step}", "w") as f:
                 if step == 10003:
                     f.write("-1\n")
                 else:
@@ -138,7 +140,7 @@ class TestTracker(unittest.TestCase):
             # print(f"step is {self.tracker.current_step()}\n")
             # print(self.tracker.current_step() > last_step)
             self.assertTrue(self.tracker.current_step() > last_step)
-            with open("tests/testing_fodder/track/res/linkage.%d" % last_step) as f:
+            with open("testing_fodder/track/res/linkage.%d" % last_step) as f:
                 lines = f.readlines()
                 # print(last_step,lines[0])
                 if last_step == 10003:
@@ -151,7 +153,7 @@ class TestTracker(unittest.TestCase):
     def test_full_forward(self):
         """Automatic full forward tracking run."""
         shutil.copytree(
-            "tests/testing_fodder/track/res_orig/", "tests/testing_fodder/track/res/")
+            "testing_fodder/track/res_orig/", "testing_fodder/track/res/")
         self.tracker.full_forward()
         # if it passes without error, we assume it's ok. The actual test is in
         # the C code.
@@ -159,7 +161,7 @@ class TestTracker(unittest.TestCase):
     def test_full_backward(self):
         """Automatic full backward correction phase."""
         shutil.copytree(
-            "tests/testing_fodder/track/res_orig/", "tests/testing_fodder/track/res/")
+            "testing_fodder/track/res_orig/", "testing_fodder/track/res/")
         self.tracker.full_forward()
         self.tracker.full_backward()
         # if it passes without error, we assume it's ok. The actual test is in
@@ -171,9 +173,9 @@ class TestTracker(unittest.TestCase):
         try:
             # Using regular strings - will be encoded automatically
             naming_strings = {
-                'corres': 'tests/testing_fodder/track/res/rt_is',
-                'linkage': 'tests/testing_fodder/track/res/ptv_is',
-                'prio': 'tests/testing_fodder/track/res/added'
+                'corres': 'testing_fodder/track/res/rt_is',
+                'linkage': 'testing_fodder/track/res/ptv_is',
+                'prio': 'testing_fodder/track/res/added'
             }
             # Convert Python parameter objects to Cython objects
             c_cpar = self.cpar.to_cython_object()
@@ -187,9 +189,9 @@ class TestTracker(unittest.TestCase):
 
             # Using bytes directly - will be passed through
             naming_bytes = {
-                'corres': b'tests/testing_fodder/track/res/rt_is',
-                'linkage': b'tests/testing_fodder/track/res/ptv_is',
-                'prio': b'tests/testing_fodder/track/res/added'
+                'corres': b'testing_fodder/track/res/rt_is',
+                'linkage': b'testing_fodder/track/res/ptv_is',
+                'prio': b'testing_fodder/track/res/added'
             }
             # Convert Python parameter objects to Cython objects
             c_cpar = self.cpar.to_cython_object()
@@ -203,9 +205,9 @@ class TestTracker(unittest.TestCase):
 
             # Using mixed - both will work
             naming_mixed = {
-                'corres': 'tests/testing_fodder/track/res/rt_is',  # string
-                'linkage': b'tests/testing_fodder/track/res/ptv_is',  # bytes
-                'prio': 'tests/testing_fodder/track/res/added'  # string
+                'corres': 'testing_fodder/track/res/rt_is',  # string
+                'linkage': b'testing_fodder/track/res/ptv_is',  # bytes
+                'prio': 'testing_fodder/track/res/added'  # string
             }
             # Convert Python parameter objects to Cython objects
             c_cpar = self.cpar.to_cython_object()
@@ -223,8 +225,8 @@ class TestTracker(unittest.TestCase):
 
     def tearDown(self):
         # Clean up resources
-        if os.path.exists("tests/testing_fodder/track/res/"):
-            shutil.rmtree("tests/testing_fodder/track/res/")
+        if os.path.exists("testing_fodder/track/res/"):
+            shutil.rmtree("testing_fodder/track/res/")
 
         # Clean up object references
         self.cals = None
