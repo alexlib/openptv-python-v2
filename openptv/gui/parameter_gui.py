@@ -693,12 +693,25 @@ class Main_Params(HasTraits):
         self.fixp_name = calOriParams.fixp_name
 
         # load read_targ_rec
-        targRecParams = TargRecParams(ptvParams.n_img, path=self.par_path)
+        targRecParams = TargRecParams(path=self.par_path)
         targRecParams.read()
+
+        # Handle different attribute names for gray value thresholds
+        if hasattr(targRecParams, 'gvthresh') and isinstance(targRecParams.gvthresh, list):
+            gvthres = targRecParams.gvthresh
+        elif hasattr(targRecParams, 'gvthres') and isinstance(targRecParams.gvthres, list):
+            gvthres = targRecParams.gvthres
+        else:
+            # Default to a list of zeros if no valid attribute is found
+            gvthres = [0] * ptvParams.n_img
+
+        # Ensure gvthres has enough elements
+        if len(gvthres) < ptvParams.n_img:
+            gvthres.extend([0] * (ptvParams.n_img - len(gvthres)))
 
         for i in range(ptvParams.n_img):
             exec(
-                "self.Gray_Tresh_{0} = targRecParams.gvthres[{1}]".format(
+                "self.Gray_Tresh_{0} = gvthres[{1}]".format(
                     i + 1, i
                 )
             )
@@ -735,20 +748,20 @@ class Main_Params(HasTraits):
         self.Seq_Last = sequenceParams.last
 
         # load criteria_par
-        VolumeParams = VolumeParams(path=self.par_path)
-        VolumeParams.read()
-        self.Xmin = VolumeParams.X_lay[0]
-        self.Xmax = VolumeParams.X_lay[1]
-        self.Zmin1 = VolumeParams.Zmin_lay[0]
-        self.Zmin2 = VolumeParams.Zmin_lay[1]
-        self.Zmax1 = VolumeParams.Zmax_lay[0]
-        self.Zmax2 = VolumeParams.Zmax_lay[1]
-        self.Min_Corr_nx = VolumeParams.cnx
-        self.Min_Corr_ny = VolumeParams.cny
-        self.Min_Corr_npix = VolumeParams.cn
-        self.Sum_gv = VolumeParams.csumg
-        self.Min_Weight_corr = VolumeParams.corrmin
-        self.Tol_Band = VolumeParams.eps0
+        volumeParams = VolumeParams(path=self.par_path)
+        volumeParams.read()
+        self.Xmin = volumeParams.X_lay[0]
+        self.Xmax = volumeParams.X_lay[1]
+        self.Zmin1 = volumeParams.Zmin_lay[0]
+        self.Zmin2 = volumeParams.Zmin_lay[1]
+        self.Zmax1 = volumeParams.Zmax_lay[0]
+        self.Zmax2 = volumeParams.Zmax_lay[1]
+        self.Min_Corr_nx = volumeParams.cnx
+        self.Min_Corr_ny = volumeParams.cny
+        self.Min_Corr_npix = volumeParams.cn
+        self.Sum_gv = volumeParams.csumg
+        self.Min_Weight_corr = volumeParams.corrmin
+        self.Tol_Band = volumeParams.eps0
 
         # write masking parameters
         masking_filename = Path(self.par_path) / 'masking.json'
@@ -1166,23 +1179,64 @@ class Calib_Params(HasTraits):
             self.chfield = "Field even"
 
         # read detect plate parameters
+        # Since DetectPlateParams is essentially the same as TargetParams,
+        # we need to handle both naming conventions
         detectPlateParams = DetectPlateParams(path=self.par_path)
         detectPlateParams.read()
 
-        # Map the attributes from the new parameter class to the expected names
-        gvth_1 = detectPlateParams.gvth_1  # Use the attribute name from the new class
-        gvth_2 = detectPlateParams.gvth_2  # These might need to be adjusted based on the actual structure
-        gvth_3 = detectPlateParams.gvth_3
-        gvth_4 = detectPlateParams.gvth_4
-        tolerable_discontinuity = detectPlateParams.tol_dis
-        min_npix = detectPlateParams.min_npix
-        max_npix = detectPlateParams.max_npix
-        min_npix_x = detectPlateParams.min_npix_x
-        max_npix_x = detectPlateParams.max_npix_x
-        min_npix_y = detectPlateParams.min_npix_y
-        max_npix_y = detectPlateParams.max_npix_y
-        sum_of_grey = detectPlateParams.sum_grey
-        size_of_crosses = detectPlateParams.size_cross
+        # Extract gray value thresholds
+        # First check if it has a gvthresh array (TargetParams style)
+        if hasattr(detectPlateParams, 'gvthresh'):
+            gvth_values = detectPlateParams.gvthresh
+            gvth_1 = gvth_values[0] if len(gvth_values) > 0 else 0
+            gvth_2 = gvth_values[1] if len(gvth_values) > 1 else 0
+            gvth_3 = gvth_values[2] if len(gvth_values) > 2 else 0
+            gvth_4 = gvth_values[3] if len(gvth_values) > 3 else 0
+        # Then check if it has individual gvth_N attributes (YAML style)
+        elif hasattr(detectPlateParams, 'gvth_1'):
+            gvth_1 = detectPlateParams.gvth_1
+            gvth_2 = detectPlateParams.gvth_2 if hasattr(detectPlateParams, 'gvth_2') else 0
+            gvth_3 = detectPlateParams.gvth_3 if hasattr(detectPlateParams, 'gvth_3') else 0
+            gvth_4 = detectPlateParams.gvth_4 if hasattr(detectPlateParams, 'gvth_4') else 0
+        # Finally, check if it has a gvthres array (old style)
+        elif hasattr(detectPlateParams, 'gvthres'):
+            gvth_1 = detectPlateParams.gvthres[0] if len(detectPlateParams.gvthres) > 0 else 0
+            gvth_2 = detectPlateParams.gvthres[1] if len(detectPlateParams.gvthres) > 1 else 0
+            gvth_3 = detectPlateParams.gvthres[2] if len(detectPlateParams.gvthres) > 2 else 0
+            gvth_4 = detectPlateParams.gvthres[3] if len(detectPlateParams.gvthres) > 3 else 0
+        else:
+            # Default values if no attributes found
+            gvth_1, gvth_2, gvth_3, gvth_4 = 0, 0, 0, 0
+
+        # Get other parameters with appropriate fallbacks for different naming conventions
+        # Check for both TargetParams and DetectPlateParams attribute names
+        tolerable_discontinuity = getattr(detectPlateParams, 'tol_dis',
+                                         getattr(detectPlateParams, 'discont',
+                                                getattr(detectPlateParams, 'tolerable_discontinuity', 0)))
+
+        min_npix = getattr(detectPlateParams, 'min_npix',
+                          getattr(detectPlateParams, 'nnmin', 0))
+
+        max_npix = getattr(detectPlateParams, 'max_npix',
+                          getattr(detectPlateParams, 'nnmax', 0))
+
+        min_npix_x = getattr(detectPlateParams, 'min_npix_x',
+                            getattr(detectPlateParams, 'nxmin', 0))
+
+        max_npix_x = getattr(detectPlateParams, 'max_npix_x',
+                            getattr(detectPlateParams, 'nxmax', 0))
+
+        min_npix_y = getattr(detectPlateParams, 'min_npix_y',
+                            getattr(detectPlateParams, 'nymin', 0))
+
+        max_npix_y = getattr(detectPlateParams, 'max_npix_y',
+                            getattr(detectPlateParams, 'nymax', 0))
+
+        sum_of_grey = getattr(detectPlateParams, 'sum_grey',
+                             getattr(detectPlateParams, 'sumg_min', 0))
+
+        size_of_crosses = getattr(detectPlateParams, 'size_cross',
+                                 getattr(detectPlateParams, 'cr_sz', 0))
 
         for i in range(self.n_img):
             setattr(self, f"grey_value_treshold_{i+1}", locals()[f"gvth_{i+1}"])

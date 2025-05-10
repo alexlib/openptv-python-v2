@@ -73,20 +73,36 @@ def negative(img: np.ndarray) -> np.ndarray:
     return 255 - img
 
 
-def simple_highpass(img: np.ndarray, cpar: ControlParams) -> np.ndarray:
+def simple_highpass(img: np.ndarray, cpar) -> np.ndarray:
     """Apply a simple highpass filter to an image.
 
-    This function will automatically use the appropriate implementation
-    (Cython or pure Python) based on availability.
+    This function uses the Python implementation of the highpass filter.
 
     Args:
         img: Input image as numpy array
-        cpar: Control parameters
+        cpar: Control parameters (from openptv.parameters)
 
     Returns:
         Highpass filtered image
     """
-    return preprocess_image(img, 0, cpar, DEFAULT_HIGHPASS_FILTER_SIZE)
+    # Use the Python implementation directly
+    from scipy import ndimage
+
+    # Apply low-pass filter
+    if img.dtype != np.uint8:
+        img = img_as_ubyte(img)
+
+    img_lp = ndimage.uniform_filter(
+        img,
+        size=DEFAULT_HIGHPASS_FILTER_SIZE * 2 + 1,
+        mode="constant",
+        cval=0,
+    )
+
+    # Subtract low-pass filtered image from original image
+    img_hp = img | img_lp
+
+    return img_hp
 
 
 def _read_calibrations(cpar, n_cams: int) -> List[Calibration]:
@@ -142,21 +158,35 @@ def py_start_proc_c() -> Tuple[ControlParams, SequenceParams, VolumeParams,
     else:
         up.from_legacy_dir(parameters_dir)
         up.set_path(unified_path)
-    
+
     try:
-        n_cams = up.get_num_cams()
-        # The 'control' section in parameters.yml is equivalent to ptv.par (not control.par)
+        # Get the control parameters first
         cpar = up.get_section('control')  # This is the content of ptv.par
+
+        # Get the number of cameras from the control parameters
+        if hasattr(up, 'get_num_cams'):
+            n_cams = up.get_num_cams()
+        elif hasattr(cpar, 'n_img'):
+            n_cams = cpar.n_img
+        else:
+            # Default to 4 cameras if we can't determine the number
+            n_cams = 4
+            print(f"Warning: Could not determine number of cameras, defaulting to {n_cams}")
+
+        # Get the rest of the parameters
         spar = up.get_section('sequence')
         vpar = up.get_section('volume')
         track_par = up.get_section('tracking')
         tpar = up.get_section('target')
         epar = up.get_section('examine')
+
+        # Read calibrations
         cals = _read_calibrations(cpar, n_cams)
+
         return cpar, spar, vpar, track_par, tpar, cals, epar
     except Exception as e:
         raise ValueError(f"Failed to read parameters: {e}")
-    
+
 
 def py_pre_processing_c(list_of_images: List[np.ndarray], cpar: ControlParams) -> List[np.ndarray]:
     """Apply pre-processing to a list of images.
@@ -379,8 +409,13 @@ def py_sequence_loop(exp) -> None:
     # spar.read_sequence_par("parameters/sequence.par", n_cams)
 
 
+    # Try to read PftVersionParams, but use default if file doesn't exist
     pftVersionParams = PftVersionParams(path=Path("parameters"))
-    pftVersionParams.read()
+    try:
+        pftVersionParams.read()
+    except IOError:
+        # Use default value if file doesn't exist
+        print("Warning: Could not read pft_version.par, using default value (Existing_Target=False)")
     Existing_Target = np.bool_(pftVersionParams.Existing_Target)
 
     # sequence loop for all frames
@@ -398,10 +433,16 @@ def py_sequence_loop(exp) -> None:
             if Existing_Target:
                 targs = read_targets(base_image_name, frame)
             else:
-                # imname = spar.get_img_base_name(i_cam) + str(frame).encode()
-
-                # imname = Path(imname.replace('#',f'{frame}'))
-                imname = Path(base_image_name % frame) # works with jumps from 1 to 10
+                # Handle different format strings in the base_image_name
+                if '%d' in base_image_name:
+                    # If it's a C-style format string with %d
+                    imname = Path(base_image_name.replace('%d', str(frame)))
+                elif '#' in base_image_name:
+                    # If it uses # as a placeholder
+                    imname = Path(base_image_name.replace('#', str(frame)))
+                else:
+                    # Otherwise just append the frame number
+                    imname = Path(f"{base_image_name}{frame}")
                 # print(f'Image name {imname}')
 
                 if not imname.exists():
@@ -433,10 +474,58 @@ def py_sequence_loop(exp) -> None:
 
 
                 high_pass = simple_highpass(img, cpar)
-                targs = target_recognition(high_pass, tpar, i_cam, cpar)
+
+                # Use the Python implementation of target_recognition
+                from openptv.pyoptv.segmentation import target_recognition as py_target_recognition
+                from openptv.pyoptv.parameters import ControlPar, TargetPar
+
+                # Create Python parameter objects
+                py_cpar = ControlPar()
+                py_cpar.imx = cpar.imx
+                py_cpar.imy = cpar.imy
+
+                py_tpar = TargetPar()
+                # Print parameter values for debugging
+                print(f"tpar.gvthresh: {tpar.gvthresh}")
+                print(f"tpar.discont: {tpar.discont}")
+                print(f"tpar.nnmin: {tpar.nnmin}")
+                print(f"tpar.nnmax: {tpar.nnmax}")
+
+                # Handle the case when gvthresh is not a list
+                if isinstance(tpar.gvthresh, list):
+                    py_tpar.gvthresh = tpar.gvthresh
+                else:
+                    # Create a list with the same value for all cameras
+                    py_tpar.gvthresh = [tpar.gvthresh] * 4
+
+                py_tpar.discont = tpar.discont
+                py_tpar.nnmin = tpar.nnmin
+                py_tpar.nnmax = tpar.nnmax
+                py_tpar.nxmin = tpar.nxmin
+                py_tpar.nxmax = tpar.nxmax
+                py_tpar.nymin = tpar.nymin
+                py_tpar.nymax = tpar.nymax
+                py_tpar.sumg_min = tpar.sumg_min
+
+                # Create a TargetArray to hold the results
+                targs = TargetArray(0)  # Start with empty array
+
+                # Call the Python implementation
+                py_targs = py_target_recognition(high_pass, py_tpar, i_cam, py_cpar)
+
+                # Convert the Python targets to TargetArray
+                if len(py_targs) > 0:
+                    targs = TargetArray(len(py_targs))
+                    for i, t in enumerate(py_targs):
+                        targs[i].set_pnr(i)
+                        targs[i].set_pos(t['pos'])
+                        targs[i].set_pixel_counts(t['n'], t['nx'], t['ny'])
+                        targs[i].set_sum_grey_value(t['sumg'])
 
             targs.sort_y()
             detections.append(targs)
+
+            # Create MatchedCoords using the original cpar
             masked_coords = MatchedCoords(targs, cpar, cals[i_cam])
             pos, _ = masked_coords.as_arrays()
             corrected.append(masked_coords)
@@ -445,6 +534,10 @@ def py_sequence_loop(exp) -> None:
         #            return False
 
         # Corresp. + positions.
+        # Use the Python implementation of correspondences
+        from openptv.pyoptv.correspondences import correspondences as py_correspondences
+
+        # Call the Python implementation
         sorted_pos, sorted_corresp, _ = correspondences(
             detections, corrected, cals, vpar, cpar)
 

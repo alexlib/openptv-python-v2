@@ -6,6 +6,7 @@ This module provides the base Parameter class that all parameter classes inherit
 
 from pathlib import Path
 import os
+import copy
 
 # Import from our own utils module
 from openptv.parameters.utils import par_dir_prefix
@@ -119,6 +120,57 @@ class Parameters:
             NotImplementedError: This method must be implemented by subclasses.
         """
         raise NotImplementedError("Subclasses must implement from_c_struct()")
+
+    def to_dict(self):
+        """
+        Convert parameter values to a dictionary.
+
+        Returns:
+            dict: A dictionary of parameter values.
+        """
+        # Create a copy of the object's __dict__ to avoid modifying the original
+        result = copy.deepcopy(self.__dict__)
+
+        # Remove internal attributes and path-related attributes
+        for key in list(result.keys()):
+            if key.startswith('_') or key in ['path', 'exp_path']:
+                del result[key]
+
+        # Convert Path objects to strings
+        for key, value in result.items():
+            if isinstance(value, Path):
+                result[key] = str(value)
+
+        return result
+
+    @classmethod
+    def from_dict(cls, data, path=None):
+        """
+        Create a Parameters object from a dictionary.
+
+        Args:
+            data: A dictionary of parameter values.
+            path: Path to the parameter directory. If None, uses the default path.
+
+        Returns:
+            Parameters: A new Parameters object.
+        """
+        # Create a copy of the data to avoid modifying the original
+        data_copy = copy.deepcopy(data)
+
+        # Remove path-related keys if they exist
+        for key in ['path', 'exp_path']:
+            if key in data_copy:
+                del data_copy[key]
+
+        # Create a new instance with the provided path
+        instance = cls(path=path)
+
+        # Set all attributes from the dictionary
+        for key, value in data_copy.items():
+            setattr(instance, key, value)
+
+        return instance
 
     def istherefile(self, filename):
         """

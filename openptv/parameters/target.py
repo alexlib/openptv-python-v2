@@ -9,13 +9,13 @@ import numpy as np
 
 from openptv.parameters.base import Parameters
 from openptv.parameters.utils import g
-from typing import List, Union 
+from typing import List, Union
 
 
 class TargetParams(Parameters):
     """
     Target parameters for OpenPTV.
-    
+
     This class handles reading and writing target parameters to/from files,
     and converting between Python and C representations.
     """
@@ -25,7 +25,7 @@ class TargetParams(Parameters):
                  path: Union[str, None]=None):
         """
         Initialize target parameters.
-        
+
         Args:
             gvthresh (list): List of gray value thresholds for each camera.
             discont (int): Discontinuity threshold.
@@ -41,12 +41,12 @@ class TargetParams(Parameters):
         """
         super().__init__(path)
         self.set(gvthresh, discont, nnmin, nnmax, nxmin, nxmax, nymin, nymax, sumg_min, cr_sz)
-    
+
     def set(self, gvthresh=None, discont=0, nnmin=0, nnmax=0,
             nxmin=0, nxmax=0, nymin=0, nymax=0, sumg_min=0, cr_sz=0):
         """
         Set target parameters.
-        
+
         Args:
             gvthresh (list): List of gray value thresholds for each camera.
             discont (int): Discontinuity threshold.
@@ -69,20 +69,32 @@ class TargetParams(Parameters):
         self.nymax = nymax
         self.sumg_min = sumg_min
         self.cr_sz = cr_sz
-    
+
+        # Add aliases for backward compatibility with GUI code
+        self.tol_dis = self.discont  # For backward compatibility
+        self.disco = self.discont  # For backward compatibility (another name for discont)
+        self.min_npix = self.nnmin  # For backward compatibility
+        self.max_npix = self.nnmax  # For backward compatibility
+        self.min_npix_x = self.nxmin  # For backward compatibility
+        self.max_npix_x = self.nxmax  # For backward compatibility
+        self.min_npix_y = self.nymin  # For backward compatibility
+        self.max_npix_y = self.nymax  # For backward compatibility
+        self.sum_grey = self.sumg_min  # For backward compatibility
+        self.size_cross = self.cr_sz  # For backward compatibility
+
     def filename(self):
         """
         Get the filename for target parameters.
-        
+
         Returns:
             str: The filename for target parameters.
         """
-        return self.path
-    
+        return "targ_rec.par"
+
     def read(self):
         """
         Read target parameters from file.
-        
+
         Raises:
             IOError: If the file cannot be read.
         """
@@ -100,11 +112,11 @@ class TargetParams(Parameters):
                 self.cr_sz = int(g(f))
         except Exception as e:
             raise IOError(f"Error reading target parameters: {e}")
-    
+
     def write(self):
         """
         Write target parameters to file.
-        
+
         Raises:
             IOError: If the file cannot be written.
         """
@@ -123,11 +135,11 @@ class TargetParams(Parameters):
                 f.write(f"{self.cr_sz}\n")
         except Exception as e:
             raise IOError(f"Error writing target parameters: {e}")
-    
+
     def to_c_struct(self):
         """
         Convert target parameters to a dictionary suitable for creating a C struct.
-        
+
         Returns:
             dict: A dictionary of target parameter values.
         """
@@ -143,16 +155,16 @@ class TargetParams(Parameters):
             'sumg_min': self.sumg_min,
             'cr_sz': self.cr_sz,
         }
-    
+
     @classmethod
     def from_c_struct(cls, c_struct, path=None):
         """
         Create a TargetParams object from a C struct.
-        
+
         Args:
             c_struct: A dictionary of target parameter values from a C struct.
             path: Path to the parameter directory.
-        
+
         Returns:
             TargetParams: A new TargetParams object.
         """
@@ -169,3 +181,8 @@ class TargetParams(Parameters):
             cr_sz=c_struct['cr_sz'],
             path=path,
         )
+
+
+# TargRecParams and DetectPlateParams are aliases for TargetParams for backward compatibility
+TargRecParams = TargetParams
+DetectPlateParams = TargetParams

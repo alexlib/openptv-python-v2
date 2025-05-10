@@ -13,7 +13,7 @@ def test_core_functionality(test_data_dir):
     print("Testing core functionality...")
 
     # Print versions
-    print(f"PyPTV version: {openptv.gui.__version__}")
+    print(f"OpenPTV version: {openptv.__version__}")
 
     # Test path to test_cavity
     test_cavity_path = test_data_dir

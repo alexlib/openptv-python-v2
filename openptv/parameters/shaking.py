@@ -14,17 +14,17 @@ from openptv.parameters.utils import g, bool_to_int, int_to_bool
 class ShakingParams(Parameters):
     """
     Shaking parameters for OpenPTV.
-    
+
     This class handles reading and writing shaking parameters to/from files.
     """
-    
-    def __init__(self, shaking_first_frame=0, shaking_last_frame=0, 
-                 shaking_max_num_points=0, shaking_max_num_frames=0, 
-                 shaking_start_points=None, shaking_end_points=None, 
-                 path=None):
+
+    def __init__(self, shaking_first_frame=0, shaking_last_frame=0,
+                 shaking_max_num_points=0, shaking_max_num_frames=0,
+                 shaking_start_points=None, shaking_end_points=None,
+                 path=None, **kwargs):
         """
         Initialize shaking parameters.
-        
+
         Args:
             shaking_first_frame (int): First frame for shaking.
             shaking_last_frame (int): Last frame for shaking.
@@ -33,16 +33,23 @@ class ShakingParams(Parameters):
             shaking_start_points (list): List of start points for shaking.
             shaking_end_points (list): List of end points for shaking.
             path (str or Path): Path to the parameter directory.
+            **kwargs: Additional keyword arguments for alternative parameter names.
         """
         super().__init__(path)
-        self.set(shaking_first_frame, shaking_last_frame, 
-                 shaking_max_num_points, shaking_max_num_frames)
-    
-    def set(self, shaking_first_frame=0, shaking_last_frame=0, 
+
+        # Handle alternative parameter names
+        first_frame = kwargs.get('first_frame', shaking_first_frame)
+        last_frame = kwargs.get('last_frame', shaking_last_frame)
+        max_num_points = kwargs.get('max_num_points', shaking_max_num_points)
+        max_num_frames = kwargs.get('max_num_frames', shaking_max_num_frames)
+
+        self.set(first_frame, last_frame, max_num_points, max_num_frames)
+
+    def set(self, shaking_first_frame=0, shaking_last_frame=0,
             shaking_max_num_points=0, shaking_max_num_frames=0):
         """
         Set shaking parameters.
-        
+
         Args:
             shaking_first_frame (int): First frame for shaking.
             shaking_last_frame (int): Last frame for shaking.
@@ -53,20 +60,20 @@ class ShakingParams(Parameters):
         self.shaking_last_frame = shaking_last_frame
         self.shaking_max_num_points = shaking_max_num_points
         self.shaking_max_num_frames = shaking_max_num_frames
-    
+
     def filename(self):
         """
         Get the filename for shaking parameters.
-        
+
         Returns:
             str: The filename for shaking parameters.
         """
         return "shaking.par"
-    
+
     def read(self):
         """
         Read shaking parameters from file.
-        
+
         Raises:
             IOError: If the file cannot be read.
         """
@@ -75,14 +82,14 @@ class ShakingParams(Parameters):
                 self.shaking_first_frame = int(g(f))
                 self.shaking_last_frame = int(g(f))
                 self.shaking_max_num_points = int(g(f))
-                self.shaking_max_num_frames = int(g(f))                
+                self.shaking_max_num_frames = int(g(f))
         except Exception as e:
             raise IOError(f"Error reading shaking parameters: {e}")
-    
+
     def write(self):
         """
         Write shaking parameters to file.
-        
+
         Raises:
             IOError: If the file cannot be written.
         """
@@ -92,14 +99,14 @@ class ShakingParams(Parameters):
                 f.write(f"{self.shaking_last_frame}\n")
                 f.write(f"{self.shaking_max_num_points}\n")
                 f.write(f"{self.shaking_max_num_frames}\n")
-                
+
         except Exception as e:
             raise IOError(f"Error writing shaking parameters: {e}")
-    
+
     def to_c_struct(self):
         """
         Convert shaking parameters to a dictionary suitable for creating a C struct.
-        
+
         Returns:
             dict: A dictionary of shaking parameter values.
         """
@@ -109,16 +116,16 @@ class ShakingParams(Parameters):
             'shaking_max_num_points': self.shaking_max_num_points,
             'shaking_max_num_frames': self.shaking_max_num_frames,
         }
-    
+
     @classmethod
     def from_c_struct(cls, c_struct, path=None):
         """
         Create a ShakingParams object from a C struct.
-        
+
         Args:
             c_struct: A dictionary of shaking parameter values from a C struct.
             path: Path to the parameter directory.
-        
+
         Returns:
             ShakingParams: A new ShakingParams object.
         """

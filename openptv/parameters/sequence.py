@@ -14,15 +14,15 @@ from openptv.parameters.utils import g
 class SequenceParams(Parameters):
     """
     Sequence parameters for OpenPTV.
-    
+
     This class handles reading and writing sequence parameters to/from files,
     and converting between Python and C representations.
     """
-    
+
     def __init__(self, n_img=0, base_name=None, first=0, last=0, path=None):
         """
         Initialize sequence parameters.
-        
+
         Args:
             n_img (int): Number of cameras.
             base_name (list): List of base names for image sequences.
@@ -32,11 +32,11 @@ class SequenceParams(Parameters):
         """
         super().__init__(path)
         self.set(n_img, base_name, first, last)
-    
+
     def set(self, n_img=0, base_name=None, first=0, last=0):
         """
         Set sequence parameters.
-        
+
         Args:
             n_img (int): Number of cameras.
             base_name (list): List of base names for image sequences.
@@ -50,20 +50,20 @@ class SequenceParams(Parameters):
             self.base_name.extend([''] * (self.n_img - len(self.base_name)))
         self.first = first
         self.last = last
-    
+
     def filename(self):
         """
         Get the filename for sequence parameters.
-        
+
         Returns:
             str: The filename for sequence parameters.
         """
         return "sequence.par"
-    
+
     def read(self):
         """
         Read sequence parameters from file.
-        
+
         Raises:
             IOError: If the file cannot be read.
         """
@@ -76,11 +76,11 @@ class SequenceParams(Parameters):
                 self.last = int(g(f))
         except Exception as e:
             raise IOError(f"Error reading sequence parameters: {e}")
-    
+
     def write(self):
         """
         Write sequence parameters to file.
-        
+
         Raises:
             IOError: If the file cannot be written.
         """
@@ -92,11 +92,11 @@ class SequenceParams(Parameters):
                 f.write(f"{self.last}\n")
         except Exception as e:
             raise IOError(f"Error writing sequence parameters: {e}")
-    
+
     def to_c_struct(self):
         """
         Convert sequence parameters to a dictionary suitable for creating a C struct.
-        
+
         Returns:
             dict: A dictionary of sequence parameter values.
         """
@@ -106,16 +106,16 @@ class SequenceParams(Parameters):
             'first': self.first,
             'last': self.last,
         }
-    
+
     @classmethod
     def from_c_struct(cls, c_struct, path=None):
         """
         Create a SequenceParams object from a C struct.
-        
+
         Args:
             c_struct: A dictionary of sequence parameter values from a C struct.
             path: Path to the parameter directory.
-        
+
         Returns:
             SequenceParams: A new SequenceParams object.
         """
@@ -126,3 +126,65 @@ class SequenceParams(Parameters):
             last=c_struct['last'],
             path=path,
         )
+
+    def get_first(self):
+        """
+        Get the first frame number.
+
+        Returns:
+            int: The first frame number.
+        """
+        return self.first
+
+    def set_first(self, first):
+        """
+        Set the first frame number.
+
+        Args:
+            first (int): The first frame number.
+        """
+        self.first = first
+
+    def get_last(self):
+        """
+        Get the last frame number.
+
+        Returns:
+            int: The last frame number.
+        """
+        return self.last
+
+    def set_last(self, last):
+        """
+        Set the last frame number.
+
+        Args:
+            last (int): The last frame number.
+        """
+        self.last = last
+
+    def get_img_base_name(self, cam):
+        """
+        Get the image base name for a camera.
+
+        Args:
+            cam (int): Camera index.
+
+        Returns:
+            str: The image base name.
+        """
+        if cam < 0 or cam >= self.n_img:
+            raise ValueError(f"Camera index {cam} out of range (0-{self.n_img-1})")
+        return self.base_name[cam]
+
+    def set_img_base_name(self, cam, name):
+        """
+        Set the image base name for a camera.
+
+        Args:
+            cam (int): Camera index.
+            name (str): The image base name.
+        """
+        if cam < 0 or cam >= self.n_img:
+            raise ValueError(f"Camera index {cam} out of range (0-{self.n_img-1})")
+        self.base_name[cam] = name

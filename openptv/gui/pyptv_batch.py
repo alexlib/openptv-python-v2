@@ -43,6 +43,9 @@ def run_batch(new_seq_first: int, new_seq_last: int):
     spar.set_first(new_seq_first)
     spar.set_last(new_seq_last)
 
+    # Get the number of cameras from the control parameters
+    n_cams = cpar.n_img if hasattr(cpar, 'n_img') else len(cals)
+
     exp = {
         'cpar': cpar,
         'spar': spar,

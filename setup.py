@@ -199,10 +199,19 @@ ext_modules = cythonize(
     include_path=['./openptv/binding/']
 )
 
+# Get version from openptv/__init__.py
+with open('openptv/__init__.py', 'r') as f:
+    for line in f:
+        if line.startswith('__version__'):
+            version = line.split('=')[1].strip().strip("'").strip('"')
+            break
+    else:
+        version = '0.1.1'  # Default if not found
+
 # Package metadata
 setup(
     name="openptv-python",
-    version="0.1.1",
+    version=version,
     description="Python package for Particle Tracking Velocimetry",
     author="OpenPTV Contributors",
     author_email="alex@libptv.org",

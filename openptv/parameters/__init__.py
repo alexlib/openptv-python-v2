@@ -11,10 +11,9 @@ from openptv.parameters.base import Parameters
 from openptv.parameters.tracking import TrackingParams
 from openptv.parameters.sequence import SequenceParams
 from openptv.parameters.volume import VolumeParams
-from openptv.parameters.control import ControlParams
-from openptv.parameters.target import TargetParams
+from openptv.parameters.control import ControlParams, PtvParams  # PtvParams is an alias for ControlParams
+from openptv.parameters.target import TargetParams, TargRecParams, DetectPlateParams  # TargRecParams and DetectPlateParams are aliases for TargetParams
 from openptv.parameters.calibration import CalOriParams
-from openptv.parameters.volume import VolumeParams
 from openptv.parameters.examine import ExamineParams
 from openptv.parameters.orient import OrientParams
 from openptv.parameters.dumbbell import DumbbellParams

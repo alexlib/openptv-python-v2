@@ -1,1 +1,2 @@
-from .__version__ import __version__
+# Import the version from the main package
+from openptv import __version__

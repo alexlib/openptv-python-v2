@@ -10,7 +10,12 @@ import importlib
 import warnings
 import sys
 
-__version__ = '0.1.0'
+try:
+    # Try to get version from version.py (created by setuptools)
+    from .version import __version__
+except ImportError:
+    # Default version if not installed with setuptools
+    __version__ = '0.1.1'
 
 # Import constants from the standalone module
 from openptv.constants import (
