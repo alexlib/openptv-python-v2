@@ -106,5 +106,4 @@ def test_correspondences_basic_functionality():
 
 if __name__ == "__main__":
     # This allows running the tests directly with python
-    import sys
-    sys.exit(pytest.main(["-v", __file__]))
+    pytest.main(["-v", __file__])

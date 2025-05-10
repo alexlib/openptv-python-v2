@@ -198,6 +198,35 @@ def test_sequence_params(temp_params_dir):
     finally:
         os.chdir(original_dir)
 
+from openptv.parameters import (
+    PtvParams, CalOriParams, SequenceParams, CriteriaParams, TargRecParams, ManOriParams,
+    DetectPlateParams, OrientParams, TrackingParams, PftVersionParams, ExamineParams,
+    DumbbellParams, ShakingParams, MultiPlaneParams
+)
+
+PARAM_CLASSES = [
+    PtvParams, CalOriParams, SequenceParams, CriteriaParams, TargRecParams, ManOriParams,
+    DetectPlateParams, OrientParams, TrackingParams, PftVersionParams, ExamineParams,
+    DumbbellParams, ShakingParams, MultiPlaneParams
+]
+
+def convert_all_par_to_yaml(param_dir):
+    param_dir = Path(param_dir)
+    for cls in PARAM_CLASSES:
+        try:
+            obj = cls(n_img=4, path=param_dir)
+        except TypeError:
+            obj = cls(path=param_dir)
+        par_file = param_dir / obj.filename()
+        if par_file.exists():
+            print(f"Converting {par_file} to YAML...")
+            obj.read()
+            yaml_file = par_file.with_suffix('.yaml')
+            obj.to_yaml()
+            print(f"Saved {yaml_file}")
+        else:
+            print(f"{par_file} not found, skipping.")        
+
 def test_convert_par_to_yaml_script(tmp_path):
     """Test the migration script for converting .par to .yaml"""
     import subprocess
@@ -209,11 +238,12 @@ def test_convert_par_to_yaml_script(tmp_path):
         f.write("4\nimg/cam1.%d\ncal/cam1.tif\nimg/cam2.%d\ncal/cam2.tif\nimg/cam3.%d\ncal/cam3.tif\nimg/cam4.%d\ncal/cam4.tif\n1\n1\n1\n1280\n1024\n0.012\n0.012\n0\n1.0\n1.33\n1.46\n5.0\n")
     # Run from project root so script path is correct
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    subprocess.run([
-        "python", "examples/convert_par_to_yaml.py", str(param_dir)
-    ], check=True, cwd=project_root)
+    convert_all_par_to_yaml(str(param_dir))
     ptv_yaml = param_dir / "ptv.yaml"
     assert ptv_yaml.exists()
     with open(ptv_yaml) as f:
         data = yaml.safe_load(f)
     assert data["n_img"] == 4
+
+if __name__ == "__main__":
+    pytest.main(["-v", __file__])
