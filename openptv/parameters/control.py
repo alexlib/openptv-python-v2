@@ -19,7 +19,7 @@ class ControlParams(Parameters):
     and converting between Python and C representations.
     """
     
-    def __init__(self, n_img=0, img_base_name=None, cal_img_base_name=None,
+    def __init__(self, num_cams=0, img_base_name=None, cal_img_base_name=None,
                  hp_flag=False, allcam_flag=False, tiff_flag=False,
                  imx=0, imy=0, pix_x=0.0, pix_y=0.0, chfield=0,
                  mm_np=None, path=None):
@@ -27,7 +27,7 @@ class ControlParams(Parameters):
         Initialize control parameters.
         
         Args:
-            n_img (int): Number of cameras.
+            num_cams (int): Number of cameras.
             img_base_name (list): List of base names for images.
             cal_img_base_name (list): List of base names for calibration images.
             hp_flag (bool): High-pass filter flag.
@@ -42,17 +42,17 @@ class ControlParams(Parameters):
             path (str or Path): Path to the parameter directory.
         """
         super().__init__(path)
-        self.set(n_img, img_base_name, cal_img_base_name, hp_flag, allcam_flag,
+        self.set(num_cams, img_base_name, cal_img_base_name, hp_flag, allcam_flag,
                  tiff_flag, imx, imy, pix_x, pix_y, chfield, mm_np)
     
-    def set(self, n_img=0, img_base_name=None, cal_img_base_name=None,
+    def set(self, num_cams=0, img_base_name=None, cal_img_base_name=None,
             hp_flag=False, allcam_flag=False, tiff_flag=False,
             imx=0, imy=0, pix_x=0.0, pix_y=0.0, chfield=0, mm_np=None):
         """
         Set control parameters.
         
         Args:
-            n_img (int): Number of cameras.
+            num_cams (int): Number of cameras.
             img_base_name (list): List of base names for images.
             cal_img_base_name (list): List of base names for calibration images.
             hp_flag (bool): High-pass filter flag.
@@ -65,15 +65,17 @@ class ControlParams(Parameters):
             chfield (int): Camera field (0=frame, 1=odd, 2=even).
             mm_np (dict): Multimedia parameters.
         """
-        self.n_img = n_img
+        if num_cams is None or num_cams == 0:
+            raise ValueError("num_cams must be provided and greater than zero")
+        self.num_cams = num_cams
         self.img_base_name = img_base_name or []
         self.cal_img_base_name = cal_img_base_name or []
         
-        # Ensure img_base_name and cal_img_base_name have n_img elements
-        if len(self.img_base_name) < self.n_img:
-            self.img_base_name.extend([''] * (self.n_img - len(self.img_base_name)))
-        if len(self.cal_img_base_name) < self.n_img:
-            self.cal_img_base_name.extend([''] * (self.n_img - len(self.cal_img_base_name)))
+        # Ensure img_base_name and cal_img_base_name have num_cams elements
+        if len(self.img_base_name) < self.num_cams:
+            self.img_base_name.extend([''] * (self.num_cams - len(self.img_base_name)))
+        if len(self.cal_img_base_name) < self.num_cams:
+            self.cal_img_base_name.extend([''] * (self.num_cams - len(self.cal_img_base_name)))
         
         self.hp_flag = hp_flag
         self.allcam_flag = allcam_flag
@@ -103,7 +105,7 @@ class ControlParams(Parameters):
         Returns:
             str: The filename for control parameters.
         """
-        return "control.par"
+        return "ptv.par"
     
     def read(self):
         """
@@ -114,11 +116,11 @@ class ControlParams(Parameters):
         """
         try:
             with open(self.filepath(), "r") as f:
-                self.n_img = int(g(f))
+                self.num_cams = int(g(f))
                 
                 self.img_base_name = []
                 self.cal_img_base_name = []
-                for i in range(self.n_img):
+                for i in range(self.num_cams):
                     self.img_base_name.append(g(f))
                     self.cal_img_base_name.append(g(f))
                 
@@ -151,9 +153,9 @@ class ControlParams(Parameters):
         """
         try:
             with open(self.filepath(), "w") as f:
-                f.write(f"{self.n_img}\n")
+                f.write(f"{self.num_cams}\n")
                 
-                for i in range(self.n_img):
+                for i in range(self.num_cams):
                     f.write(f"{self.img_base_name[i]}\n")
                     f.write(f"{self.cal_img_base_name[i]}\n")
                 
@@ -182,7 +184,7 @@ class ControlParams(Parameters):
             dict: A dictionary of control parameter values.
         """
         return {
-            'num_cams': self.n_img,
+            'num_cams': self.num_cams,
             'img_base_name': self.img_base_name,
             'cal_img_base_name': self.cal_img_base_name,
             'hp_flag': bool_to_int(self.hp_flag),
@@ -209,7 +211,7 @@ class ControlParams(Parameters):
             ControlParams: A new ControlParams object.
         """
         return cls(
-            n_img=c_struct['num_cams'],
+            num_cams=c_struct['num_cams'],
             img_base_name=c_struct['img_base_name'],
             cal_img_base_name=c_struct['cal_img_base_name'],
             hp_flag=int_to_bool(c_struct['hp_flag']),
@@ -223,227 +225,17 @@ class ControlParams(Parameters):
             mm_np=c_struct['mm'],
             path=path,
         )
+    
+    def to_cython(self):
+        """
+        Convert control parameters to a Cython-compatible format.
+        
+        Returns:
+            object: A Cython-compatible object representing the control parameters.
+        """
+        from openptv.binding.param_bridge import control_params_to_c
+        return control_params_to_c(self)
 
 
-class PtvParams(Parameters):
-    """
-    PTV parameters for OpenPTV.
-    
-    This class handles reading and writing PTV parameters to/from files.
-    It's a specialized version of ControlParams used in the GUI.
-    """
-    
-    def __init__(self, n_img=0, img_name=None, img_cal=None,
-                 hp_flag=False, allcam_flag=False, tiff_flag=False,
-                 imx=0, imy=0, pix_x=0.0, pix_y=0.0, chfield=0,
-                 mmp_n1=1.0, mmp_n2=1.0, mmp_n3=1.0, mmp_d=1.0,
-                 path=None):
-        """
-        Initialize PTV parameters.
-        
-        Args:
-            n_img (int): Number of cameras.
-            img_name (list): List of image names.
-            img_cal (list): List of calibration image names.
-            hp_flag (bool): High-pass filter flag.
-            allcam_flag (bool): All cameras flag.
-            tiff_flag (bool): TIFF flag.
-            imx (int): Image width.
-            imy (int): Image height.
-            pix_x (float): Pixel width.
-            pix_y (float): Pixel height.
-            chfield (int): Camera field (0=frame, 1=odd, 2=even).
-            mmp_n1 (float): Refractive index of medium 1.
-            mmp_n2 (float): Refractive index of medium 2.
-            mmp_n3 (float): Refractive index of medium 3.
-            mmp_d (float): Thickness of medium 2.
-            path (str or Path): Path to the parameter directory.
-        """
-        super().__init__(path)
-        self.set(n_img, img_name, img_cal, hp_flag, allcam_flag, tiff_flag,
-                 imx, imy, pix_x, pix_y, chfield, mmp_n1, mmp_n2, mmp_n3, mmp_d)
-    
-    def set(self, n_img=0, img_name=None, img_cal=None,
-            hp_flag=False, allcam_flag=False, tiff_flag=False,
-            imx=0, imy=0, pix_x=0.0, pix_y=0.0, chfield=0,
-            mmp_n1=1.0, mmp_n2=1.0, mmp_n3=1.0, mmp_d=1.0):
-        """
-        Set PTV parameters.
-        
-        Args:
-            n_img (int): Number of cameras.
-            img_name (list): List of image names.
-            img_cal (list): List of calibration image names.
-            hp_flag (bool): High-pass filter flag.
-            allcam_flag (bool): All cameras flag.
-            tiff_flag (bool): TIFF flag.
-            imx (int): Image width.
-            imy (int): Image height.
-            pix_x (float): Pixel width.
-            pix_y (float): Pixel height.
-            chfield (int): Camera field (0=frame, 1=odd, 2=even).
-            mmp_n1 (float): Refractive index of medium 1.
-            mmp_n2 (float): Refractive index of medium 2.
-            mmp_n3 (float): Refractive index of medium 3.
-            mmp_d (float): Thickness of medium 2.
-        """
-        self.n_img = n_img
-        self.img_name = img_name or []
-        self.img_cal = img_cal or []
-        
-        # Ensure img_name and img_cal have n_img elements
-        if len(self.img_name) < self.n_img:
-            self.img_name.extend([''] * (self.n_img - len(self.img_name)))
-        if len(self.img_cal) < self.n_img:
-            self.img_cal.extend([''] * (self.n_img - len(self.img_cal)))
-        
-        self.hp_flag = hp_flag
-        self.allcam_flag = allcam_flag
-        self.tiff_flag = tiff_flag
-        self.imx = imx
-        self.imy = imy
-        self.pix_x = pix_x
-        self.pix_y = pix_y
-        self.chfield = chfield
-        self.mmp_n1 = mmp_n1
-        self.mmp_n2 = mmp_n2
-        self.mmp_n3 = mmp_n3
-        self.mmp_d = mmp_d
-    
-    def filename(self):
-        """
-        Get the filename for PTV parameters.
-        
-        Returns:
-            str: The filename for PTV parameters.
-        """
-        return "ptv.par"
-    
-    def read(self):
-        """
-        Read PTV parameters from file. Tries .par first, then .yaml if .par is missing.
-        Raises:
-            IOError: If the file cannot be read.
-        """
-        par_path = self.filepath()
-        yaml_path = par_path.with_suffix('.yaml')
-        try:
-            if par_path.exists():
-                with open(par_path, "r", encoding="utf8") as f:
-                    self.n_img = int(g(f))
-                    self.img_name = []
-                    self.img_cal = []
-                    for i in range(self.n_img):
-                        self.img_name.append(g(f))
-                        self.img_cal.append(g(f))
-                    self.hp_flag = int_to_bool(int(g(f)))
-                    self.allcam_flag = int_to_bool(int(g(f)))
-                    self.tiff_flag = int_to_bool(int(g(f)))
-                    self.imx = int(g(f))
-                    self.imy = int(g(f))
-                    self.pix_x = float(g(f))
-                    self.pix_y = float(g(f))
-                    self.chfield = int(g(f))
-                    self.mmp_n1 = float(g(f))
-                    self.mmp_n2 = float(g(f))
-                    self.mmp_n3 = float(g(f))
-                    self.mmp_d = float(g(f))
-            elif yaml_path.exists():
-                import yaml
-                with open(yaml_path, "r") as f:
-                    data = yaml.safe_load(f)
-                for k, v in data.items():
-                    setattr(self, k, v)
-            else:
-                raise FileNotFoundError(f"Neither {par_path} nor {yaml_path} exists.")
-        except Exception as e:
-            raise IOError(f"Error reading PTV parameters: {e}")
-    
-    def write(self):
-        """
-        Write PTV parameters to file and update YAML as well.
-        Raises:
-            IOError: If the file cannot be written.
-        """
-        try:
-            with open(self.filepath(), "w", encoding="utf8") as f:
-                f.write(f"{self.n_img}\n")
-                for i in range(self.n_img):
-                    f.write(f"{self.img_name[i]}\n")
-                    f.write(f"{self.img_cal[i]}\n")
-                f.write(f"{int(self.hp_flag)}\n")
-                f.write(f"{int(self.allcam_flag)}\n")
-                f.write(f"{int(self.tiff_flag)}\n")
-                f.write(f"{self.imx}\n")
-                f.write(f"{self.imy}\n")
-                f.write(f"{self.pix_x}\n")
-                f.write(f"{self.pix_y}\n")
-                f.write(f"{self.chfield}\n")
-                f.write(f"{self.mmp_n1}\n")
-                f.write(f"{self.mmp_n2}\n")
-                f.write(f"{self.mmp_n3}\n")
-                f.write(f"{self.mmp_d}\n")
-            self.to_yaml()  # Always update YAML after writing
-        except Exception as e:
-            raise IOError(f"Error writing PTV parameters: {e}")
-    
-    def to_control_params(self):
-        """
-        Convert PTV parameters to ControlParams.
-        
-        Returns:
-            ControlParams: A ControlParams object.
-        """
-        mm_np = {
-            'nlay': 1,
-            'n1': self.mmp_n1,
-            'n2': [self.mmp_n2, 0.0, 0.0],
-            'n3': self.mmp_n3,
-            'd': [self.mmp_d, 0.0, 0.0],
-        }
-        
-        return ControlParams(
-            n_img=self.n_img,
-            img_base_name=self.img_name,
-            cal_img_base_name=self.img_cal,
-            hp_flag=self.hp_flag,
-            allcam_flag=self.allcam_flag,
-            tiff_flag=self.tiff_flag,
-            imx=self.imx,
-            imy=self.imy,
-            pix_x=self.pix_x,
-            pix_y=self.pix_y,
-            chfield=self.chfield,
-            mm_np=mm_np,
-            path=self.path,
-        )
-    
-    @classmethod
-    def from_control_params(cls, control_params):
-        """
-        Create a PtvParams object from a ControlParams object.
-        
-        Args:
-            control_params: A ControlParams object.
-        
-        Returns:
-            PtvParams: A new PtvParams object.
-        """
-        return cls(
-            n_img=control_params.n_img,
-            img_name=control_params.img_base_name,
-            img_cal=control_params.cal_img_base_name,
-            hp_flag=control_params.hp_flag,
-            allcam_flag=control_params.allcam_flag,
-            tiff_flag=control_params.tiff_flag,
-            imx=control_params.imx,
-            imy=control_params.imy,
-            pix_x=control_params.pix_x,
-            pix_y=control_params.pix_y,
-            chfield=control_params.chfield,
-            mmp_n1=control_params.mm_np['n1'],
-            mmp_n2=control_params.mm_np['n2'][0],
-            mmp_n3=control_params.mm_np['n3'],
-            mmp_d=control_params.mm_np['d'][0],
-            path=control_params.path,
-        )
+# Remove the PtvParams class and make it an alias to ControlParams
+PtvParams = ControlParams

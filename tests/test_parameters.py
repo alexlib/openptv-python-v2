@@ -74,7 +74,7 @@ def test_ptv_params(temp_params_dir):
     # Create a test ptv.yaml file
     ptv_yaml_path = params_dir / "ptv.yaml"
     ptv_yaml_data = {
-        "n_img": 4,
+        "num_cams": 4,
         "img_name": ["img/cam1.%d", "img/cam2.%d", "img/cam3.%d", "img/cam4.%d"],
         "img_cal": ["cal/cam1.tif", "cal/cam2.tif", "cal/cam3.tif", "cal/cam4.tif"],
         "hp_flag": True,
@@ -100,7 +100,7 @@ def test_ptv_params(temp_params_dir):
     try:
         cparams = PtvParams(path=params_dir)
         cparams.read()
-        assert cparams.n_img == 4
+        assert cparams.num_cams == 4
         assert cparams.img_name[0] == "img/cam1.%d"
         assert cparams.img_cal[0] == "cal/cam1.tif"
         assert cparams.hp_flag is True
@@ -117,19 +117,19 @@ def test_ptv_params(temp_params_dir):
         assert cparams.mmp_d == 5.0
 
         # Test writing to file
-        cparams.n_img = 3
+        cparams.num_cams = 3
         cparams.write()
 
         # Read back and verify
         cparams2 = PtvParams(path=params_dir)
         cparams2.read()
-        assert cparams2.n_img == 3
+        assert cparams2.num_cams == 3
 
         # Remove the .par file and test that YAML is used
         ptv_par_path.unlink()
         cparams3 = PtvParams(path=params_dir)
         cparams3.read()
-        assert cparams3.n_img == 3
+        assert cparams3.num_cams == 3
         # Remove the .yaml file and test fallback to .par
         ptv_yaml_path.unlink()
         with open(ptv_par_path, "w") as f:
@@ -156,7 +156,7 @@ def test_ptv_params(temp_params_dir):
             f.write("5.0\n")
         cparams4 = PtvParams(path=params_dir)
         cparams4.read()
-        assert cparams4.n_img == 4
+        assert cparams4.num_cams == 4
         ptv_par_path.unlink(missing_ok=True)
         ptv_yaml_path.unlink(missing_ok=True)
     finally:
@@ -180,7 +180,7 @@ def test_sequence_params(temp_params_dir):
     os.chdir(params_dir)
 
     try:
-        sparams = SequenceParams(n_img=4, base_name=[], first=0, last=0, path=params_dir)
+        sparams = SequenceParams(num_cams=4, base_name=[], first=0, last=0, path=params_dir)
         sparams.read()
         assert sparams.first == 10000
         assert sparams.last == 10010
@@ -191,7 +191,7 @@ def test_sequence_params(temp_params_dir):
         sparams.last = 10009
         sparams.write()
 
-        sparams2 = SequenceParams(n_img=4, base_name=[], first=0, last=0, path=params_dir)
+        sparams2 = SequenceParams(num_cams=4, base_name=[], first=0, last=0, path=params_dir)
         sparams2.read()
         assert sparams2.first == 10001
         assert sparams2.last == 10009
@@ -199,13 +199,13 @@ def test_sequence_params(temp_params_dir):
         os.chdir(original_dir)
 
 from openptv.parameters import (
-    PtvParams, CalOriParams, SequenceParams, CriteriaParams, TargRecParams, ManOriParams,
+    PtvParams, CalOriParams, SequenceParams, CriteriaParams, ManOriParams,
     DetectPlateParams, OrientParams, TrackingParams, PftVersionParams, ExamineParams,
     DumbbellParams, ShakingParams, MultiPlaneParams
 )
 
 PARAM_CLASSES = [
-    PtvParams, CalOriParams, SequenceParams, CriteriaParams, TargRecParams, ManOriParams,
+    PtvParams, CalOriParams, SequenceParams, CriteriaParams, ManOriParams,
     DetectPlateParams, OrientParams, TrackingParams, PftVersionParams, ExamineParams,
     DumbbellParams, ShakingParams, MultiPlaneParams
 ]
@@ -214,7 +214,7 @@ def convert_all_par_to_yaml(param_dir):
     param_dir = Path(param_dir)
     for cls in PARAM_CLASSES:
         try:
-            obj = cls(n_img=4, path=param_dir)
+            obj = cls(num_cams=4, path=param_dir)
         except TypeError:
             obj = cls(path=param_dir)
         par_file = param_dir / obj.filename()
@@ -243,7 +243,7 @@ def test_convert_par_to_yaml_script(tmp_path):
     assert ptv_yaml.exists()
     with open(ptv_yaml) as f:
         data = yaml.safe_load(f)
-    assert data["n_img"] == 4
+    assert data["num_cams"] == 4
 
 if __name__ == "__main__":
     pytest.main(["-v", __file__])

@@ -16,7 +16,7 @@ from openptv.parameters.tracking import TrackingParams
 from openptv.parameters.sequence import SequenceParams
 from openptv.parameters.volume import VolumeParams
 from openptv.parameters.control import ControlParams, PtvParams
-from openptv.parameters.target import TargetParams, TargRecParams
+from openptv.parameters.target import TargetParams
 from openptv.parameters.calibration import CalOriParams
 from openptv.parameters.orient import OrientParams
 from openptv.parameters.man_ori import ManOriParams

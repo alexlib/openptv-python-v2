@@ -157,3 +157,10 @@ class Parameters:
         data = {k: _to_primitive(v) for k, v in self.__dict__.items() if not k.startswith('_') and not callable(v)}
         with open(yaml_file, "w") as outfile:
             yaml.safe_dump(data, outfile, default_flow_style=False)
+
+    def to_cython(self):
+        """
+        Convert this parameter object to a Cython parameter object for use with Cython bindings.
+        Must be implemented by subclasses.
+        """
+        raise NotImplementedError("Subclasses must implement to_cython() for Cython parameter conversion.")

@@ -19,35 +19,35 @@ class SequenceParams(Parameters):
     and converting between Python and C representations.
     """
     
-    def __init__(self, n_img=0, base_name=None, first=0, last=0, path=None):
+    def __init__(self, num_cams=0, base_name=None, first=0, last=0, path=None):
         """
         Initialize sequence parameters.
         
         Args:
-            n_img (int): Number of cameras.
+            num_cams (int): Number of cameras.
             base_name (list): List of base names for image sequences.
             first (int): First frame number.
             last (int): Last frame number.
             path (str or Path): Path to the parameter directory.
         """
         super().__init__(path)
-        self.set(n_img, base_name, first, last)
+        self.set(num_cams, base_name, first, last)
     
-    def set(self, n_img=0, base_name=None, first=0, last=0):
+    def set(self, num_cams=0, base_name=None, first=0, last=0):
         """
         Set sequence parameters.
         
         Args:
-            n_img (int): Number of cameras.
+            num_cams (int): Number of cameras.
             base_name (list): List of base names for image sequences.
             first (int): First frame number.
             last (int): Last frame number.
         """
-        self.n_img = n_img
+        self.num_cams = num_cams
         self.base_name = base_name or []
-        # Ensure base_name has n_img elements
-        if len(self.base_name) < self.n_img:
-            self.base_name.extend([''] * (self.n_img - len(self.base_name)))
+        # Ensure base_name has num_cams elements
+        if len(self.base_name) < self.num_cams:
+            self.base_name.extend([''] * (self.num_cams - len(self.base_name)))
         self.first = first
         self.last = last
     
@@ -70,7 +70,7 @@ class SequenceParams(Parameters):
         try:
             with open(self.filepath(), "r") as f:
                 self.base_name = []
-                for i in range(self.n_img):
+                for i in range(self.num_cams):
                     self.base_name.append(g(f))
                 self.first = int(g(f))
                 self.last = int(g(f))
@@ -86,7 +86,7 @@ class SequenceParams(Parameters):
         """
         try:
             with open(self.filepath(), "w") as f:
-                for i in range(self.n_img):
+                for i in range(self.num_cams):
                     f.write(f"{self.base_name[i]}\n")
                 f.write(f"{self.first}\n")
                 f.write(f"{self.last}\n")
@@ -101,7 +101,7 @@ class SequenceParams(Parameters):
             dict: A dictionary of sequence parameter values.
         """
         return {
-            'num_cams': self.n_img,
+            'num_cams': self.num_cams,
             'img_base_name': self.base_name,
             'first': self.first,
             'last': self.last,
@@ -120,9 +120,13 @@ class SequenceParams(Parameters):
             SequenceParams: A new SequenceParams object.
         """
         return cls(
-            n_img=c_struct['num_cams'],
+            num_cams=c_struct['num_cams'],
             base_name=c_struct['img_base_name'],
             first=c_struct['first'],
             last=c_struct['last'],
             path=path,
         )
+    
+    def to_cython(self):
+        from openptv.binding.param_bridge import sequence_params_to_c
+        return sequence_params_to_c(self)

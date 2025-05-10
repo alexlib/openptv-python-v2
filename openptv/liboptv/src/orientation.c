@@ -704,7 +704,7 @@ int raw_orient (Calibration* cal, control_par *cpar, int nfix, vec3d fix[], targ
    the calibration target points in the calibration file
    char *calblock_filename - path to the text file containing the calibration points.
    char* man_ori_filename - path to the text file containing the manually selected points.
-   int cam - ID (number) of the camera (0,1, ..., n_cams)
+   int cam - ID (number) of the camera (0,1, ..., num_cams)
 
    Returns:
    int number of points, should be 4. If reading failed for any reason, returns NULL.

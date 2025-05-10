@@ -56,7 +56,6 @@ from openptv.parameters import (
     SequenceParams,
     CalOriParams,
     CriteriaParams,
-    TargRecParams,
     ManOriParams,
     DetectPlateParams,
     OrientParams,
@@ -560,7 +559,7 @@ class TreeMenuHandler(Handler):
             info.object.tpar,
             info.object.cals,
             info.object.epar,
-        ) = ptv.py_start_proc_c(info.object.n_cams)
+        ) = ptv.py_start_proc_c(info.object.num_cams)
         mainGui.pass_init = True
         print("Read all the parameters and calibrations successfully ")
 
@@ -636,7 +635,7 @@ class TreeMenuHandler(Handler):
         info.object.drawcross_in_all_cams("x", "y", x, y, "blue", 3)
 
     def _clean_correspondences(self, tmp):
-        """arr is a (n_cams,N,2) array that contains four lists of
+        """arr is a (num_cams,N,2) array that contains four lists of
         correspondences (each per camera)
         """
         x1, y1 = [], []
@@ -911,7 +910,7 @@ class TreeMenuHandler(Handler):
     def three_d_positions(self, info):
         """Extracts and saves 3D positions from the list of correspondences"""
         ptv.py_determination_proc_c(
-            info.object.n_cams,
+            info.object.num_cams,
             info.object.sorted_pos,
             info.object.sorted_corresp,
             info.object.corrected,
@@ -946,7 +945,7 @@ class TreeMenuHandler(Handler):
 
         print("Starting detect_part_track")
         x1_a, x2_a, y1_a, y2_a = [], [], [], []
-        for i in range(info.object.n_cams):  # initialize result arrays
+        for i in range(info.object.num_cams):  # initialize result arrays
             x1_a.append([])
             x2_a.append([])
             y1_a.append([])
@@ -955,7 +954,7 @@ class TreeMenuHandler(Handler):
     # imx, imy = info.object.cpar.get_image_size()
 
 
-        for i_img in range(info.object.n_cams):
+        for i_img in range(info.object.num_cams):
             for i_seq in range(seq_first, seq_last + 1):  # loop over sequences
                 intx_green, inty_green = [], []
                 intx_blue, inty_blue = [], []
@@ -978,7 +977,7 @@ class TreeMenuHandler(Handler):
                 y2_a[i_img] = y2_a[i_img] + inty_blue
 
         # plot result arrays
-        for i_img in range(info.object.n_cams):
+        for i_img in range(info.object.num_cams):
             info.object.camera_list[i_img].drawcross(
                 "x_tr_gr", "y_tr_gr", x1_a[i_img], y1_a[i_img], "green", 3)
             info.object.camera_list[i_img].drawcross(
@@ -1009,7 +1008,7 @@ class TreeMenuHandler(Handler):
         heads_x, heads_y = [], []
         tails_x, tails_y = [], []
         ends_x, ends_y = [], []
-        for i_cam in range(info.object.n_cams):
+        for i_cam in range(info.object.num_cams):
             head_x, head_y = [], []
             tail_x, tail_y = [], []
             end_x, end_y = [], []
@@ -1048,7 +1047,7 @@ class TreeMenuHandler(Handler):
             ends_x.append(end_x)
             ends_y.append(end_y)
 
-        for i_cam in range(info.object.n_cams):
+        for i_cam in range(info.object.num_cams):
             info.object.camera_list[i_cam].drawcross(
                 "heads_x", "heads_y", heads_x[i_cam], heads_y[i_cam], "red", 3
             )
@@ -1380,15 +1379,15 @@ class MainGUI(HasTraits):
         self.exp1 = Experiment()
         self.exp1.populate_runs(exp_path)
         self.plugins = Plugins()
-        self.n_cams = self.exp1.active_params.m_params.Num_Cam
-        self.orig_image = self.n_cams * [[]]
+        self.num_cams = self.exp1.active_params.m_params.Num_Cam
+        self.orig_image = self.num_cams * [[]]
         self.current_camera = 0
         self.camera_list = [
-            CameraWindow(colors[i], f"Camera {i+1}") for i in range(self.n_cams)
+            CameraWindow(colors[i], f"Camera {i+1}") for i in range(self.num_cams)
         ]
         self.software_path = software_path
         self.exp_path = exp_path
-        for i in range(self.n_cams):
+        for i in range(self.num_cams):
             self.camera_list[i].on_trait_change(self.right_click_process, "rclicked")
 
     def right_click_process(self):
@@ -1439,7 +1438,7 @@ class MainGUI(HasTraits):
                 )
 
                 # look for points along epipolars for other cameras
-                for j in range(self.n_cams):
+                for j in range(self.num_cams):
                     if i == j:
                         continue
                     pts = epipolar_curve(
@@ -1474,7 +1473,7 @@ class MainGUI(HasTraits):
             is_float (bool, optional): _description_. Defaults to False.
         """
         print("inside update plots, images changed\n")
-        for i in range(self.n_cams):
+        for i in range(self.num_cams):
             self.camera_list[i].create_image(images[i], is_float)
             self.camera_list[i]._plot.request_redraw()
 
@@ -1486,7 +1485,7 @@ class MainGUI(HasTraits):
             is_float (bool, optional): _description_. Defaults to False.
         """
         print("inside update plots, images changed\n")
-        for i in range(self.n_cams):
+        for i in range(self.num_cams):
             self.camera_list[i].update_image(images[i], is_float)
             self.camera_list[i]._plot.request_redraw()
 
@@ -1505,7 +1504,7 @@ class MainGUI(HasTraits):
         else:
             index = None
 
-        for i in range(self.n_cams):
+        for i in range(self.num_cams):
             plot_list = list(self.camera_list[i]._plot.plots.keys())
             # if not remove_background:
             #   index=None
@@ -1526,7 +1525,7 @@ class MainGUI(HasTraits):
             self.camera_list[i].right_p_y1 = []
 
     def _update_thread_plot_changed(self):
-        n_cams = len(self.camera_list)
+        num_cams = len(self.camera_list)
 
         if self.update_thread_plot and self.tr_thread:
             print("updating plots..\n")
@@ -1540,7 +1539,7 @@ class MainGUI(HasTraits):
                 self.tr_thread.inty1,
                 self.tr_thread.inty2,
             )
-            for i in range(n_cams):
+            for i in range(num_cams):
                 self.camera_list[i].drawcross(
                     str(step) + "x0",
                     str(step) + "y0",
@@ -1588,12 +1587,12 @@ class MainGUI(HasTraits):
             update_all (bool, optional): Whether to update all cameras. Defaults to True.
             display_only (bool, optional): Whether to only display without processing. Defaults to False.
         """
-        n_cams = len(self.camera_list)
+        num_cams = len(self.camera_list)
 
         # Get the base names for all cameras
         self.base_name = [
             getattr(self.exp1.active_params.m_params, f"Basename_{i+1}_Seq")
-            for i in range(n_cams)
+            for i in range(num_cams)
         ]
 
         # Convert sequence number to string for consistent handling
@@ -1610,7 +1609,7 @@ class MainGUI(HasTraits):
             except Exception as e:
                 print(f"Error formatting image name for camera {j+1}: {str(e)}")
         else:
-            for j in range(n_cams):
+            for j in range(num_cams):
                 try:
                     # Format the filename using % operator for consistent handling
                     img_name = self.base_name[j] % seq
@@ -1628,15 +1627,15 @@ class MainGUI(HasTraits):
             seq_last (int): Last sequence number
         """
         print(f"Overlaying images from sequence {seq_first} to {seq_last}")
-        n_cams = len(self.camera_list)
+        num_cams = len(self.camera_list)
 
         # Get the base names for all cameras
         self.base_name = [
             getattr(self.exp1.active_params.m_params, f"Basename_{i+1}_Seq")
-            for i in range(n_cams)
+            for i in range(num_cams)
         ]
 
-        for cam_id in range(n_cams):
+        for cam_id in range(num_cams):
             try:
                 # Format the filename using % operator
                 first_img_path = self.base_name[cam_id] % seq_first

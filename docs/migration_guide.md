@@ -113,7 +113,6 @@ The following parameter classes are available in the new unified module:
 - `ControlParams`: Control parameters
 - `PtvParams`: PTV parameters
 - `TargetParams`: Target parameters
-- `TargRecParams`: Target recognition parameters
 - `CalOriParams`: Calibration and orientation parameters
 - `OrientParams`: Orientation parameters
 - `ManOriParams`: Manual orientation parameters

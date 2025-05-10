@@ -76,15 +76,15 @@ def simple_highpass(img: np.ndarray, cpar: ControlParams) -> np.ndarray:
     Returns:
         Highpass filtered image
     """
-    return preprocess_image(img, 0, cpar, DEFAULT_HIGHPASS_FILTER_SIZE)
+    return preprocess_image(img, 0, cpar.to_c_struct(), DEFAULT_HIGHPASS_FILTER_SIZE)
 
 
-def _read_calibrations(cpar: ControlParams, n_cams: int) -> List[Calibration]:
+def _read_calibrations(cpar: ControlParams, num_cams: int) -> List[Calibration]:
     """Read calibration files for all cameras.
 
     Args:
         cpar: Control parameters
-        n_cams: Number of cameras
+        num_cams: Number of cameras
 
     Returns:
         List of Calibration objects, one for each camera
@@ -93,9 +93,9 @@ def _read_calibrations(cpar: ControlParams, n_cams: int) -> List[Calibration]:
         IOError: If calibration files cannot be read
     """
     cals = []
-    for i_cam in range(n_cams):
+    for i_cam in range(num_cams):
         cal = Calibration()
-        base_name = cpar.get_cal_img_base_name(i_cam)
+        base_name = cpar.cal_img_base_name[i_cam]   
         ori_file = base_name + ".ori"
         addpar_file = base_name + ".addpar"
 
@@ -108,7 +108,7 @@ def _read_calibrations(cpar: ControlParams, n_cams: int) -> List[Calibration]:
     return cals
 
 
-def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeParams,
+def py_start_proc_c(num_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeParams,
                                     TrackingParams, TargetParams, List[Calibration],
                                     ExamineParams]:
     """Read all parameters needed for processing.
@@ -117,7 +117,7 @@ def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeP
     the necessary objects for processing.
 
     Args:
-        n_cams: Number of cameras
+        num_cams: Number of cameras
 
     Returns:
         Tuple containing:
@@ -131,40 +131,44 @@ def py_start_proc_c(n_cams: int) -> Tuple[ControlParams, SequenceParams, VolumeP
     """
     # Get parameter file paths
     parameters_dir = Path("parameters")
-    ptv_par_path = parameters_dir / "ptv.par"
-    sequence_par_path = parameters_dir / "sequence.par"
-    criteria_par_path = parameters_dir / "criteria.par"
-    track_par_path = parameters_dir / "track.par"
+    # ptv_par_path = parameters_dir / "ptv.par"
+    # sequence_par_path = parameters_dir / "sequence.par"
+    # criteria_par_path = parameters_dir / "criteria.par"
+    # track_par_path = parameters_dir / "track.par"
     targ_rec_par_path = parameters_dir / "targ_rec.par"
-    examine_par_path = parameters_dir
+    # examine_par_path = parameters_dir
 
     try:
         # Control parameters
-        cpar = ControlParams(n_cams)
-        cpar.read_control_par(str(ptv_par_path))
+        cpar = ControlParams(num_cams, path = parameters_dir)
+        cpar.read()
 
         # Sequence parameters
-        spar = SequenceParams(num_cams=n_cams)
-        spar.read_sequence_par(str(sequence_par_path), n_cams)
+        spar = SequenceParams(num_cams=num_cams, path = parameters_dir)
+        spar.read()
+        # spar.read_sequence_par(, num_cams)
 
         # Volume parameters
-        vpar = VolumeParams()
-        vpar.read_volume_par(str(criteria_par_path))
+        vpar = VolumeParams(path = parameters_dir)
+        vpar.read()
+        # vpar.read_volume_par(str())
 
         # Tracking parameters
-        track_par = TrackingParams()
-        track_par.read_track_par(str(track_par_path))
+        track_par = TrackingParams(path = parameters_dir)
+        track_par.read()
+        # track_par.read_track_par(str(track_par_path))
 
         # Target parameters
-        tpar = TargetParams(n_cams)
-        tpar.read(str(targ_rec_par_path))
+        tpar = TargetParams(path = parameters_dir, filename = 'targ_rec.par')
+        tpar.read()
+        # tpar.read(str())
 
         # Examine parameters (multiplane vs single plane calibration)
         # Use the high-level API's ExamineParams
-        epar = ExamineParams.from_file(examine_par_path)
+        epar = ExamineParams.from_file(path = parameters_dir)
 
         # Read calibration files
-        cals = _read_calibrations(cpar, n_cams)
+        cals = _read_calibrations(cpar, num_cams)
 
         return cpar, spar, vpar, track_par, tpar, cals, epar
     except Exception as e:
@@ -257,27 +261,27 @@ def py_correspondences_proc_c(exp):
         exp.detections, exp.corrected, exp.cals, exp.vpar, exp.cpar)
 
     # Save targets only after they've been modified:
-    for i_cam in range(exp.n_cams):
+    for i_cam in range(exp.num_cams):
         base_name = get_short_img_base_name(i_cam, spar=exp.cpar)
         write_targets(exp.detections[i_cam], base_name, frame)
 
     return sorted_pos, sorted_corresp, num_targs
 
 
-def py_determination_proc_c(n_cams: int,
+def py_determination_proc_c(num_cams: int,
                          sorted_pos: List[np.ndarray],
                          sorted_corresp: np.ndarray,
                          corrected: List[MatchedCoords]) -> None:
     """Calculate 3D positions from 2D correspondences and save to file.
 
     Args:
-        n_cams: Number of cameras
+        num_cams: Number of cameras
         sorted_pos: List of sorted positions for each camera
         sorted_corresp: Array of correspondence indices
         corrected: List of corrected coordinates
     """
     # Get parameters
-    cpar, _, vpar, _, _, cals, _ = py_start_proc_c(n_cams)
+    cpar, _, vpar, _, _, cals, _ = py_start_proc_c(num_cams)
 
     # Concatenate sorted positions (distinction between quad/trip irrelevant here)
     sorted_pos = np.concatenate(sorted_pos, axis=1)
@@ -285,14 +289,14 @@ def py_determination_proc_c(n_cams: int,
 
     # Get corrected coordinates by point numbers
     flat = np.array([
-        corrected[i].get_by_pnrs(sorted_corresp[i]) for i in range(n_cams)
+        corrected[i].get_by_pnrs(sorted_corresp[i]) for i in range(num_cams)
     ])
 
     # Calculate 3D positions
     pos, _ = point_positions(flat.transpose(1, 0, 2), cpar, cals, vpar)
 
     # Format correspondence array for printing
-    if n_cams < 4:
+    if num_cams < 4:
         print_corresp = -1 * np.ones((4, sorted_corresp.shape[1]))
         print_corresp[:len(cals), :] = sorted_corresp
     else:
@@ -379,8 +383,8 @@ def py_sequence_loop(exp) -> None:
 
     # Sequence parameters
 
-    n_cams, cpar, spar, vpar, tpar, cals = (
-        exp.n_cams,
+    num_cams, cpar, spar, vpar, tpar, cals = (
+        exp.num_cams,
         exp.cpar,
         exp.spar,
         exp.vpar,
@@ -389,8 +393,8 @@ def py_sequence_loop(exp) -> None:
     )
 
     # # Sequence parameters
-    # spar = SequenceParams(num_cams=n_cams)
-    # spar.read_sequence_par("parameters/sequence.par", n_cams)
+    # spar = SequenceParams(num_cams=num_cams)
+    # spar.read_sequence_par("parameters/sequence.par", num_cams)
 
 
     pftVersionParams = PftVersionParams(path=Path("parameters"))
@@ -407,7 +411,7 @@ def py_sequence_loop(exp) -> None:
 
         detections = []
         corrected = []
-        for i_cam in range(n_cams):
+        for i_cam in range(num_cams):
             base_image_name = spar.get_img_base_name(i_cam)
             if Existing_Target:
                 # Use short base name for reading targets
@@ -463,7 +467,7 @@ def py_sequence_loop(exp) -> None:
 
         # Save targets only after they've been modified:
         # this is a workaround of the proper way to construct _targets name
-        for i_cam in range(n_cams):
+        for i_cam in range(num_cams):
             base_name = get_short_img_base_name(i_cam, spar=spar)
             write_targets(detections[i_cam], base_name, frame)
 
@@ -741,7 +745,7 @@ def py_calibration(selection, exp):
 #     Overwrites the ori and addpar files of the cameras specified in cal_ori.par of the multiplane parameter folder
 #     """
 
-#     for i_cam in range(exp.n_cams):  # iterate over all cameras
+#     for i_cam in range(exp.num_cams):  # iterate over all cameras
 #         all_known = []
 #         all_detected = []
 #         for i in range(exp.MultiParams.n_planes):  # combine all single planes

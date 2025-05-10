@@ -18,8 +18,8 @@ def main():
     
     # Initialize the parameters
     print("Initializing parameters...")
-    n_cams = 4
-    cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c(n_cams=n_cams)
+    num_cams = 4
+    cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c(num_cams=num_cams)
     
     # Set the sequence parameters
     spar.set_first(10000)
@@ -34,7 +34,7 @@ def main():
         'tpar': tpar,
         'cals': cals,
         'epar': epar,
-        'n_cams': n_cams,
+        'num_cams': num_cams,
     }
     
     # Convert dictionary keys to attributes

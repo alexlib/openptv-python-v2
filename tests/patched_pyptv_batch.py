@@ -38,9 +38,9 @@ def run_batch(new_seq_first: int, new_seq_last: int):
     """
     # read the number of cameras
     with open("parameters/ptv.par", "r") as f:
-        n_cams = int(f.readline())
+        num_cams = int(f.readline())
     
-    cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c(n_cams=n_cams)
+    cpar, spar, vpar, track_par, tpar, cals, epar = py_start_proc_c(num_cams=num_cams)
     
     # FIX: Use the function parameters instead of undefined globals
     spar.set_first(new_seq_first)
@@ -54,7 +54,7 @@ def run_batch(new_seq_first: int, new_seq_last: int):
     'tpar':tpar,
     'cals':cals,
     'epar':epar,
-    'n_cams':n_cams,
+    'num_cams':num_cams,
         }
     
     # use dataclass to convert dictionary keys to attributes

@@ -4,13 +4,13 @@ Script to convert all .par parameter files in a directory to YAML format using O
 import sys
 from pathlib import Path
 from openptv.parameters import (
-    PtvParams, CalOriParams, SequenceParams, CriteriaParams, TargRecParams, ManOriParams,
+    PtvParams, CalOriParams, SequenceParams, CriteriaParams, ManOriParams,
     DetectPlateParams, OrientParams, TrackingParams, PftVersionParams, ExamineParams,
     DumbbellParams, ShakingParams, MultiPlaneParams
 )
 
 PARAM_CLASSES = [
-    PtvParams, CalOriParams, SequenceParams, CriteriaParams, TargRecParams, ManOriParams,
+    PtvParams, CalOriParams, SequenceParams, CriteriaParams, ManOriParams,
     DetectPlateParams, OrientParams, TrackingParams, PftVersionParams, ExamineParams,
     DumbbellParams, ShakingParams, MultiPlaneParams
 ]

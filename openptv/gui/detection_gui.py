@@ -324,16 +324,16 @@ class DetectionGUI(HasTraits):
         print(f"Inside a folder: {pathlib.Path()}")
         # read parameters
         with open( (self.par_path / 'ptv.par'), 'r', encoding="utf-8") as f:
-            self.n_cams = int(f.readline())
+            self.num_cams = int(f.readline())
 
-        print(f"Loading images/parameters in {self.n_cams} cams \n")
+        print(f"Loading images/parameters in {self.num_cams} cams \n")
 
         # copy parameters from active to default folder parameters/
         # par.copy_params_dir(self.active_path, self.par_path)
 
         # read from parameters
         self.cpar, self.spar, self.vpar, self.track_par, self.tpar, \
-        self.cals, self.epar = ptv.py_start_proc_c(self.n_cams)
+        self.cals, self.epar = ptv.py_start_proc_c(self.num_cams)
 
         self.tpar.read('parameters/detect_plate.par')
 
@@ -343,7 +343,7 @@ class DetectionGUI(HasTraits):
         self.ysize_bounds = list(self.tpar.get_ysize_bounds())
         self.sum_grey = self.tpar.get_min_sum_grey()
 
-        # self.add_trait("i_cam", Enum(range(1,self.n_cams+1))) 
+        # self.add_trait("i_cam", Enum(range(1,self.num_cams+1))) 
         self.add_trait("grey_thresh", Range(1,255,self.thresholds[0],mode='slider'))
         self.add_trait("min_npix",Range(0,self.pixel_count_bounds[0]+50, self.pixel_count_bounds[0], method='slider',label='min npix'))
         self.add_trait("min_npix_x",Range(1,self.xsize_bounds[0]+20,self.xsize_bounds[0], mode='slider',label='min npix in x')) 
@@ -505,7 +505,7 @@ class DetectionGUI(HasTraits):
         self.camera[0].drawcross("x", "y", np.array(x), np.array(y), "yellow", 8)
         self.camera[0]._right_click_avail = 1
 
-        # for i in range(self.n_cams):
+        # for i in range(self.num_cams):
         #     self.camera[i]._right_click_avail = 1
 
     def reset_plots(self):

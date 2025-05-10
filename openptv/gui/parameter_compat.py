@@ -15,7 +15,6 @@ from openptv.parameters import (
     CalOriParams as OldCalOriParams,
     SequenceParams as OldSequenceParams,
     CriteriaParams as OldCriteriaParams,
-    TargRecParams as OldTargRecParams,
     ManOriParams as OldManOriParams,
     DetectPlateParams as OldDetectPlateParams,
     OrientParams as OldOrientParams,
@@ -35,7 +34,6 @@ from openptv.parameters import (
     CalOriParams as NewCalOriParams,
     SequenceParams as NewSequenceParams,
     CriteriaParams as NewCriteriaParams,
-    TargRecParams as NewTargRecParams,
     ManOriParams as NewManOriParams,
     DetectPlateParams as NewDetectPlateParams,
     OrientParams as NewOrientParams,
@@ -140,32 +138,6 @@ def convert_old_to_new_criteria_params(old_params: OldCriteriaParams) -> NewCrit
         csumg=old_params.csumg,
         corrmin=old_params.corrmin,
         eps0=old_params.eps0,
-        path=old_params.path,
-    )
-
-
-def convert_old_to_new_targ_rec_params(old_params: OldTargRecParams) -> NewTargRecParams:
-    """
-    Convert old TargRecParams to new TargRecParams.
-
-    Args:
-        old_params: Old TargRecParams object.
-
-    Returns:
-        New TargRecParams object.
-    """
-    return NewTargRecParams(
-        n_img=old_params.n_img,
-        gvthres=old_params.gvthres,
-        disco=old_params.disco,
-        nnmin=old_params.nnmin,
-        nnmax=old_params.nnmax,
-        nxmin=old_params.nxmin,
-        nxmax=old_params.nxmax,
-        nymin=old_params.nymin,
-        nymax=old_params.nymax,
-        sumg_min=old_params.sumg_min,
-        cr_sz=old_params.cr_sz,
         path=old_params.path,
     )
 

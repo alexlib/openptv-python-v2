@@ -190,3 +190,7 @@ class TrackingParams(Parameters):
             flagNewParticles=int_to_bool(c_struct['add']),
             path=path,
         )
+
+    def to_cython(self):
+        from openptv.binding.param_bridge import tracking_params_to_c
+        return tracking_params_to_c(self)

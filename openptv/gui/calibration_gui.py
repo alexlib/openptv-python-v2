@@ -378,13 +378,13 @@ class CalibrationGUI(HasTraits):
 
         # read parameters
         with open(self.par_path / "ptv.par", "r") as f:
-            self.n_cams = int(f.readline())
+            self.num_cams = int(f.readline())
 
-        self.calParams = CalOriParams(self.n_cams, path=self.par_path)
+        self.calParams = CalOriParams(self.num_cams, path=self.par_path)
         self.calParams.read()
 
-        self.camera = [PlotWindow() for i in range(self.n_cams)]
-        for i in range(self.n_cams):
+        self.camera = [PlotWindow() for i in range(self.num_cams)]
+        for i in range(self.num_cams):
             self.camera[i].name = "Camera" + str(i + 1)
             self.camera[i].cameraN = i
             self.camera[i].py_rclick_delete = ptv.py_rclick_delete
@@ -540,7 +540,7 @@ class CalibrationGUI(HasTraits):
             self.tpar,
             self.cals,
             self.epar,
-        ) = ptv.py_start_proc_c(self.n_cams)
+        ) = ptv.py_start_proc_c(self.num_cams)
 
     def _button_showimg_fired(self):
 
@@ -569,7 +569,7 @@ class CalibrationGUI(HasTraits):
             self.tpar,
             self.cals,
             self.epar,
-        ) = ptv.py_start_proc_c(self.n_cams)
+        ) = ptv.py_start_proc_c(self.num_cams)
 
         print("reset grey scale thresholds for calibration:\n")
         self.tpar.read("parameters/detect_plate.par")
@@ -634,13 +634,13 @@ class CalibrationGUI(HasTraits):
 
         self.drawcross("x", "y", x, y, "blue", 4)
 
-        for i in range(self.n_cams):
+        for i in range(self.num_cams):
             self.camera[i]._right_click_avail = 1
 
     def _button_manual_fired(self):
         print('Start manual orientation, use clicks and then press this button again')
         points_set = True
-        for i in range(self.n_cams):
+        for i in range(self.num_cams):
             if len(self.camera[i]._x) < 4:
                 print(f"Camera {i} less than 4 points: {self.camera[i]._x}")
                 points_set = False
@@ -653,7 +653,7 @@ class CalibrationGUI(HasTraits):
                 if f is None:
                     self.status_text = "Error saving man_ori.dat."
                 else:
-                    for i in range(self.n_cams):
+                    for i in range(self.num_cams):
                         for j in range(4):
                             f.write(
                                 "%f %f\n"
@@ -674,7 +674,7 @@ class CalibrationGUI(HasTraits):
 
 
         with open(self.man_ori_dat_path, "r") as f:
-            for i in range(self.n_cams):
+            for i in range(self.num_cams):
                 self.camera[i]._x = []
                 self.camera[i]._y = []
                 for j in range(4):  # 4 orientation points
@@ -694,7 +694,7 @@ class CalibrationGUI(HasTraits):
         if f is None:
             self.status_text = "Error loading man_ori."
         else:
-            for i in range(self.n_cams):
+            for i in range(self.num_cams):
                 for j in range(4):
                     self.camera[i].man_ori[j] = int(f.readline().split()[0])
                 self.status_text = "man_ori.par loaded."
@@ -711,13 +711,13 @@ class CalibrationGUI(HasTraits):
         self.cal_points = self._read_cal_points()
 
         self.cals = []
-        for i_cam in range(self.n_cams):
+        for i_cam in range(self.num_cams):
             cal = Calibration()
             tmp = self.cpar.get_cal_img_base_name(i_cam)
             cal.from_file(tmp + ".ori", tmp + ".addpar")
             self.cals.append(cal)
 
-        for i_cam in range(self.n_cams):
+        for i_cam in range(self.num_cams):
             self._project_cal_points(i_cam)
 
     def _project_cal_points(self, i_cam, color="orange"):
@@ -756,7 +756,7 @@ class CalibrationGUI(HasTraits):
 
         print("_button_sort_grid_fired")
 
-        for i_cam in range(self.n_cams):
+        for i_cam in range(self.num_cams):
 
             # if len(self.cal_points) > len(self.detections[i_cam]):
             #     raise ValueError("Insufficient detected points, need at \
@@ -800,7 +800,7 @@ class CalibrationGUI(HasTraits):
 
         # get manual points from cal_points and use ids from man_ori.par
 
-        for i_cam in range(self.n_cams):
+        for i_cam in range(self.num_cams):
             selected_points = np.zeros((4, 3))
             for i, cp_id in enumerate(self.cal_points["id"]):
                 for j in range(4):
@@ -847,7 +847,7 @@ class CalibrationGUI(HasTraits):
 
         flags = [name for name in NAMES if getattr(op, name) == 1]
 
-        for i_cam in range(self.n_cams):  # iterate over all cameras
+        for i_cam in range(self.num_cams):  # iterate over all cameras
 
             if self.epar.Combine_Flag:
 
@@ -1169,10 +1169,10 @@ args=(self.cals[i_cam],
         seq_first = sp.shaking_first_frame
         seq_last = sp.shaking_last_frame
 
-        base_names = [self.sget_img_base_name(i).decode() for i in range(self.n_cams)]
+        base_names = [self.sget_img_base_name(i).decode() for i in range(self.num_cams)]
 
 
-        for i_cam in range(self.n_cams):
+        for i_cam in range(self.num_cams):
 
             targ_ix = targ_ix_all[i_cam]
             targs = targs_all[i_cam]
@@ -1266,7 +1266,7 @@ args=(self.cals[i_cam],
         :rtype: None
         """
         if i_cam is None:
-            for i in range(self.n_cams):
+            for i in range(self.num_cams):
                 self.camera[i].drawcross(
                     str_x, str_y, x[i], y[i], color1, size1
                 )
@@ -1275,9 +1275,9 @@ args=(self.cals[i_cam],
 
     def backup_ori_files(self):
         """backup ORI/ADDPAR files to the backup_cal directory"""
-        calOriParams = CalOriParams(self.n_cams, path=self.par_path)
+        calOriParams = CalOriParams(self.num_cams, path=self.par_path)
         calOriParams.read()
-        for f in calOriParams.img_ori[: self.n_cams]:
+        for f in calOriParams.img_ori[: self.num_cams]:
             print(f"Backing up {f}")
             shutil.copyfile(f, f + ".bck")
             g = f.replace("ori", "addpar")
@@ -1285,10 +1285,10 @@ args=(self.cals[i_cam],
 
     def restore_ori_files(self):
         # backup ORI/ADDPAR files to the backup_cal directory
-        calOriParams = CalOriParams(self.n_cams, path=self.par_path)
+        calOriParams = CalOriParams(self.num_cams, path=self.par_path)
         calOriParams.read()
 
-        for f in calOriParams.img_ori[: self.n_cams]:
+        for f in calOriParams.img_ori[: self.num_cams]:
             print(f"Restoring {f}")
             shutil.copyfile(f + ".bck", f)
             g = f.replace("ori", "addpar")
@@ -1297,7 +1297,7 @@ args=(self.cals[i_cam],
     def protect_ori_files(self):
         # backup ORI/ADDPAR files to the backup_cal directory
 
-        for f in CalOriParams.img_ori[: self.n_cams]:
+        for f in CalOriParams.img_ori[: self.num_cams]:
             with open(f, "r") as d:
                 d.read().split()
                 if not np.all(
