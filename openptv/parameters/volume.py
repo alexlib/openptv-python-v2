@@ -14,17 +14,17 @@ from openptv.parameters.utils import g
 class VolumeParams(Parameters):
     """
     Volume parameters for OpenPTV.
-    
+
     This class handles reading and writing volume parameters to/from files,
     and converting between Python and C representations.
     """
-    
-    def __init__(self, X_lay=None, Zmin_lay=None, Zmax_lay=None, 
-                 cnx=0.0, cny=0.0, cn=0.0, csumg=0.0, corrmin=0.0, eps0=0.0, 
+
+    def __init__(self, X_lay=None, Zmin_lay=None, Zmax_lay=None,
+                 cnx=0.0, cny=0.0, cn=0.0, csumg=0.0, corrmin=0.0, eps0=0.0,
                  path=None):
         """
         Initialize volume parameters.
-        
+
         Args:
             X_lay (list): X coordinates of the layers.
             Zmin_lay (list): Minimum Z coordinates of the layers.
@@ -39,12 +39,12 @@ class VolumeParams(Parameters):
         """
         super().__init__(path)
         self.set(X_lay, Zmin_lay, Zmax_lay, cnx, cny, cn, csumg, corrmin, eps0)
-    
-    def set(self, X_lay=None, Zmin_lay=None, Zmax_lay=None, 
+
+    def set(self, X_lay=None, Zmin_lay=None, Zmax_lay=None,
             cnx=0.0, cny=0.0, cn=0.0, csumg=0.0, corrmin=0.0, eps0=0.0):
         """
         Set volume parameters.
-        
+
         Args:
             X_lay (list): X coordinates of the layers.
             Zmin_lay (list): Minimum Z coordinates of the layers.
@@ -65,20 +65,20 @@ class VolumeParams(Parameters):
         self.csumg = csumg
         self.corrmin = corrmin
         self.eps0 = eps0
-    
+
     def filename(self):
         """
         Get the filename for volume parameters.
-        
+
         Returns:
             str: The filename for volume parameters.
         """
         return "criteria.par"
-    
+
     def read(self):
         """
         Read volume parameters from file.
-        
+
         Raises:
             IOError: If the file cannot be read.
         """
@@ -101,11 +101,11 @@ class VolumeParams(Parameters):
                 self.eps0 = float(g(f))
         except Exception as e:
             raise IOError(f"Error reading volume parameters: {e}")
-    
+
     def write(self):
         """
         Write volume parameters to file.
-        
+
         Raises:
             IOError: If the file cannot be written.
         """
@@ -125,11 +125,11 @@ class VolumeParams(Parameters):
                 f.write(f"{self.eps0}\n")
         except Exception as e:
             raise IOError(f"Error writing volume parameters: {e}")
-    
+
     def to_c_struct(self):
         """
         Convert volume parameters to a dictionary suitable for creating a C struct.
-        
+
         Returns:
             dict: A dictionary of volume parameter values.
         """
@@ -144,16 +144,40 @@ class VolumeParams(Parameters):
             'corrmin': self.corrmin,
             'eps0': self.eps0,
         }
-    
+
+    def to_cython_object(self):
+        """
+        Convert to a Cython VolumeParams object.
+
+        Returns:
+            openptv.binding.parameters.VolumeParams: A Cython VolumeParams object.
+        """
+        from openptv.binding.parameters import VolumeParams as CythonVolumeParams
+
+        # Create z_spans in the format expected by Cython VolumeParams
+        z_spans = [[self.Zmin_lay[i], self.Zmax_lay[i]] for i in range(len(self.Zmin_lay))]
+
+        # Create a Cython VolumeParams object with the appropriate arguments
+        return CythonVolumeParams(
+            x_span=self.X_lay,
+            z_spans=z_spans,
+            pixels_x=self.cnx,
+            pixels_y=self.cny,
+            pixels_tot=self.cn,
+            ref_gray=self.csumg,
+            min_correlation=self.corrmin,
+            epipolar_band=self.eps0
+        )
+
     @classmethod
     def from_c_struct(cls, c_struct, path=None):
         """
         Create a VolumeParams object from a C struct.
-        
+
         Args:
             c_struct: A dictionary of volume parameter values from a C struct.
             path: Path to the parameter directory.
-        
+
         Returns:
             VolumeParams: A new VolumeParams object.
         """

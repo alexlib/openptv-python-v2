@@ -107,6 +107,23 @@ class SequenceParams(Parameters):
             'last': self.last,
         }
 
+    def to_cython_object(self):
+        """
+        Convert to a Cython SequenceParams object.
+
+        Returns:
+            openptv.binding.parameters.SequenceParams: A Cython SequenceParams object.
+        """
+        from openptv.binding.parameters import SequenceParams as CythonSequenceParams
+
+        # Create a Cython SequenceParams object with the appropriate arguments
+        cy_params = CythonSequenceParams(
+            image_base=self.base_name,
+            frame_range=(self.first, self.last)
+        )
+
+        return cy_params
+
     @classmethod
     def from_c_struct(cls, c_struct, path=None):
         """

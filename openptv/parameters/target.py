@@ -156,6 +156,31 @@ class TargetParams(Parameters):
             'cr_sz': self.cr_sz,
         }
 
+    def to_cython_object(self):
+        """
+        Convert to a Cython TargetParams object.
+
+        Returns:
+            openptv.binding.parameters.TargetParams: A Cython TargetParams object.
+        """
+        from openptv.binding.parameters import TargetParams as CythonTargetParams
+
+        # Create a Cython TargetParams object
+        # Note: The Cython TargetParams constructor doesn't have direct parameters,
+        # so we'll need to create it and then set the values
+        cython_params = CythonTargetParams()
+
+        # Set the values using the correct method names
+        cython_params.set_grey_thresholds(self.gvthresh)
+        cython_params.set_max_discontinuity(self.discont)
+        cython_params.set_pixel_count_bounds((self.nnmin, self.nnmax))
+        cython_params.set_xsize_bounds((self.nxmin, self.nxmax))
+        cython_params.set_ysize_bounds((self.nymin, self.nymax))
+        cython_params.set_min_sum_grey(self.sumg_min)
+        cython_params.set_cross_size(self.cr_sz)
+
+        return cython_params
+
     @classmethod
     def from_c_struct(cls, c_struct, path=None):
         """

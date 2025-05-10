@@ -14,8 +14,9 @@ import shutil
 import os
 from openptv.binding.tracker import Tracker
 from openptv.binding.calibration import Calibration
-from openptv.binding.parameters import ControlParams, VolumeParams, TrackingParams, \
+from openptv.parameters import ControlParams, VolumeParams, TrackingParams, \
     SequenceParams
+
 framebuf_naming = {
     'corres': b'tests/testing_fodder/track/res/particles',
     'linkage': b'tests/testing_fodder/track/res/linkage',
@@ -40,14 +41,82 @@ class TestTracker(unittest.TestCase):
             self.cals.append(cal)
             img_base.append(seq_cfg['targets_template'].format(cam=cix + 1))
 
-        self.cpar = ControlParams(len(yaml_conf['cameras']), **yaml_conf['scene'])
-        self.vpar = VolumeParams(**yaml_conf['correspondences'])
+        # Extract parameters from the scene configuration
+        scene = yaml_conf['scene']
+
+        # Parse flags
+        flags = scene.get('flags', '').split(',')
+        hp_flag = 'hp' in flags
+        allcam_flag = 'headers' in flags
+        tiff_flag = 'tiff' in flags
+
+        # Extract image size and pixel size
+        image_size = scene.get('image_size', [0, 0])
+        pixel_size = scene.get('pixel_size', [0, 0])
+
+        # Extract multimedia parameters
+        mmp_n1 = scene.get('cam_side_n', 1.0)
+        mmp_n3 = scene.get('object_side_n', 1.0)
+        mmp_n2 = scene.get('wall_ns', [1.0])[0] if 'wall_ns' in scene else 1.0
+        mmp_d = scene.get('wall_thicks', [0.0])[0] if 'wall_thicks' in scene else 0.0
+
+        # Create the ControlParams object
+        self.cpar = ControlParams(
+            n_img=len(yaml_conf['cameras']),
+            hp_flag=hp_flag,
+            allcam_flag=allcam_flag,
+            tiff_flag=tiff_flag,
+            imx=image_size[0],
+            imy=image_size[1],
+            pix_x=pixel_size[0],
+            pix_y=pixel_size[1],
+            mmp_n1=mmp_n1,
+            mmp_n2=mmp_n2,
+            mmp_n3=mmp_n3,
+            mmp_d=mmp_d
+        )
+        # Extract parameters from the correspondences configuration
+        corr = yaml_conf['correspondences']
+
+        # Extract X_lay, Zmin_lay, Zmax_lay
+        X_lay = corr.get('x_span', [0.0, 0.0])
+        z_spans = corr.get('z_spans', [[-20.0, 20.0], [-20.0, 20.0]])
+        Zmin_lay = [z_span[0] for z_span in z_spans]
+        Zmax_lay = [z_span[1] for z_span in z_spans]
+
+        # Extract other parameters
+        cnx = corr.get('pixels_x', 0.0)
+        cny = corr.get('pixels_y', 0.0)
+        cn = corr.get('pixels_tot', 0.0)
+        csumg = corr.get('ref_gray', 0.0)
+        corrmin = corr.get('min_correlation', 0.0)
+        eps0 = corr.get('epipolar_band', 0.0)
+
+        # Create the VolumeParams object
+        self.vpar = VolumeParams(
+            X_lay=X_lay,
+            Zmin_lay=Zmin_lay,
+            Zmax_lay=Zmax_lay,
+            cnx=cnx,
+            cny=cny,
+            cn=cn,
+            csumg=csumg,
+            corrmin=corrmin,
+            eps0=eps0
+        )
         self.tpar = TrackingParams(**yaml_conf['tracking'])
         self.spar = SequenceParams(
             image_base=img_base,
             frame_range=(seq_cfg['first'], seq_cfg['last']))
 
-        self.tracker = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, framebuf_naming)
+        # Convert Python parameter objects to Cython objects
+        c_cpar = self.cpar.to_cython_object()
+        c_vpar = self.vpar.to_cython_object()
+        c_tpar = self.tpar.to_cython_object()
+        c_spar = self.spar.to_cython_object()
+
+        # Create the tracker with the Cython objects
+        self.tracker = Tracker(c_cpar, c_vpar, c_tpar, c_spar, self.cals, framebuf_naming)
 
     def test_forward(self):
         """Manually running a full forward tracking run."""
@@ -106,7 +175,14 @@ class TestTracker(unittest.TestCase):
                 'linkage': 'tests/testing_fodder/track/res/ptv_is',
                 'prio': 'tests/testing_fodder/track/res/added'
             }
-            tracker1 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_strings)
+            # Convert Python parameter objects to Cython objects
+            c_cpar = self.cpar.to_cython_object()
+            c_vpar = self.vpar.to_cython_object()
+            c_tpar = self.tpar.to_cython_object()
+            c_spar = self.spar.to_cython_object()
+
+            # Create the tracker with the Cython objects
+            tracker1 = Tracker(c_cpar, c_vpar, c_tpar, c_spar, self.cals, naming_strings)
             assert tracker1 is not None, "Failed to create tracker with string paths"
 
             # Using bytes directly - will be passed through
@@ -115,7 +191,14 @@ class TestTracker(unittest.TestCase):
                 'linkage': b'tests/testing_fodder/track/res/ptv_is',
                 'prio': b'tests/testing_fodder/track/res/added'
             }
-            tracker2 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_bytes)
+            # Convert Python parameter objects to Cython objects
+            c_cpar = self.cpar.to_cython_object()
+            c_vpar = self.vpar.to_cython_object()
+            c_tpar = self.tpar.to_cython_object()
+            c_spar = self.spar.to_cython_object()
+
+            # Create the tracker with the Cython objects
+            tracker2 = Tracker(c_cpar, c_vpar, c_tpar, c_spar, self.cals, naming_bytes)
             assert tracker2 is not None, "Failed to create tracker with byte paths"
 
             # Using mixed - both will work
@@ -124,7 +207,14 @@ class TestTracker(unittest.TestCase):
                 'linkage': b'tests/testing_fodder/track/res/ptv_is',  # bytes
                 'prio': 'tests/testing_fodder/track/res/added'  # string
             }
-            tracker3 = Tracker(self.cpar, self.vpar, self.tpar, self.spar, self.cals, naming_mixed)
+            # Convert Python parameter objects to Cython objects
+            c_cpar = self.cpar.to_cython_object()
+            c_vpar = self.vpar.to_cython_object()
+            c_tpar = self.tpar.to_cython_object()
+            c_spar = self.spar.to_cython_object()
+
+            # Create the tracker with the Cython objects
+            tracker3 = Tracker(c_cpar, c_vpar, c_tpar, c_spar, self.cals, naming_mixed)
             assert tracker3 is not None, "Failed to create tracker with mixed paths"
 
             print("✓ Tracker string handling test passed!")

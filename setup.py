@@ -183,8 +183,7 @@ extensions = [
     create_extension('openptv.binding.image_processing', ['./openptv/binding/image_processing.pyx']),
 
     # Build the bridge modules last
-    create_extension('openptv.binding.param_bridge', ['./openptv/binding/param_bridge.pyx']),
-    create_extension('openptv.binding.tracker_bridge', ['./openptv/binding/tracker_bridge.pyx'])
+    create_extension('openptv.binding.param_bridge', ['./openptv/binding/param_bridge.pyx'])
 ]
 
 # Use cythonize on the extensions

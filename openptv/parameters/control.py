@@ -223,6 +223,39 @@ class ControlParams(Parameters):
             'mm': self.mm_np,
         }
 
+    def to_cython_object(self):
+        """
+        Convert to a Cython ControlParams object.
+
+        Returns:
+            openptv.binding.parameters.ControlParams: A Cython ControlParams object.
+        """
+        from openptv.binding.parameters import ControlParams as CythonControlParams
+
+        # Create flags list
+        flags = []
+        if self.hp_flag:
+            flags.append('hp')
+        if self.allcam_flag:
+            flags.append('allcam')
+        if self.tiff_flag:
+            flags.append('headers')
+
+        # Note: The Cython ControlParams constructor doesn't take img_name or cal_img_name directly,
+        # but we'll need to set them after creation if we want to use them
+
+        # Create a Cython ControlParams object with the appropriate arguments
+        return CythonControlParams(
+            num_cams=self.n_img,
+            flags=flags,
+            image_size=(self.imx, self.imy),
+            pixel_size=(self.pix_x, self.pix_y),
+            cam_side_n=self.mmp_n1,
+            wall_ns=[self.mmp_n2],
+            wall_thicks=[self.mmp_d],
+            object_side_n=self.mmp_n3
+        )
+
     @classmethod
     def from_c_struct(cls, c_struct, path=None):
         """

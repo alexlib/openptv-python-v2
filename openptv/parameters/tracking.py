@@ -21,8 +21,7 @@ class TrackingParams(Parameters):
 
     def __init__(self, dvxmin=0.0, dvxmax=0.0, dvymin=0.0, dvymax=0.0,
                  dvzmin=0.0, dvzmax=0.0, dangle=0.0, dacc=0.0,
-                 flagNewParticles=False, path=None,
-                 velocity_lims=None, angle_lim=None, accel_lim=None, add_particle=None, **kwargs):
+                 flagNewParticles=False, path=None, velocity_lims=None, **kwargs):
         """
         Initialize tracking parameters.
 
@@ -37,10 +36,7 @@ class TrackingParams(Parameters):
             dacc (float): Acceleration criterion for tracking.
             flagNewParticles (bool): Whether to add new particles.
             path (str or Path): Path to the parameter directory.
-            velocity_lims (list): List of [min, max] velocity limits for x, y, z.
-            angle_lim (float): Angle criterion for tracking (alternative to dangle).
-            accel_lim (float): Acceleration criterion for tracking (alternative to dacc).
-            add_particle (int): Whether to add new particles (alternative to flagNewParticles).
+            velocity_lims (list): List of velocity limits in the form [[dvxmin, dvxmax], [dvymin, dvymax], [dvzmin, dvzmax]].
         """
         super().__init__(path)
 
@@ -52,14 +48,6 @@ class TrackingParams(Parameters):
             dvymax = velocity_lims[1][1]
             dvzmin = velocity_lims[2][0]
             dvzmax = velocity_lims[2][1]
-
-        # Handle alternative parameter names
-        if angle_lim is not None:
-            dangle = angle_lim
-        if accel_lim is not None:
-            dacc = accel_lim
-        if add_particle is not None:
-            flagNewParticles = bool(add_particle)
 
         self.set(dvxmin, dvxmax, dvymin, dvymax, dvzmin, dvzmax,
                  dangle, dacc, flagNewParticles)
@@ -165,6 +153,30 @@ class TrackingParams(Parameters):
             'dnx': 0,
             'dny': 0,
         }
+
+    def to_cython_object(self):
+        """
+        Convert to a Cython TrackingParams object.
+
+        Returns:
+            openptv.binding.parameters.TrackingParams: A Cython TrackingParams object.
+        """
+        from openptv.binding.parameters import TrackingParams as CythonTrackingParams
+
+        # Create velocity_lims in the format expected by Cython TrackingParams
+        velocity_lims = [
+            [self.dvxmin, self.dvxmax],
+            [self.dvymin, self.dvymax],
+            [self.dvzmin, self.dvzmax]
+        ]
+
+        # Create a Cython TrackingParams object with the appropriate arguments
+        return CythonTrackingParams(
+            accel_lim=self.dacc,
+            angle_lim=self.dangle,
+            velocity_lims=velocity_lims,
+            add_particle=bool_to_int(self.flagNewParticles)
+        )
 
     @classmethod
     def from_c_struct(cls, c_struct, path=None):
