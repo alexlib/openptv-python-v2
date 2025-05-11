@@ -196,6 +196,7 @@ ext_modules = cythonize(
         'wraparound': False,
         'initializedcheck': False,
     },
+    # gdb_debug=True,
     include_path=['./openptv/coptv/']
 )
 
