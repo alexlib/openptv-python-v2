@@ -2,7 +2,7 @@
 Tests for the unified parameter module.
 
 This module tests the parameter classes in the openptv.parameters module
-and the bridge functions in openptv.binding.param_bridge.
+and the bridge functions in openptv.coptv.param_bridge.
 """
 
 import os

@@ -24,7 +24,7 @@ from skimage import img_as_ubyte
 from skimage.color import rgb2gray
 
 # from optv import segmentation
-from openptv.binding.segmentation import target_recognition
+from openptv.coptv.segmentation import target_recognition
 from openptv.gui import ptv
 
 from openptv.gui.text_box_overlay import TextBoxOverlay

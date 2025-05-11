@@ -684,7 +684,7 @@ def py_calibration(selection, exp):
 
     if selection == 10:
         """Run the calibration with particles """
-        from openptv.binding.tracking_framebuf import Frame
+        from openptv.coptv.tracking_framebuf import Frame
         from openptv.parameters import OrientParams, ShakingParams
 
         num_cams = exp.cpar.get_num_cams()
@@ -997,8 +997,8 @@ def full_scipy_calibration(cal: Calibration,
 
     """ Full calibration using scipy.optimize """
     from scipy.optimize import minimize
-    from openptv.binding.transforms import convert_arr_metric_to_pixel
-    from openptv.binding.imgcoord import image_coordinates
+    from openptv.coptv.transforms import convert_arr_metric_to_pixel
+    from openptv.coptv.imgcoord import image_coordinates
 
     def _residuals_k(x, cal, XYZ, xy, cpar):
         """Residuals due to radial distortion

@@ -28,8 +28,8 @@ def test_optv_integration():
     """Test integration with openptv package"""
     print("\nTesting OpenPTV integration...")
     try:
-        from openptv.binding.calibration import Calibration
-        from openptv.binding.parameters import ControlParams
+        from openptv.coptv.calibration import Calibration
+        from openptv.coptv.parameters import ControlParams
 
         # Create test calibration
         cal = Calibration()

@@ -24,7 +24,7 @@ def test_import_binding(module_name):
         # pytest.skip(f"Skipping {module_name} test since it's not compiled yet")
 
     try:
-        module = importlib.import_module(f"openptv.binding.{module_name}")
+        module = importlib.import_module(f"openptv.coptv.{module_name}")
         assert module is not None, f"Failed to import {module_name}"
         print(f"Successfully imported {module_name}")
 
@@ -39,7 +39,7 @@ def test_import_binding(module_name):
 def test_vec_utils_basic_functionality():
     """Test basic functionality of vec_utils module."""
     try:
-        from openptv.binding.vec_utils import py_vec_copy, py_vec_cmp
+        from openptv.coptv.vec_utils import py_vec_copy, py_vec_cmp
         import numpy as np
 
         # Create test vectors
@@ -70,7 +70,7 @@ def test_vec_utils_basic_functionality():
 def test_tracking_basic_functionality():
     """Test basic functionality of tracking module."""
     try:
-        from openptv.binding.tracking_framebuf import Frame, TargetArray, read_targets
+        from openptv.coptv.tracking_framebuf import Frame, TargetArray, read_targets
         import numpy as np
 
         # Test that we can create a TargetArray
@@ -89,7 +89,7 @@ def test_tracking_basic_functionality():
 def test_correspondences_basic_functionality():
     """Test basic functionality of correspondences module."""
     try:
-        from openptv.binding.correspondences import MatchedCoords, correspondences, single_cam_correspondence
+        from openptv.coptv.correspondences import MatchedCoords, correspondences, single_cam_correspondence
         import numpy as np
 
         # Just test that we can import the module and its classes

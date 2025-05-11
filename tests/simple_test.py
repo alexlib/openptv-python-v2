@@ -3,8 +3,8 @@ import sys
 import traceback
 
 try:
-    from openptv.binding.parameters import ControlParams
-    from openptv.binding.calibration import Calibration
+    from openptv.coptv.parameters import ControlParams
+    from openptv.coptv.calibration import Calibration
     import numpy as np
     
     print("Imports successful")

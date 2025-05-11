@@ -10,10 +10,10 @@ def test_imports():
     """Test importing key modules from the package."""
     modules_to_test = [
         "openptv",
-        "openptv.binding.calibration",
-        "openptv.binding.parameters",
-        "openptv.binding.tracking_framebuf",
-        "openptv.binding.transforms",
+        "openptv.coptv.calibration",
+        "openptv.coptv.parameters",
+        "openptv.coptv.tracking_framebuf",
+        "openptv.coptv.transforms",
     ]
 
     for module_name in modules_to_test:
@@ -31,8 +31,8 @@ def test_basic_functionality():
     """Test basic functionality of the package."""
     try:
         # Import key classes
-        from openptv.binding.calibration import Calibration
-        from openptv.binding.parameters import ControlParams
+        from openptv.coptv.calibration import Calibration
+        from openptv.coptv.parameters import ControlParams
 
         # Create instances
         cal = Calibration()

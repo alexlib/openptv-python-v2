@@ -3,7 +3,7 @@ Unified parameter handling for OpenPTV.
 
 This module provides a single source of truth for parameter handling in OpenPTV.
 It replaces the separate parameter handling in openptv.gui.parameters and
-openptv.binding.parameters.
+openptv.coptv.parameters.
 """
 
 # Import parameter classes to make them available at the module level

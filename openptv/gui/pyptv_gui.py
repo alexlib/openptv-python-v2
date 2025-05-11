@@ -25,8 +25,8 @@ import numpy as np
 import openptv
 from openptv import using_cython
 from openptv import epipolar_curve
-from openptv.binding.imgcoord import image_coordinates
-from openptv.binding.transforms import convert_arr_metric_to_pixel
+from openptv.coptv.imgcoord import image_coordinates
+from openptv.coptv.transforms import convert_arr_metric_to_pixel
 
 from traits.api import HasTraits, Int, Bool, Instance, List, Enum, Any
 from traitsui.api import (

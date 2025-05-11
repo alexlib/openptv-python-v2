@@ -2,13 +2,13 @@ import numpy as np
 import random
 import unittest
 
-from openptv.binding.calibration import Calibration
-from openptv.binding.imgcoord import image_coordinates, flat_image_coordinates
-from openptv.binding.orientation import match_detection_to_ref, point_positions, \
+from openptv.coptv.calibration import Calibration
+from openptv.coptv.imgcoord import image_coordinates, flat_image_coordinates
+from openptv.coptv.orientation import match_detection_to_ref, point_positions, \
     external_calibration, full_calibration, dumbbell_target_func
-from openptv.binding.parameters import ControlParams, VolumeParams
-from openptv.binding.tracking_framebuf import TargetArray
-from openptv.binding.transforms import convert_arr_metric_to_pixel
+from openptv.coptv.parameters import ControlParams, VolumeParams
+from openptv.coptv.tracking_framebuf import TargetArray
+from openptv.coptv.transforms import convert_arr_metric_to_pixel
 
 
 class Test_Orientation(unittest.TestCase):

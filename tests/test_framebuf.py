@@ -8,7 +8,7 @@ References:
 """
 
 import unittest, os, numpy as np
-from openptv.binding.tracking_framebuf import read_targets, Target, TargetArray, Frame
+from openptv.coptv.tracking_framebuf import read_targets, Target, TargetArray, Frame
 
 class TestTargets(unittest.TestCase):
     def test_fill_target(self):

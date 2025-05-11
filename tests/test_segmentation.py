@@ -10,8 +10,8 @@ Created on Thu Aug 18 16:52:36 2016
 import unittest
 import numpy as np
 
-from openptv.binding.segmentation import target_recognition
-from openptv.binding.parameters import ControlParams, TargetParams
+from openptv.coptv.segmentation import target_recognition
+from openptv.coptv.parameters import ControlParams, TargetParams
 
 class TestTargRec(unittest.TestCase):
     def test_single_target(self):

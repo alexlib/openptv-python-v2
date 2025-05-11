@@ -2,8 +2,8 @@
 import os
 import sys
 import openptv
-from openptv.binding.calibration import Calibration
-from openptv.binding.parameters import ControlParams
+from openptv.coptv.calibration import Calibration
+from openptv.coptv.parameters import ControlParams
 
 def test_openptv_functionality(test_data_dir):
     """Test basic OpenPTV functionality"""

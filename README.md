@@ -19,7 +19,7 @@ The package is structured to allow both high-performance processing via C/Cython
 openptv-python/
 ├── liboptv/            # C library implementation
 ├── openptv/            # Main Python package
-│   ├── binding/        # Cython bindings to liboptv
+│   ├── coptv/        # Cython bindings to liboptv
 │   ├── pyoptv/         # Pure Python implementation
 │   ├── gui/            # TraitsUI-based GUI components
 │   └── utils/          # Utility functions

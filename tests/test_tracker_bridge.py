@@ -1,7 +1,7 @@
 """
 Tests for the tracker bridge functions.
 
-This module tests the bridge functions in openptv.binding.tracker_bridge.
+This module tests the bridge functions in openptv.coptv.tracker_bridge.
 """
 
 import os
@@ -10,11 +10,11 @@ import numpy as np
 
 from openptv.parameters.tracking import TrackingParams
 from openptv.parameters.volume import VolumeParams
-from openptv.binding.tracking_framebuf import TargetArray
+from openptv.coptv.tracking_framebuf import TargetArray
 
 # Import bridge functions
 try:
-    from openptv.binding.tracker_bridge import track_forward_with_params
+    from openptv.coptv.tracker_bridge import track_forward_with_params
     BRIDGE_AVAILABLE = True
 except ImportError:
     BRIDGE_AVAILABLE = False

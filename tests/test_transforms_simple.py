@@ -4,8 +4,8 @@ import traceback
 import numpy as np
 
 try:
-    from openptv.binding.parameters import ControlParams
-    from openptv.binding.transforms import convert_arr_metric_to_pixel
+    from openptv.coptv.parameters import ControlParams
+    from openptv.coptv.transforms import convert_arr_metric_to_pixel
     
     print("Imports successful")
     

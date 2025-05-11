@@ -14,7 +14,7 @@ build/
 *.egg-info/
 
 # Cython generated files
-openptv/binding/*.c
+openptv/coptv/*.c
 
 # IDE files
 .idea/

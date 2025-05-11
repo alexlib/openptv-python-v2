@@ -142,14 +142,14 @@ def create_extension(name, sources):
     include_dirs = [
         numpy.get_include(),
         './openptv/liboptv/include/',
-        './openptv/binding/',
+        './openptv/coptv/',
     ]
 
     # Add absolute paths for Windows
     if sys.platform.startswith('win'):
         include_dirs.extend([
             os.path.abspath('./openptv/liboptv/include/'),
-            os.path.abspath('./openptv/binding/'),
+            os.path.abspath('./openptv/coptv/'),
         ])
 
     return Extension(
@@ -165,26 +165,26 @@ def create_extension(name, sources):
 # Create extensions with explicit module names and in a specific order
 extensions = [
     # Build vec_utils first as it's needed by other modules
-    create_extension('openptv.binding.vec_utils', ['./openptv/binding/vec_utils.pyx']),
+    create_extension('openptv.coptv.vec_utils', ['./openptv/coptv/vec_utils.pyx']),
 
     # Build parameters next as it's needed by many modules
-    create_extension('openptv.binding.parameters', ['./openptv/binding/parameters.pyx']),
+    create_extension('openptv.coptv.parameters', ['./openptv/coptv/parameters.pyx']),
 
     # Build the rest of the modules
-    create_extension('openptv.binding.calibration', ['./openptv/binding/calibration.pyx']),
-    create_extension('openptv.binding.transforms', ['./openptv/binding/transforms.pyx']),
-    create_extension('openptv.binding.tracking_framebuf', ['./openptv/binding/tracking_framebuf.pyx']),
-    create_extension('openptv.binding.imgcoord', ['./openptv/binding/imgcoord.pyx']),
-    create_extension('openptv.binding.orientation', ['./openptv/binding/orientation.pyx']),
-    create_extension('openptv.binding.segmentation', ['./openptv/binding/segmentation.pyx']),
-    create_extension('openptv.binding.tracker', ['./openptv/binding/tracker.pyx']),
-    create_extension('openptv.binding.correspondences', ['./openptv/binding/correspondences.pyx']),
-    create_extension('openptv.binding.epipolar', ['./openptv/binding/epipolar.pyx']),
-    create_extension('openptv.binding.image_processing', ['./openptv/binding/image_processing.pyx']),
+    create_extension('openptv.coptv.calibration', ['./openptv/coptv/calibration.pyx']),
+    create_extension('openptv.coptv.transforms', ['./openptv/coptv/transforms.pyx']),
+    create_extension('openptv.coptv.tracking_framebuf', ['./openptv/coptv/tracking_framebuf.pyx']),
+    create_extension('openptv.coptv.imgcoord', ['./openptv/coptv/imgcoord.pyx']),
+    create_extension('openptv.coptv.orientation', ['./openptv/coptv/orientation.pyx']),
+    create_extension('openptv.coptv.segmentation', ['./openptv/coptv/segmentation.pyx']),
+    create_extension('openptv.coptv.tracker', ['./openptv/coptv/tracker.pyx']),
+    create_extension('openptv.coptv.correspondences', ['./openptv/coptv/correspondences.pyx']),
+    create_extension('openptv.coptv.epipolar', ['./openptv/coptv/epipolar.pyx']),
+    create_extension('openptv.coptv.image_processing', ['./openptv/coptv/image_processing.pyx']),
 
     # Build the bridge modules last
-    create_extension('openptv.binding.param_bridge', ['./openptv/binding/param_bridge.pyx']),
-    create_extension('openptv.binding.tracker_bridge', ['./openptv/binding/tracker_bridge.pyx'])
+    create_extension('openptv.coptv.param_bridge', ['./openptv/coptv/param_bridge.pyx']),
+    create_extension('openptv.coptv.tracker_bridge', ['./openptv/coptv/tracker_bridge.pyx'])
 ]
 
 # Use cythonize on the extensions
@@ -196,7 +196,7 @@ ext_modules = cythonize(
         'wraparound': False,
         'initializedcheck': False,
     },
-    include_path=['./openptv/binding/']
+    include_path=['./openptv/coptv/']
 )
 
 # Package metadata
@@ -278,7 +278,7 @@ setup(
     package_data={
         'openptv': [
             'liboptv/include/*.h',
-            'binding/*.pxd',
+            'coptv/*.pxd',
         ],
     },
 )

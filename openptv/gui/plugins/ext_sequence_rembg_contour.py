@@ -11,9 +11,9 @@ from skimage.segmentation import clear_border
 from skimage.morphology import binary_erosion, binary_dilation, disk
 from skimage.util import img_as_ubyte
 
-from openptv.binding.correspondences import correspondences, MatchedCoords
-from openptv.binding.tracker import default_naming
-from openptv.binding.orientation import point_positions
+from openptv.coptv.correspondences import correspondences, MatchedCoords
+from openptv.coptv.tracker import default_naming
+from openptv.coptv.orientation import point_positions
 
 import matplotlib.pyplot as plt
 

@@ -49,7 +49,7 @@ If you need to make changes to a submodule, you should:
 
 This project includes adapter layers that provide a unified API for working with the submodules:
 
-1. **openptv/binding/** - Adapter for the C library and Cython bindings
+1. **openptv/coptv/** - Adapter for the C library and Cython bindings
 2. **openptv/gui/** - Adapter for the GUI components
 3. **openptv/pyoptv/** - Pure Python implementation that can be used as a fallback
 

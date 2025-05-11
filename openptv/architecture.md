@@ -2,7 +2,7 @@
 
 ## Three-Layer Architecture
 
-1. **Core Layer** (`binding/`):
+1. **Core Layer** (`coptv/`):
    - Cython bindings to C library
    - Direct mapping to C structs
    - Minimal Python-specific features

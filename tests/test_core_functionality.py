@@ -5,8 +5,8 @@ Test script to verify core functionality of pyptv and optv
 import os
 import sys
 import openptv
-from openptv.binding.calibration import Calibration
-from openptv.binding.parameters import VolumeParams
+from openptv.coptv.calibration import Calibration
+from openptv.coptv.parameters import VolumeParams
 
 def test_core_functionality(test_data_dir):
     """Test core functionality of pyptv and optv"""

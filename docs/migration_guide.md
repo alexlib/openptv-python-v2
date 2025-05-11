@@ -4,7 +4,7 @@ This guide explains how to migrate from the old parameter handling to the new un
 
 ## Overview
 
-The new unified parameter module (`openptv.parameters`) replaces the separate parameter handling in `openptv.gui.parameters` and `openptv.binding.parameters`. It provides a single source of truth for parameter handling in OpenPTV.
+The new unified parameter module (`openptv.parameters`) replaces the separate parameter handling in `openptv.gui.parameters` and `openptv.coptv.parameters`. It provides a single source of truth for parameter handling in OpenPTV.
 
 ## Benefits
 
@@ -28,11 +28,11 @@ from openptv.gui.parameters import TrackingParams, SequenceParams
 from openptv.parameters import TrackingParams, SequenceParams
 ```
 
-Replace imports from `openptv.binding.parameters` with imports from `openptv.parameters`:
+Replace imports from `openptv.coptv.parameters` with imports from `openptv.parameters`:
 
 ```python
 # Old code
-from openptv.binding.parameters import TrackingParams, SequenceParams
+from openptv.coptv.parameters import TrackingParams, SequenceParams
 
 # New code
 from openptv.parameters import TrackingParams, SequenceParams
@@ -58,18 +58,18 @@ params.write()
 
 ### 3. Update Parameter Usage in Cython Code
 
-If you're using parameters in Cython code, you'll need to use the bridge functions from `openptv.binding.param_bridge`:
+If you're using parameters in Cython code, you'll need to use the bridge functions from `openptv.coptv.param_bridge`:
 
 ```python
 # Old code
-from openptv.binding.parameters import TrackingParams
+from openptv.coptv.parameters import TrackingParams
 params = TrackingParams(path="path/to/parameters")
 params.read()
 result = track_forward(targets, params, vol_params)
 
 # New code
 from openptv.parameters import TrackingParams
-from openptv.binding.param_bridge import tracking_params_to_c
+from openptv.coptv.param_bridge import tracking_params_to_c
 
 params = TrackingParams(path="path/to/parameters")
 params.read()
@@ -83,7 +83,7 @@ Or use the new wrapper functions that handle the conversion for you:
 ```python
 # New code with wrapper function
 from openptv.parameters import TrackingParams
-from openptv.binding.tracker_bridge import track_forward_with_params
+from openptv.coptv.tracker_bridge import track_forward_with_params
 
 params = TrackingParams(path="path/to/parameters")
 params.read()
@@ -126,7 +126,7 @@ The following parameter classes are available in the new unified module:
 
 ## Bridge Functions
 
-The following bridge functions are available in `openptv.binding.param_bridge`:
+The following bridge functions are available in `openptv.coptv.param_bridge`:
 
 - `tracking_params_to_c`: Convert a Python `TrackingParams` object to a C `track_par` struct
 - `tracking_params_from_c`: Convert a C `track_par` struct to a Python `TrackingParams` object
@@ -166,7 +166,7 @@ params.write()
 
 ```python
 from openptv.parameters import TrackingParams, VolumeParams
-from openptv.binding.tracker_bridge import track_forward_with_params
+from openptv.coptv.tracker_bridge import track_forward_with_params
 
 # Create parameter objects
 track_params = TrackingParams(path="path/to/parameters")

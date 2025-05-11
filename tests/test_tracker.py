@@ -12,9 +12,9 @@ import unittest
 import yaml
 import shutil
 import os
-from openptv.binding.tracker import Tracker
-from openptv.binding.calibration import Calibration
-from openptv.binding.parameters import ControlParams, VolumeParams, TrackingParams, \
+from openptv.coptv.tracker import Tracker
+from openptv.coptv.calibration import Calibration
+from openptv.coptv.parameters import ControlParams, VolumeParams, TrackingParams, \
     SequenceParams
 framebuf_naming = {
     'corres': b'tests/testing_fodder/track/res/particles',

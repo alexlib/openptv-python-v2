@@ -9,7 +9,7 @@ import os
 
 def test_vec_utils():
     """Test the vector utilities module."""
-    from openptv.binding.vec_utils import py_vec_copy, py_vec_cmp
+    from openptv.coptv.vec_utils import py_vec_copy, py_vec_cmp
 
     # Create test vectors
     vec1 = np.array([1.0, 2.0, 3.0], dtype=np.float64)
@@ -32,7 +32,7 @@ def test_vec_utils():
 
 def test_tracking_framebuf():
     """Test the tracking_framebuf module."""
-    from openptv.binding.tracking_framebuf import Frame, TargetArray, read_targets
+    from openptv.coptv.tracking_framebuf import Frame, TargetArray, read_targets
 
     # Test that we can create a TargetArray
     targets = TargetArray(5)  # Create an array with 5 targets
@@ -43,7 +43,7 @@ def test_tracking_framebuf():
 
 def test_correspondences():
     """Test the correspondences module."""
-    from openptv.binding.correspondences import MatchedCoords, correspondences, single_cam_correspondence
+    from openptv.coptv.correspondences import MatchedCoords, correspondences, single_cam_correspondence
 
     # Just test that we can import the module and its classes
     assert MatchedCoords is not None, "MatchedCoords class should be available"
@@ -54,7 +54,7 @@ def test_correspondences():
 def test_calibration():
     """Test the calibration module."""
     try:
-        from openptv.binding.calibration import Calibration
+        from openptv.coptv.calibration import Calibration
 
         # This is just an import test for now
         assert Calibration is not None
@@ -65,7 +65,7 @@ def test_calibration():
 def test_parameters():
     """Test the parameters module."""
     try:
-        from openptv.binding.parameters import ControlParams, VolumeParams
+        from openptv.coptv.parameters import ControlParams, VolumeParams
 
         # This is just an import test for now
         assert ControlParams is not None
@@ -78,10 +78,10 @@ def test_transforms():
     """Test the transforms module."""
     try:
         # Check if the module can be imported
-        import openptv.binding.transforms
+        import openptv.coptv.transforms
 
         # This is just an import test for now
-        assert openptv.binding.transforms is not None
+        assert openptv.coptv.transforms is not None
     except ImportError as e:
         pytest.fail(f"Failed to import transforms: {e}")
 
@@ -90,10 +90,10 @@ def test_imgcoord():
     """Test the imgcoord module."""
     try:
         # Check if the module can be imported
-        import openptv.binding.imgcoord
+        import openptv.coptv.imgcoord
 
         # This is just an import test for now
-        assert openptv.binding.imgcoord is not None
+        assert openptv.coptv.imgcoord is not None
     except ImportError as e:
         pytest.fail(f"Failed to import imgcoord: {e}")
 
@@ -102,10 +102,10 @@ def test_orientation():
     """Test the orientation module."""
     try:
         # Check if the module can be imported
-        import openptv.binding.orientation
+        import openptv.coptv.orientation
 
         # This is just an import test for now
-        assert openptv.binding.orientation is not None
+        assert openptv.coptv.orientation is not None
     except ImportError as e:
         pytest.fail(f"Failed to import orientation: {e}")
 
@@ -114,10 +114,10 @@ def test_epipolar():
     """Test the epipolar module."""
     try:
         # Check if the module can be imported
-        import openptv.binding.epipolar
+        import openptv.coptv.epipolar
 
         # This is just an import test for now
-        assert openptv.binding.epipolar is not None
+        assert openptv.coptv.epipolar is not None
     except ImportError as e:
         pytest.fail(f"Failed to import epipolar: {e}")
 
@@ -125,7 +125,7 @@ def test_epipolar():
 def test_segmentation():
     """Test the segmentation module."""
     try:
-        from openptv.binding.segmentation import target_recognition
+        from openptv.coptv.segmentation import target_recognition
 
         # This is just an import test for now
         assert target_recognition is not None
@@ -137,10 +137,10 @@ def test_tracker():
     """Test the tracker module."""
     try:
         # Check if the module can be imported
-        import openptv.binding.tracker
+        import openptv.coptv.tracker
 
         # This is just an import test for now
-        assert openptv.binding.tracker is not None
+        assert openptv.coptv.tracker is not None
     except ImportError as e:
         pytest.fail(f"Failed to import tracker: {e}")
 
@@ -149,10 +149,10 @@ def test_image_processing():
     """Test the image_processing module."""
     try:
         # Check if the module can be imported
-        import openptv.binding.image_processing
+        import openptv.coptv.image_processing
 
         # This is just an import test for now
-        assert openptv.binding.image_processing is not None
+        assert openptv.coptv.image_processing is not None
     except ImportError as e:
         pytest.fail(f"Failed to import image_processing: {e}")
 

@@ -3,7 +3,7 @@
 ## Parameter Types
 
 1. **Core Parameters**
-   - Located in `openptv.binding.parameters` (Cython) or `openptv.pyoptv.parameters` (Python)
+   - Located in `openptv.coptv.parameters` (Cython) or `openptv.pyoptv.parameters` (Python)
    - Used for actual processing
    - Exposed through the main package (`openptv`)
    - Examples: `MultimediaParams`, `TrackingParams`, etc.

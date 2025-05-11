@@ -25,7 +25,7 @@ _using_cython = False
 # Try to import the Cython bindings
 try:
     # Import core tracking functions from tracking_framebuf as a test for Cython availability
-    from openptv.binding.tracking_framebuf import TargetArray, Target
+    from openptv.coptv.tracking_framebuf import TargetArray, Target
     _using_cython = True
 except ImportError as e:
     # Cython bindings are required
@@ -56,7 +56,7 @@ _binding_modules = [
 # Import and expose each module at the top level
 for _module_name in _binding_modules:
     try:
-        _module = importlib.import_module(f'openptv.binding.{_module_name}')
+        _module = importlib.import_module(f'openptv.coptv.{_module_name}')
         globals()[_module_name] = _module
     except ImportError as e:
         warnings.warn(f"Could not import module {_module_name}: {e}")
@@ -64,26 +64,26 @@ for _module_name in _binding_modules:
 # Clean up temporary variables
 if '_module_name' in locals():
     del _module_name
-if '_binding_modules' in locals():
+if '_coptv_modules' in locals():
     del _binding_modules
 if '_module' in locals():
     del _module
 
 # Direct imports of commonly used classes and functions
 try:
-    from openptv.binding.calibration import Calibration
-    from openptv.binding.parameters import (
+    from openptv.coptv.calibration import Calibration
+    from openptv.coptv.parameters import (
         MultimediaParams, TrackingParams, SequenceParams,
         VolumeParams, ControlParams, TargetParams
     )
-    from openptv.binding.tracking_framebuf import TargetArray, Target, Frame
-    from openptv.binding.correspondences import correspondences, MatchedCoords
-    from openptv.binding.image_processing import preprocess_image
-    from openptv.binding.segmentation import target_recognition
-    from openptv.binding.orientation import point_positions, external_calibration, full_calibration
-    from openptv.binding.tracker import Tracker, default_naming
-    from openptv.binding.epipolar import epipolar_curve
-    from openptv.binding.vec_utils import py_vec_copy, py_vec_cmp
+    from openptv.coptv.tracking_framebuf import TargetArray, Target, Frame
+    from openptv.coptv.correspondences import correspondences, MatchedCoords
+    from openptv.coptv.image_processing import preprocess_image
+    from openptv.coptv.segmentation import target_recognition
+    from openptv.coptv.orientation import point_positions, external_calibration, full_calibration
+    from openptv.coptv.tracker import Tracker, default_naming
+    from openptv.coptv.epipolar import epipolar_curve
+    from openptv.coptv.vec_utils import py_vec_copy, py_vec_cmp
     from openptv.parameters import ExamineParams
 except ImportError as e:
     # If any of the direct imports fail, log a warning but don't crash
@@ -93,17 +93,17 @@ except ImportError as e:
 # if _using_cython:
 #     try:
 #         # Import constants from tracking_framebuf
-#         from openptv.binding.tracking_framebuf import (
+#         from openptv.coptv.tracking_framebuf import (
 #             CORRES_NONE, PT_UNUSED
 #         )
 
 #         # Import constants from orientation
-#         from openptv.binding.orientation import (
+#         from openptv.coptv.orientation import (
 #             NPAR, COORD_UNUSED
 #         )
 
 #         # Import constants from tracker
-#         from openptv.binding.tracker import (
+#         from openptv.coptv.tracker import (
 #             TR_BUFSPACE, MAX_TARGETS, TR_MAX_CAMS
 #         )
 

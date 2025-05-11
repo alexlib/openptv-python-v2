@@ -6,12 +6,12 @@ such as the MatchedCoordinates structure.
 import unittest
 import numpy as np
 
-from openptv.binding.parameters import ControlParams, VolumeParams
-from openptv.binding.calibration import Calibration
-from openptv.binding.tracking_framebuf import read_targets, TargetArray
-from openptv.binding.correspondences import MatchedCoords, correspondences
-from openptv.binding.imgcoord import image_coordinates
-from openptv.binding.transforms import convert_arr_metric_to_pixel
+from openptv.coptv.parameters import ControlParams, VolumeParams
+from openptv.coptv.calibration import Calibration
+from openptv.coptv.tracking_framebuf import read_targets, TargetArray
+from openptv.coptv.correspondences import MatchedCoords, correspondences
+from openptv.coptv.imgcoord import image_coordinates
+from openptv.coptv.transforms import convert_arr_metric_to_pixel
 
 class TestMatchedCoords(unittest.TestCase):
     def test_instantiate(self):

@@ -1,10 +1,10 @@
 import unittest
-from openptv.binding.parameters import ControlParams
-from openptv.binding.transforms import convert_arr_metric_to_pixel, \
+from openptv.coptv.parameters import ControlParams
+from openptv.coptv.transforms import convert_arr_metric_to_pixel, \
     convert_arr_pixel_to_metric,\
     correct_arr_brown_affine, \
     distort_arr_brown_affine, distorted_to_flat
-from openptv.binding.calibration import Calibration
+from openptv.coptv.calibration import Calibration
 import numpy as np
 
 class Test_transforms(unittest.TestCase):

@@ -1,6 +1,6 @@
 import unittest
-from openptv.binding.parameters import ControlParams
-from openptv.binding.image_processing import preprocess_image
+from openptv.coptv.parameters import ControlParams
+from openptv.coptv.image_processing import preprocess_image
 import numpy as np
 
 class Test_image_processing(unittest.TestCase):

@@ -1,6 +1,6 @@
 # Unified Parameter Module for OpenPTV
 
-This module provides a unified interface for parameter handling in OpenPTV. It replaces the separate parameter handling in `openptv.gui.parameters` and `openptv.binding.parameters`.
+This module provides a unified interface for parameter handling in OpenPTV. It replaces the separate parameter handling in `openptv.gui.parameters` and `openptv.coptv.parameters`.
 
 ## Design Goals
 
@@ -35,7 +35,7 @@ track_params.write()
 
 ```python
 from openptv.parameters import TrackingParams, VolumeParams
-from openptv.binding.tracker_bridge import track_forward_with_params
+from openptv.coptv.tracker_bridge import track_forward_with_params
 
 # Create parameter objects
 track_params = TrackingParams(path="path/to/parameters")
@@ -71,7 +71,7 @@ results = track_forward_with_params(targets, track_params, vol_params)
 
 ## Bridge Functions
 
-The `openptv.binding.param_bridge` module provides functions for converting between Python parameter objects and C parameter structs:
+The `openptv.coptv.param_bridge` module provides functions for converting between Python parameter objects and C parameter structs:
 
 - `tracking_params_to_c`: Convert a Python `TrackingParams` object to a C `track_par` struct
 - `tracking_params_from_c`: Convert a C `track_par` struct to a Python `TrackingParams` object
@@ -82,8 +82,8 @@ The `openptv.binding.param_bridge` module provides functions for converting betw
 To migrate from the old parameter handling to the new unified module:
 
 1. Replace imports from `openptv.gui.parameters` with imports from `openptv.parameters`
-2. Replace imports from `openptv.binding.parameters` with imports from `openptv.parameters`
-3. Use bridge functions from `openptv.binding.param_bridge` to convert between Python and C parameter objects
+2. Replace imports from `openptv.coptv.parameters` with imports from `openptv.parameters`
+3. Use bridge functions from `openptv.coptv.param_bridge` to convert between Python and C parameter objects
 
 ## Implementation Details
 

@@ -12,9 +12,9 @@ import unittest
 import yaml
 import os
 import shutil
-from openptv.binding.tracker import Tracker
-from openptv.binding.calibration import Calibration
-from openptv.binding.parameters import ControlParams, VolumeParams, TrackingParams, \
+from openptv.coptv.tracker import Tracker
+from openptv.coptv.calibration import Calibration
+from openptv.coptv.parameters import ControlParams, VolumeParams, TrackingParams, \
     SequenceParams
 
 # Will be set in setUp

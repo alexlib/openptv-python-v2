@@ -12,7 +12,7 @@ from pathlib import Path
 from openptv.parameters import TrackingParams, SequenceParams, VolumeParams
 
 # Import bridge functions for calling C functions with Python parameter objects
-from openptv.binding.tracker_bridge import track_forward_with_params
+from openptv.coptv.tracker_bridge import track_forward_with_params
 
 
 def main():

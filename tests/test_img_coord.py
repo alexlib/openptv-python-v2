@@ -1,7 +1,7 @@
 import unittest
-from openptv.binding.imgcoord import flat_image_coordinates, image_coordinates
-from openptv.binding.parameters import ControlParams, MultimediaParams
-from openptv.binding.calibration import Calibration
+from openptv.coptv.imgcoord import flat_image_coordinates, image_coordinates
+from openptv.coptv.parameters import ControlParams, MultimediaParams
+from openptv.coptv.calibration import Calibration
 
 import numpy as np
 

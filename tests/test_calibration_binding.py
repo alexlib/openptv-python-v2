@@ -1,6 +1,6 @@
 import unittest
 import pytest
-from openptv.binding.calibration import Calibration
+from openptv.coptv.calibration import Calibration
 import numpy, os, filecmp, shutil
 
 class Test_Calibration(unittest.TestCase):

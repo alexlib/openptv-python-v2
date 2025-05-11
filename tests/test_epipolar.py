@@ -11,9 +11,9 @@ Created on Thu Mar 23 16:12:21 2017
 import unittest
 import numpy as np
 
-from openptv.binding.calibration import Calibration
-from openptv.binding.parameters import ControlParams, VolumeParams
-from openptv.binding.epipolar import epipolar_curve
+from openptv.coptv.calibration import Calibration
+from openptv.coptv.parameters import ControlParams, VolumeParams
+from openptv.coptv.epipolar import epipolar_curve
 
 class TestEpipolarCurve(unittest.TestCase):
     def test_two_cameras(self):

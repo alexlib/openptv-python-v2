@@ -4,8 +4,8 @@ import traceback
 import numpy as np
 
 try:
-    from openptv.binding.calibration import Calibration
-    from openptv.binding.transforms import distort_arr_brown_affine, correct_arr_brown_affine
+    from openptv.coptv.calibration import Calibration
+    from openptv.coptv.transforms import distort_arr_brown_affine, correct_arr_brown_affine
     
     print("Imports successful")
     

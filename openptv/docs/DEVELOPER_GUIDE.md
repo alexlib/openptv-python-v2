@@ -60,7 +60,7 @@ openptv-python/
 │   ├── include/        # Header files
 │   └── src/            # Source files
 ├── openptv/            # Main Python package
-│   ├── binding/        # Cython bindings to liboptv
+│   ├── coptv/        # Cython bindings to liboptv
 │   ├── pyoptv/         # Pure Python implementation
 │   ├── gui/            # TraitsUI-based GUI components
 │   └── utils/          # Utility functions
@@ -75,8 +75,8 @@ The package implements an automatic fallback mechanism that allows it to work ev
 ```python
 # Try to import the Cython bindings
 try:
-    from openptv.binding.tracking_cy import track_particles_py as track_particles
-    from openptv.binding.tracking_cy import find_correspondences_py as find_correspondences
+    from openptv.coptv.tracking_cy import track_particles_py as track_particles
+    from openptv.coptv.tracking_cy import find_correspondences_py as find_correspondences
     _using_cython = True
 except ImportError:
     # Fall back to pure Python implementation
@@ -128,7 +128,7 @@ When working on the Cython bindings:
 
 1. Define C function declarations in `.pxd` files
 2. Implement Python wrappers in `.pyx` files
-3. Update `openptv/binding/__init__.py` to expose the functions
+3. Update `openptv/coptv/__init__.py` to expose the functions
 4. Rebuild after changes:
    ```bash
    python setup.py build_ext --inplace
@@ -204,7 +204,7 @@ The package is designed to work with either the Cython or Python implementation.
      so_file = None
      for file in os.listdir("openptv/binding"):
          if file.endswith(".so"):
-             so_file = os.path.join("openptv/binding", file)
+             so_file = os.path.join("openptv/coptv", file)
              break
 
      # Temporarily move it

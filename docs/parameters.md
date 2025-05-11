@@ -1,6 +1,6 @@
 # Unified Parameter Module for OpenPTV
 
-The unified parameter module provides a single source of truth for parameter handling in OpenPTV. It replaces the separate parameter handling in `openptv.gui.parameters` and `openptv.binding.parameters`.
+The unified parameter module provides a single source of truth for parameter handling in OpenPTV. It replaces the separate parameter handling in `openptv.gui.parameters` and `openptv.coptv.parameters`.
 
 ## Design Goals
 
@@ -60,7 +60,7 @@ The following parameter classes are available in the unified module:
 
 ## Bridge Functions
 
-The bridge functions in `openptv.binding.param_bridge` provide a way to convert between Python parameter objects and C parameter structs:
+The bridge functions in `openptv.coptv.param_bridge` provide a way to convert between Python parameter objects and C parameter structs:
 
 - `tracking_params_to_c`: Convert a Python `TrackingParams` object to a C `track_par` struct
 - `tracking_params_from_c`: Convert a C `track_par` struct to a Python `TrackingParams` object
@@ -100,7 +100,7 @@ params.write()
 
 ```python
 from openptv.parameters import TrackingParams, VolumeParams
-from openptv.binding.tracker_bridge import track_forward_with_params
+from openptv.coptv.tracker_bridge import track_forward_with_params
 
 # Create parameter objects
 track_params = TrackingParams(path="path/to/parameters")
@@ -119,7 +119,7 @@ results = track_forward_with_params(targets, track_params, vol_params)
 
 ```python
 from openptv.parameters import TrackingParams
-from openptv.binding.param_bridge import tracking_params_to_c, tracking_params_from_c
+from openptv.coptv.param_bridge import tracking_params_to_c, tracking_params_from_c
 
 # Create a parameter object
 params = TrackingParams(

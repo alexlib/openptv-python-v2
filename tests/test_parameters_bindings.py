@@ -1,5 +1,5 @@
 import unittest
-from openptv.binding.parameters import MultimediaParams, ControlParams, VolumeParams, \
+from openptv.coptv.parameters import MultimediaParams, ControlParams, VolumeParams, \
     SequenceParams, TrackingParams, TargetParams
 
 import numpy, os, shutil
